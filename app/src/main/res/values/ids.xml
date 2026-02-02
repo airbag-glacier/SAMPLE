@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="headerLayout" type="id">headerLayout</item>
+    <item name="imgProfile" type="id">imgProfile</item>
+    <item name="tvName" type="id">tvName</item>
+    <item name="tvDetails" type="id">tvDetails</item>
+    <item name="tvSeeDetails" type="id">tvSeeDetails</item>
+    <item name="headerLayout" type="id">headerLayout</item>
+</resources>
