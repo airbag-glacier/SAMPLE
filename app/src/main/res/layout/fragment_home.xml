@@ -18,17 +18,24 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/imgProfile"
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/imgProfileCard"
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:background="@color/white"
-            android:scaleType="centerCrop"
-            android:src="@drawable/pink_profile_image"
+            app:cardCornerRadius="30dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:shapeAppearanceOverlay="@style/CircleImage" />
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/imgProfile"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/white"
+                android:scaleType="centerCrop"
+                android:src="@drawable/pink_profile_image"
+                app:shapeAppearanceOverlay="@style/CircleImage" />
+        </com.google.android.material.card.MaterialCardView>
 
         <TextView
             android:id="@+id/tvName"
@@ -40,8 +47,8 @@
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/imgProfile"
-            app:layout_constraintTop_toTopOf="@id/imgProfile" />
+            app:layout_constraintStart_toEndOf="@id/imgProfileCard"
+            app:layout_constraintTop_toTopOf="@id/imgProfileCard" />
 
         <TextView
             android:id="@+id/tvDetails"
@@ -111,7 +118,8 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="bottom"
                         android:padding="12dp"
-                        android:text="Set up a checkup\nwith your doctor"
+                        android:text="Set up a checkup
+with your doctor"
                         android:textColor="@color/white"
                         android:textStyle="bold" />
                 </com.google.android.material.card.MaterialCardView>
@@ -141,7 +149,8 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="bottom"
                         android:padding="12dp"
-                        android:text="Record latest\nvitals"
+                        android:text="Record latest
+vitals"
                         android:textColor="@color/white"
                         android:textStyle="bold" />
                 </com.google.android.material.card.MaterialCardView>
@@ -180,7 +189,7 @@
                         android:layout_height="match_parent"
                         android:scaleType="centerCrop"
                     android:layout_gravity="center_horizontal"
-                    android:src="@drawable/BE_FAST"
+                    android:src="@drawable/be_fast"
                     tools:ignore="ContentDescription"/>
 
                     <TextView
@@ -188,7 +197,8 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="bottom"
                         android:padding="12dp"
-                        android:text="BE-FAST\nStroke Symptoms"
+                        android:text="BE-FAST
+Stroke Symptoms"
                         android:textColor="@color/white"
                         android:textStyle="bold" />
                 </com.google.android.material.card.MaterialCardView>
@@ -217,7 +227,8 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="bottom"
                         android:gravity="left"
-                        android:text=" Hospitals\n near you"
+                        android:text=" Hospitals
+ near you"
                         android:textColor="#D81B60"
                         android:textStyle="bold"
                         android:padding="12dp"
@@ -256,7 +267,8 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
                     android:padding="12dp"
-                    android:text="Check Blood\nChemistry"
+                    android:text="Check Blood
+Chemistry"
                     android:textStyle="bold" />
                 </com.google.android.material.card.MaterialCardView>
 
@@ -273,7 +285,8 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
                     android:padding="12dp"
-                    android:text="Update\nRisk Factors"
+                    android:text="Update
+Risk Factors"
                     android:textStyle="bold" />
                 </com.google.android.material.card.MaterialCardView>
 
