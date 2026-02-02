@@ -173,11 +173,14 @@
                     app:cardBackgroundColor="#FFCDD2"
 
                     app:cardCornerRadius="16dp"
-                    android:clipToOutline="true"> <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="100dp"
+                    >
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
                     android:layout_gravity="center_horizontal"
-                    android:src="@drawable/ic_launcher_foreground"
+                    android:src="@drawable/BE_FAST"
                     tools:ignore="ContentDescription"/>
 
                     <TextView
@@ -186,7 +189,7 @@
                         android:layout_gravity="bottom"
                         android:padding="12dp"
                         android:text="BE-FAST\nStroke Symptoms"
-                        android:textColor="#D81B60"
+                        android:textColor="@color/white"
                         android:textStyle="bold" />
                 </com.google.android.material.card.MaterialCardView>
 
@@ -201,11 +204,12 @@
                     android:clipToOutline="true"> <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:gravity="center"
+                    android:layout_gravity="bottom"
+                    android:gravity="left"
                     android:text="Hospitals\nnear you"
+                    android:textColor="#D81B60"
                     android:textStyle="bold"
-                    android:textColor="@android:color/darker_gray"/>
+                    />
                 </com.google.android.material.card.MaterialCardView>
 
             </LinearLayout>
