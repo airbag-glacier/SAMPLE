@@ -201,15 +201,28 @@
                     app:cardElevation="4dp"
 
                     app:cardCornerRadius="16dp"
-                    android:clipToOutline="true"> <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom"
-                    android:gravity="left"
-                    android:text="Hospitals\nnear you"
-                    android:textColor="#D81B60"
-                    android:textStyle="bold"
-                    />
+                    android:clipToOutline="true">
+
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:layout_gravity="center_horizontal"
+                        android:src="@drawable/map_image"
+                        tools:ignore="ContentDescription"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom"
+                        android:gravity="left"
+                        android:text=" Hospitals\n near you"
+                        android:textColor="#D81B60"
+                        android:textStyle="bold"
+                        android:padding="12dp"
+                        />
+
                 </com.google.android.material.card.MaterialCardView>
 
             </LinearLayout>
@@ -273,7 +286,7 @@
         android:id="@+id/bottomNavBar"
         android:layout_width="match_parent"
         android:layout_height="80dp"
-        android:background="@color/white"
+        android:background="@color/primaryPink"
         android:elevation="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
