@@ -237,7 +237,7 @@ with your doctor"
                             android:padding="12dp"
                             android:text="BE-FAST
 Stroke Symptoms"
-                            android:textColor="@color/white"
+                            android:textColor="@color/primaryPink"
                             android:textStyle="bold" />
                     </com.google.android.material.card.MaterialCardView>
 
@@ -322,12 +322,12 @@ Stroke Symptoms"
                     android:orientation="horizontal">
 
                     <com.google.android.material.card.MaterialCardView
-                        android:layout_width="196dp"
+                        android:layout_width="200dp"
                         android:layout_height="match_parent"
                         android:layout_marginEnd="8dp"
-                        android:clipToOutline="true"
+                        app:cardElevation="4dp"
                         app:cardCornerRadius="16dp"
-                        app:cardElevation="4dp">
+                        android:clipToOutline="true">
 
                         <TextView
                             android:layout_width="match_parent"
