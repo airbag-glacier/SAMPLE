@@ -12,7 +12,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.fragment_home)
+        enableEdgeToEdge()
         setContent {
             SAMPLETheme {
                 Text(text = "App Loaded Successfully!")
