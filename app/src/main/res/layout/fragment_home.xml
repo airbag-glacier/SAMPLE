@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -89,74 +88,111 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <LinearLayout
+            <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="160dp"
-                android:orientation="horizontal"
-                android:baselineAligned="false">
+                android:scrollbars="none">
 
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:layout_marginEnd="8dp"
-                    android:layout_weight="1"
-                    app:cardElevation="4dp"
+                    android:orientation="horizontal">
 
-                    app:cardCornerRadius="16dp"
-                    android:clipToOutline="true"> <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/img_doctor_checkup"
-                    tools:ignore="ContentDescription" />
-                    <View
-                        android:layout_width="match_parent"
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="200dp"
                         android:layout_height="match_parent"
-                        android:background="#50000000"/>
+                        android:layout_marginEnd="8dp"
+                        app:cardElevation="4dp"
+                        app:cardCornerRadius="16dp"
+                        android:clipToOutline="true">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="bottom"
-                        android:padding="12dp"
-                        android:text="Set up a checkup
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/img_doctor_checkup"
+                            tools:ignore="ContentDescription" />
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="#50000000" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="bottom"
+                            android:padding="12dp"
+                            android:text="Set up a checkup
 with your doctor"
-                        android:textColor="@color/white"
-                        android:textStyle="bold" />
-                </com.google.android.material.card.MaterialCardView>
+                            android:textColor="@color/white"
+                            android:textStyle="bold" />
+                    </com.google.android.material.card.MaterialCardView>
 
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    app:cardElevation="4dp"
-
-                    app:cardCornerRadius="16dp"
-                    android:clipToOutline="true"> <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/what_are_normal_vitals"
-                    tools:ignore="ContentDescription" />
-
-                    <View
-                        android:layout_width="match_parent"
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="200dp"
                         android:layout_height="match_parent"
-                        android:background="#40000000" />
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="8dp"
+                        app:cardElevation="4dp"
+                        app:cardCornerRadius="16dp"
+                        android:clipToOutline="true">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="bottom"
-                        android:padding="12dp"
-                        android:text="Record latest
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/what_are_normal_vitals"
+                            tools:ignore="ContentDescription" />
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="#40000000" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="bottom"
+                            android:padding="12dp"
+                            android:text="Record latest
 vitals"
-                        android:textColor="@color/white"
-                        android:textStyle="bold" />
-                </com.google.android.material.card.MaterialCardView>
+                            android:textColor="@color/white"
+                            android:textStyle="bold" />
+                    </com.google.android.material.card.MaterialCardView>
 
-            </LinearLayout>
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="200dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="8dp"
+                        app:cardElevation="4dp"
+                        app:cardCornerRadius="16dp"
+                        android:clipToOutline="true">
+
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/img_doctor_checkup"
+                            tools:ignore="ContentDescription" />
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="#50000000" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="bottom"
+                            android:padding="12dp"
+                            android:text="Set up a checkup
+with your doctor"
+                            android:textColor="@color/white"
+                            android:textStyle="bold" />
+                    </com.google.android.material.card.MaterialCardView>
+                </LinearLayout>
+            </HorizontalScrollView>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -168,76 +204,102 @@ vitals"
                 android:layout_marginTop="24dp"
                 android:layout_marginBottom="12dp"/>
 
-            <LinearLayout
+            <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="160dp"
-                android:orientation="horizontal"
-                android:baselineAligned="false">
+                android:scrollbars="none">
 
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:layout_weight="1.2"
-                    android:layout_marginEnd="8dp"
-                    app:cardElevation="4dp"
-                    app:cardBackgroundColor="#FFCDD2"
+                    android:orientation="horizontal">
 
-                    app:cardCornerRadius="16dp"
-                    >
-
-                    <ImageView
-                        android:layout_width="match_parent"
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="240dp"
                         android:layout_height="match_parent"
-                        android:scaleType="centerCrop"
-                    android:layout_gravity="center_horizontal"
-                    android:src="@drawable/be_fast"
-                    tools:ignore="ContentDescription"/>
+                        android:layout_marginEnd="8dp"
+                        app:cardElevation="4dp"
+                        app:cardBackgroundColor="#FFCDD2"
+                        app:cardCornerRadius="16dp">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="bottom"
-                        android:padding="12dp"
-                        android:text="BE-FAST
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center_horizontal"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/be_fast"
+                            tools:ignore="ContentDescription" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="bottom"
+                            android:padding="12dp"
+                            android:text="BE-FAST
 Stroke Symptoms"
-                        android:textColor="@color/white"
-                        android:textStyle="bold" />
-                </com.google.android.material.card.MaterialCardView>
+                            android:textColor="@color/white"
+                            android:textStyle="bold" />
+                    </com.google.android.material.card.MaterialCardView>
 
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="0.8"
-                    android:layout_marginStart="8dp"
-                    app:cardElevation="4dp"
-
-                    app:cardCornerRadius="16dp"
-                    android:clipToOutline="true">
-
-
-                    <ImageView
-                        android:layout_width="match_parent"
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="160dp"
                         android:layout_height="match_parent"
-                        android:scaleType="centerCrop"
-                        android:layout_gravity="center_horizontal"
-                        android:src="@drawable/map_image"
-                        tools:ignore="ContentDescription"/>
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="8dp"
+                        app:cardElevation="4dp"
+                        app:cardCornerRadius="16dp"
+                        android:clipToOutline="true">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="bottom"
-                        android:gravity="left"
-                        android:text=" Hospitals
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center_horizontal"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/map_image"
+                            tools:ignore="ContentDescription" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="bottom"
+                            android:gravity="left"
+                            android:padding="12dp"
+                            android:text=" Hospitals
  near you"
-                        android:textColor="#D81B60"
-                        android:textStyle="bold"
-                        android:padding="12dp"
-                        />
+                            android:textColor="#D81B60"
+                            android:textStyle="bold" />
 
-                </com.google.android.material.card.MaterialCardView>
+                    </com.google.android.material.card.MaterialCardView>
 
-            </LinearLayout>
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="240dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="8dp"
+                        app:cardElevation="4dp"
+                        app:cardBackgroundColor="#FFCDD2"
+                        app:cardCornerRadius="16dp">
+
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center_horizontal"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/be_fast"
+                            tools:ignore="ContentDescription" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="bottom"
+                            android:padding="12dp"
+                            android:text="BE-FAST
+Stroke Symptoms"
+                            android:textColor="@color/white"
+                            android:textStyle="bold" />
+                    </com.google.android.material.card.MaterialCardView>
+
+                </LinearLayout>
+            </HorizontalScrollView>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -249,49 +311,72 @@ Stroke Symptoms"
                 android:layout_marginTop="24dp"
                 android:layout_marginBottom="12dp"/>
 
-            <LinearLayout
+            <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="140dp"
-                android:orientation="horizontal"
-                android:baselineAligned="false">
+                android:scrollbars="none">
 
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="8dp"
-                    app:cardElevation="4dp"
+                    android:orientation="horizontal">
 
-                    app:cardCornerRadius="16dp"
-                    android:clipToOutline="true"> <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom"
-                    android:padding="12dp"
-                    android:text="Check Blood
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="196dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="8dp"
+                        android:clipToOutline="true"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="4dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="bottom"
+                            android:padding="12dp"
+                            android:text="Check Blood
 Chemistry"
-                    android:textStyle="bold" />
-                </com.google.android.material.card.MaterialCardView>
+                            android:textStyle="bold" />
+                    </com.google.android.material.card.MaterialCardView>
 
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    app:cardElevation="4dp"
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="200dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="8dp"
+                        app:cardElevation="4dp"
+                        app:cardCornerRadius="16dp"
+                        android:clipToOutline="true">
 
-                    app:cardCornerRadius="16dp"
-                    android:clipToOutline="true"> <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom"
-                    android:padding="12dp"
-                    android:text="Update
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="bottom"
+                            android:padding="12dp"
+                            android:text="Update
 Risk Factors"
-                    android:textStyle="bold" />
-                </com.google.android.material.card.MaterialCardView>
+                            android:textStyle="bold" />
+                    </com.google.android.material.card.MaterialCardView>
 
-            </LinearLayout>
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="200dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="8dp"
+                        app:cardElevation="4dp"
+                        app:cardCornerRadius="16dp"
+                        android:clipToOutline="true">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="bottom"
+                            android:padding="12dp"
+                            android:text="Check Blood
+Chemistry"
+                            android:textStyle="bold" />
+                    </com.google.android.material.card.MaterialCardView>
+                </LinearLayout>
+            </HorizontalScrollView>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
