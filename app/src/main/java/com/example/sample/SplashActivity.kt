@@ -11,14 +11,13 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
 
-        // The Delay Logic (7000 milliseconds = 7 seconds)
+
         Handler(Looper.getMainLooper()).postDelayed({
 
             // 1. Create intent to go to the Dashboard (MainActivity)
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
 
-            // 2. Close this Splash Screen so the user can't go back to it
             finish()
 
         }, 7000)
