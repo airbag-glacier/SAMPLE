@@ -12,4 +12,12 @@
 
         <item name="postSplashScreenTheme">@style/Theme.SAMPLE</item>
     </style>
+
+    <style name="Base.Theme.DeTechStroke" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/purple_500</item>
+        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorOnPrimary">@color/white</item>
+    </style>
+
+    <style name="Theme.DeTechStroke" parent="Base.Theme.DeTechStroke" />
 </resources>
