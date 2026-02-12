@@ -1,23 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.SAMPLE" parent="Theme.AppCompat.Light.NoActionBar" />
-
-    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/white</item>
-
-        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_logo</item>
-
-        <item name="windowSplashScreenAnimationDuration">200</item>
-
-        <item name="postSplashScreenTheme">@style/Theme.SAMPLE</item>
-    </style>
-
-    <style name="Base.Theme.DeTechStroke" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/purple_500</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
+    <style name="Theme.SAMPLE" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#D81B60</item> <item name="colorPrimaryVariant">#AD1457</item>
         <item name="colorOnPrimary">@color/white</item>
+        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
     </style>
 
-    <style name="Theme.DeTechStroke" parent="Base.Theme.DeTechStroke" />
+    <style name="Theme.App.Starting" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowFullscreen">true</item>
+    </style>
+
+    <style name="Theme.DeTechStroke" parent="Theme.SAMPLE" />
+
 </resources>
