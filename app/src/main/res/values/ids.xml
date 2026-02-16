@@ -5,5 +5,6 @@
     <item name="tvName" type="id" />
     <item name="tvDetails" type="id" />
     <item name="tvSeeDetails" type="id" />
+    <item name="container" type="id" />
 
 </resources>
