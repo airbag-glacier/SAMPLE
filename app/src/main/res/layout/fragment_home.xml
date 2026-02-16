@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -13,13 +12,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#D81B60"
-        android:elevation="4dp"
         android:padding="20dp"
+        android:elevation="4dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
-
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/imgProfileCard"
@@ -85,6 +82,7 @@
         android:fillViewport="true"
         app:layout_constraintTop_toBottomOf="@id/headerLayout"
         app:layout_constraintBottom_toTopOf="@id/bottomNavBar">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -102,6 +100,7 @@
                     android:orientation="horizontal">
 
                     <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardCheckup"
                         android:layout_width="200dp"
                         android:layout_height="match_parent"
                         android:layout_marginEnd="8dp"
@@ -126,8 +125,7 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="bottom"
                             android:padding="12dp"
-                            android:text="Set up a checkup
-with your doctor"
+                            android:text="Set up a checkup\nwith your doctor"
                             android:textColor="@color/white"
                             android:textStyle="bold" />
                     </com.google.android.material.card.MaterialCardView>
@@ -158,42 +156,11 @@ with your doctor"
                             android:layout_height="wrap_content"
                             android:layout_gravity="bottom"
                             android:padding="12dp"
-                            android:text="Record latest
-vitals"
+                            android:text="Record latest\nvitals"
                             android:textColor="@color/primaryPink"
                             android:textStyle="bold" />
                     </com.google.android.material.card.MaterialCardView>
 
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="200dp"
-                        android:layout_height="match_parent"
-                        android:layout_marginStart="8dp"
-                        app:cardElevation="4dp"
-                        app:cardCornerRadius="16dp"
-                        android:clipToOutline="true">
-
-                        <ImageView
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:scaleType="centerCrop"
-                            android:src="@drawable/img_doctor_checkup"
-                            tools:ignore="ContentDescription" />
-
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:background="#50000000" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="bottom"
-                            android:padding="12dp"
-                            android:text="Set up a checkup
-with your doctor"
-                            android:textColor="@color/white"
-                            android:textStyle="bold" />
-                    </com.google.android.material.card.MaterialCardView>
                 </LinearLayout>
             </HorizontalScrollView>
 
@@ -238,8 +205,7 @@ with your doctor"
                             android:layout_height="wrap_content"
                             android:layout_gravity="bottom"
                             android:padding="12dp"
-                            android:text="BE-FAST
-Stroke Symptoms"
+                            android:text="BE-FAST\nStroke Symptoms"
                             android:textColor="@color/primaryPink"
                             android:textStyle="bold" />
                     </com.google.android.material.card.MaterialCardView>
@@ -267,38 +233,10 @@ Stroke Symptoms"
                             android:layout_gravity="bottom"
                             android:gravity="left"
                             android:padding="12dp"
-                            android:text=" Hospitals
- near you"
+                            android:text=" Hospitals\n near you"
                             android:textColor="#D81B60"
                             android:textStyle="bold" />
 
-                    </com.google.android.material.card.MaterialCardView>
-
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="240dp"
-                        android:layout_height="match_parent"
-                        android:layout_marginStart="8dp"
-                        app:cardElevation="4dp"
-                        app:cardBackgroundColor="#FFCDD2"
-                        app:cardCornerRadius="16dp">
-
-                        <ImageView
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_gravity="center_horizontal"
-                            android:scaleType="centerCrop"
-                            android:src="@drawable/be_fast"
-                            tools:ignore="ContentDescription" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="bottom"
-                            android:padding="12dp"
-                            android:text="BE-FAST
-Stroke Symptoms"
-                            android:textColor="@color/white"
-                            android:textStyle="bold" />
                     </com.google.android.material.card.MaterialCardView>
 
                 </LinearLayout>
@@ -337,8 +275,7 @@ Stroke Symptoms"
                             android:layout_height="wrap_content"
                             android:layout_gravity="bottom"
                             android:padding="12dp"
-                            android:text="Check Blood Chem
-Chemistry"
+                            android:text="Check Blood Chem\nChemistry"
                             android:textStyle="bold" />
                     </com.google.android.material.card.MaterialCardView>
 
@@ -356,28 +293,10 @@ Chemistry"
                             android:layout_height="wrap_content"
                             android:layout_gravity="bottom"
                             android:padding="12dp"
-                            android:text="Update
-Risk Factors"
+                            android:text="Update\nRisk Factors"
                             android:textStyle="bold" />
                     </com.google.android.material.card.MaterialCardView>
 
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="200dp"
-                        android:layout_height="match_parent"
-                        android:layout_marginStart="8dp"
-                        app:cardElevation="4dp"
-                        app:cardCornerRadius="16dp"
-                        android:clipToOutline="true">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="bottom"
-                            android:padding="12dp"
-                            android:text="Check Blood
-Chemistry"
-                            android:textStyle="bold" />
-                    </com.google.android.material.card.MaterialCardView>
                 </LinearLayout>
             </HorizontalScrollView>
 
