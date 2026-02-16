@@ -21,8 +21,7 @@ class ScanFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // If you haven't created fragment_scan.xml yet, this line will be red.
-        // If it is red, create the layout file "fragment_scan" in res/layout.
+
         return inflater.inflate(R.layout.fragment_scan, container, false)
     }
 }
