@@ -8,6 +8,7 @@ import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.google.android.material.button.MaterialButton
 
 class VitalsFragment : Fragment() {
@@ -44,6 +45,21 @@ class VitalsFragment : Fragment() {
             Toast.makeText(requireContext(), "Vitals Saved Successfully!", Toast.LENGTH_SHORT).show()
 
 
+        }
+
+        // ... existing dropdown setup code ...
+
+// NAVIGATION LOGIC
+        val btnHome = view.findViewById<View>(R.id.btnHome)
+        btnHome.setOnClickListener {
+            // Go back to Home
+            findNavController().popBackStack()
+        }
+
+        val btnCamera = view.findViewById<View>(R.id.btnCamera)
+        btnCamera.setOnClickListener {
+            // Go to Camera (Use the Fragment ID directly)
+            findNavController().navigate(R.id.scanFragment)
         }
     }
 }
