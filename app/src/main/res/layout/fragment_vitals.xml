@@ -20,30 +20,31 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="24dp">
+            android:padding="@dimen/spacing_large">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Record Vitals"
                 android:textColor="@color/primaryPink"
-                android:textSize="28sp"
+                android:textSize="@dimen/text_title"
                 android:textStyle="bold"
-                android:layout_marginBottom="24dp"/>
+                android:layout_marginBottom="@dimen/spacing_large"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Blood Pressure (BP)"
                 android:textColor="#333333"
-                android:textSize="16sp"
+                android:textSize="@dimen/text_header"
                 android:textStyle="bold"
-                android:layout_marginBottom="8dp"/>
+                android:layout_marginBottom="@dimen/spacing_small"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:baselineAligned="false">
 
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
@@ -51,7 +52,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:hint="Systolic"
-                    android:layout_marginEnd="8dp"
+                    android:layout_marginEnd="@dimen/spacing_small"
                     app:boxStrokeColor="@color/primaryPink"
                     app:hintTextColor="@color/primaryPink">
 
@@ -67,7 +68,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="/"
-                    android:textSize="24sp"
+                    android:textSize="@dimen/text_slash"
                     android:layout_gravity="center_vertical"/>
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -76,7 +77,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:hint="Diastolic"
-                    android:layout_marginStart="8dp"
+                    android:layout_marginStart="@dimen/spacing_small"
                     app:boxStrokeColor="@color/primaryPink"
                     app:hintTextColor="@color/primaryPink">
 
@@ -94,10 +95,10 @@
                 android:layout_height="wrap_content"
                 android:text="Heart Rate"
                 android:textColor="#333333"
-                android:textSize="16sp"
+                android:textSize="@dimen/text_header"
                 android:textStyle="bold"
-                android:layout_marginTop="24dp"
-                android:layout_marginBottom="8dp"/>
+                android:layout_marginTop="@dimen/spacing_large"
+                android:layout_marginBottom="@dimen/spacing_small"/>
 
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
@@ -122,10 +123,10 @@
                 android:layout_height="wrap_content"
                 android:text="Blood Oxygen"
                 android:textColor="#333333"
-                android:textSize="16sp"
+                android:textSize="@dimen/text_header"
                 android:textStyle="bold"
-                android:layout_marginTop="24dp"
-                android:layout_marginBottom="8dp"/>
+                android:layout_marginTop="@dimen/spacing_large"
+                android:layout_marginBottom="@dimen/spacing_small"/>
 
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
@@ -150,15 +151,16 @@
                 android:layout_height="wrap_content"
                 android:text="Body Measurements"
                 android:textColor="#333333"
-                android:textSize="16sp"
+                android:textSize="@dimen/text_header"
                 android:textStyle="bold"
-                android:layout_marginTop="24dp"
-                android:layout_marginBottom="8dp"/>
+                android:layout_marginTop="@dimen/spacing_large"
+                android:layout_marginBottom="@dimen/spacing_small"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:baselineAligned="false">
 
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
@@ -166,7 +168,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:hint="Height (cm)"
-                    android:layout_marginEnd="8dp"
+                    android:layout_marginEnd="@dimen/spacing_small"
                     app:boxStrokeColor="@color/primaryPink"
                     app:hintTextColor="@color/primaryPink">
 
@@ -184,7 +186,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:hint="Weight (kg)"
-                    android:layout_marginStart="8dp"
+                    android:layout_marginStart="@dimen/spacing_small"
                     app:boxStrokeColor="@color/primaryPink"
                     app:hintTextColor="@color/primaryPink">
 
@@ -197,18 +199,22 @@
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:minHeight="@dimen/spacing_xlarge"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSaveVitals"
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:layout_marginTop="40dp"
-                android:layout_marginBottom="100dp"
+                android:layout_height="@dimen/button_height"
+                android:layout_marginBottom="@dimen/spacing_large"
                 android:text="Save Vitals"
-                android:textSize="16sp"
+                android:textSize="@dimen/text_header"
                 android:textStyle="bold"
                 app:backgroundTint="@color/primaryPink"
-                app:cornerRadius="30dp"/>
+                app:cornerRadius="@dimen/button_radius"/>
 
         </LinearLayout>
     </ScrollView>
@@ -216,17 +222,17 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/bottomNavBar"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="@dimen/nav_bar_height"
         android:background="@color/primaryPink"
-        android:elevation="16dp"
+        android:elevation="@dimen/spacing_medium"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
         <ImageView
             android:id="@+id/btnMenu"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/nav_icon_size"
+            android:layout_height="@dimen/nav_icon_size"
             android:layout_marginStart="32dp"
             android:padding="10dp"
             android:src="@drawable/ic_menu_24"
@@ -243,7 +249,7 @@
             android:src="@drawable/ic_camera_24"
             app:backgroundTint="#AD1457"
             app:tint="@color/white"
-            app:fabCustomSize="64dp"
+            app:fabCustomSize="@dimen/fab_size"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -253,8 +259,8 @@
 
         <ImageView
             android:id="@+id/btnHome"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/nav_icon_size"
+            android:layout_height="@dimen/nav_icon_size"
             android:layout_marginEnd="32dp"
             android:padding="10dp"
             android:src="@drawable/ic_home_24"
