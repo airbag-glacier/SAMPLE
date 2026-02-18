@@ -11,16 +11,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:padding="@dimen/spacing_large">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Schedule Checkup"
             android:textColor="#D81B60"
-            android:textSize="28sp"
+            android:textSize="@dimen/text_title"
             android:textStyle="bold"
-            android:layout_marginBottom="24dp"/>
+            android:layout_marginBottom="@dimen/spacing_large"/>
 
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
@@ -37,7 +37,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="none"
-                android:padding="16dp"
+                android:padding="@dimen/spacing_medium"
                 android:text="Choose a Doctor..." />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -45,7 +45,7 @@
             android:id="@+id/tvDateStatus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="@dimen/spacing_medium"
             android:text="Select a doctor to view availability."
             android:textAlignment="center"
             android:textColor="#757575"
@@ -55,7 +55,7 @@
             android:id="@+id/calendarView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="@dimen/spacing_medium"
             android:theme="@style/Theme.AppCompat.Light"
             android:weekDayTextAppearance="@style/TextAppearance.AppCompat.Medium" />
 
@@ -64,10 +64,10 @@
             android:layout_height="wrap_content"
             android:text="Available Time Slots"
             android:textColor="#333333"
-            android:textSize="18sp"
+            android:textSize="@dimen/text_subheader"
             android:textStyle="bold"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="12dp"/>
+            android:layout_marginTop="@dimen/spacing_large"
+            android:layout_marginBottom="@dimen/spacing_12"/>
 
         <RadioGroup
             android:id="@+id/radioGroupTime"
@@ -91,20 +91,20 @@
                 android:text="02:00 PM"
                 android:buttonTint="#D81B60"
                 android:textColor="#333333"
-                android:layout_marginStart="24dp"/>
+                android:layout_marginStart="@dimen/spacing_large"/>
         </RadioGroup>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnAddDoctor"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginTop="40dp"
+            android:layout_height="@dimen/button_height"
+            android:layout_marginTop="@dimen/spacing_xlarge"
             android:text="+ Add New Doctor"
-            android:textSize="16sp"
+            android:textSize="@dimen/text_header"
             android:textStyle="bold"
             app:backgroundTint="#D81B60"
-            app:cornerRadius="12dp"
-            app:elevation="4dp"/>
+            app:cornerRadius="@dimen/card_corner_radius_small"
+            app:elevation="@dimen/card_elevation"/>
 
     </LinearLayout>
 </ScrollView>

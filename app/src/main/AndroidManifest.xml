@@ -10,6 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SAMPLE">
 
+
         <activity
             android:name=".SplashActivity"
             android:exported="true"
@@ -20,9 +21,13 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".MainActivity"
-            android:exported="false" />
+        <activity android:name=".LoginActivity" />
+
+        <activity android:name=".MainActivity" />
+
+
 
     </application>
+
+
 </manifest>
