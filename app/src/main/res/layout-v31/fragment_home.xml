@@ -11,7 +11,7 @@
         android:id="@+id/headerLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#D81B60"
+        android:background="@color/primaryPink"
         android:padding="20dp"
         android:elevation="4dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -106,14 +106,15 @@
                         android:layout_marginEnd="8dp"
                         app:cardElevation="4dp"
                         app:cardCornerRadius="16dp"
-                        android:clipToOutline="true">
+                        android:clipToOutline="true"
+                        android:clickable="true"
+                        android:focusable="true">
 
                         <ImageView
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:scaleType="centerCrop"
-                            android:src="@drawable/img_doctor_checkup"
-                            tools:ignore="ContentDescription" />
+                            android:src="@drawable/img_doctor_checkup" />
 
                         <View
                             android:layout_width="match_parent"
@@ -131,20 +132,22 @@
                     </com.google.android.material.card.MaterialCardView>
 
                     <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardVitals"
                         android:layout_width="200dp"
                         android:layout_height="match_parent"
                         android:layout_marginStart="8dp"
                         android:layout_marginEnd="8dp"
                         app:cardElevation="4dp"
                         app:cardCornerRadius="16dp"
-                        android:clipToOutline="true">
+                        android:clipToOutline="true"
+                        android:clickable="true"
+                        android:focusable="true">
 
                         <ImageView
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:scaleType="centerCrop"
-                            android:src="@drawable/what_are_normal_vitals"
-                            tools:ignore="ContentDescription" />
+                            android:src="@drawable/what_are_normal_vitals" />
 
                         <View
                             android:layout_width="match_parent"
@@ -168,7 +171,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Education"
-                android:textColor="#D81B60"
+                android:textColor="@color/primaryPink"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:layout_marginTop="24dp"
@@ -185,20 +188,22 @@
                     android:orientation="horizontal">
 
                     <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardBeFast"
                         android:layout_width="240dp"
                         android:layout_height="match_parent"
                         android:layout_marginEnd="8dp"
                         app:cardElevation="4dp"
                         app:cardBackgroundColor="#FFCDD2"
-                        app:cardCornerRadius="16dp">
+                        app:cardCornerRadius="16dp"
+                        android:clickable="true"
+                        android:focusable="true">
 
                         <ImageView
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:layout_gravity="center_horizontal"
                             android:scaleType="centerCrop"
-                            android:src="@drawable/be_fast"
-                            tools:ignore="ContentDescription" />
+                            android:src="@drawable/be_fast" />
 
                         <TextView
                             android:layout_width="match_parent"
@@ -211,21 +216,23 @@
                     </com.google.android.material.card.MaterialCardView>
 
                     <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardHospitals"
                         android:layout_width="160dp"
                         android:layout_height="match_parent"
                         android:layout_marginStart="8dp"
                         android:layout_marginEnd="8dp"
                         app:cardElevation="4dp"
                         app:cardCornerRadius="16dp"
-                        android:clipToOutline="true">
+                        android:clipToOutline="true"
+                        android:clickable="true"
+                        android:focusable="true">
 
                         <ImageView
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:layout_gravity="center_horizontal"
                             android:scaleType="centerCrop"
-                            android:src="@drawable/map_image"
-                            tools:ignore="ContentDescription" />
+                            android:src="@drawable/map_image" />
 
                         <TextView
                             android:layout_width="match_parent"
@@ -234,9 +241,8 @@
                             android:gravity="left"
                             android:padding="12dp"
                             android:text=" Hospitals\n near you"
-                            android:textColor="#D81B60"
+                            android:textColor="@color/primaryPink"
                             android:textStyle="bold" />
-
                     </com.google.android.material.card.MaterialCardView>
 
                 </LinearLayout>
@@ -246,7 +252,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Health"
-                android:textColor="#D81B60"
+                android:textColor="@color/primaryPink"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:layout_marginTop="24dp"
@@ -263,12 +269,15 @@
                     android:orientation="horizontal">
 
                     <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardBloodChem"
                         android:layout_width="200dp"
                         android:layout_height="match_parent"
                         android:layout_marginEnd="8dp"
                         app:cardElevation="4dp"
                         app:cardCornerRadius="16dp"
-                        android:clipToOutline="true">
+                        android:clipToOutline="true"
+                        android:clickable="true"
+                        android:focusable="true">
 
                         <TextView
                             android:layout_width="match_parent"
@@ -280,13 +289,16 @@
                     </com.google.android.material.card.MaterialCardView>
 
                     <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardRiskFactors"
                         android:layout_width="200dp"
                         android:layout_height="match_parent"
                         android:layout_marginStart="8dp"
                         android:layout_marginEnd="8dp"
                         app:cardElevation="4dp"
                         app:cardCornerRadius="16dp"
-                        android:clipToOutline="true">
+                        android:clipToOutline="true"
+                        android:clickable="true"
+                        android:focusable="true">
 
                         <TextView
                             android:layout_width="match_parent"
@@ -323,8 +335,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/btnCamera"
-            tools:ignore="ContentDescription" />
+            app:layout_constraintEnd_toStartOf="@id/btnCamera" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/btnCamera"
@@ -337,8 +348,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="ContentDescription" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/btnHome"
@@ -350,8 +360,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/btnCamera"
-            tools:ignore="ContentDescription" />
+            app:layout_constraintStart_toEndOf="@id/btnCamera" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
