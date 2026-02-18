@@ -12,12 +12,18 @@
         tools:layout="@layout/fragment_home">
 
         <action
+            android:id="@+id/action_homeFragment_to_checkupFragment"
+            app:destination="@id/checkupFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim" />
+
+        <action
             android:id="@+id/action_home_to_scan"
             app:destination="@id/scanFragment" />
 
         <action
-            android:id="@+id/action_homeFragment_to_checkupFragment"
-            app:destination="@id/checkupFragment"
+            android:id="@+id/action_home_to_vitals"
+            app:destination="@id/vitalsFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim" />
     </fragment>
@@ -30,8 +36,14 @@
 
     <fragment
         android:id="@+id/checkupFragment"
-        android:name="com.example.sample.ui.theme.CheckupFragment"
+        android:name="com.example.sample.CheckupFragment"
         android:label="Checkup"
         tools:layout="@layout/fragment_checkup" />
+
+    <fragment
+        android:id="@+id/vitalsFragment"
+        android:name="com.example.sample.VitalsFragment"
+        android:label="Record Vitals"
+        tools:layout="@layout/fragment_vitals" />
 
 </navigation>
