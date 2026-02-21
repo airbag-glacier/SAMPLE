@@ -11,7 +11,7 @@
         android:id="@+id/headerLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#D81B60"
+        android:background="#efb2de"
         android:padding="@dimen/spacing_20"
         android:elevation="@dimen/header_elevation"
         app:layout_constraintEnd_toEndOf="parent"
@@ -43,7 +43,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/spacing_medium"
             android:text="Dela Cruz, Juan"
-            android:textColor="@color/white"
+            android:textColor="@color/black"
             android:textSize="@dimen/text_subheader"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
@@ -56,7 +56,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_tiny"
             android:text="22, Male | BMI: Normal | BP: 120/80"
-            android:textColor="#FCE4EC"
+            android:textColor="@color/black"
             android:textSize="@dimen/text_small"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@id/tvName"
@@ -68,7 +68,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_tiny"
             android:text="See details >"
-            android:textColor="@color/white"
+            android:textColor="@color/primaryPink"
             android:textSize="@dimen/text_small"
             android:textStyle="italic"
             app:layout_constraintStart_toStartOf="@id/tvName"
@@ -269,6 +269,15 @@
                         app:cardElevation="@dimen/card_elevation"
                         app:cardCornerRadius="@dimen/card_corner_radius"
                         android:clipToOutline="true">
+
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center_horizontal"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/blood_chem"
+                            tools:ignore="ContentDescription" />
+
 
                         <TextView
                             android:layout_width="match_parent"
