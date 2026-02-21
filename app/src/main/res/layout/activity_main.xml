@@ -297,6 +297,14 @@
                         app:cardCornerRadius="@dimen/card_corner_radius"
                         android:clipToOutline="true">
 
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center_horizontal"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/risk_factor"
+                            tools:ignore="ContentDescription" />
+
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -319,8 +327,9 @@
         android:background="@color/primaryPink"
         android:elevation="@dimen/spacing_medium"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent">
 
         <ImageView
             android:id="@+id/btnMenu"
@@ -329,10 +338,10 @@
             android:layout_marginStart="@dimen/spacing_32"
             android:padding="@dimen/spacing_5"
             android:src="@drawable/ic_menu_24"
-            app:tint="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:tint="@color/white"
             tools:ignore="ContentDescription" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -341,13 +350,13 @@
             android:layout_height="wrap_content"
             android:src="@drawable/ic_camera_24"
             app:backgroundTint="#AD1453"
-            app:tint="@color/white"
+            app:elevation="6dp"
             app:fabCustomSize="@dimen/fab_size"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:elevation="6dp"
+            app:tint="@color/white"
             tools:ignore="ContentDescription" />
 
         <ImageView
@@ -357,10 +366,10 @@
             android:layout_marginEnd="@dimen/spacing_32"
             android:padding="@dimen/spacing_5"
             android:src="@drawable/ic_home_24"
-            app:tint="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:tint="@color/white"
             tools:ignore="ContentDescription" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
