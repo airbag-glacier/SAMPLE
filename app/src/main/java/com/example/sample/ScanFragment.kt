@@ -1,5 +1,6 @@
 package com.example.sample
 
+import com.example.sample.R
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View

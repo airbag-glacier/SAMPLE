@@ -19,7 +19,8 @@
 
         <action
             android:id="@+id/action_home_to_scan"
-            app:destination="@id/scanFragment" />
+            app:destination="@layout/fragment_scan"
+            app:enterAnim="@anim/nav_default" />
 
         <action
             android:id="@+id/action_home_to_vitals"
