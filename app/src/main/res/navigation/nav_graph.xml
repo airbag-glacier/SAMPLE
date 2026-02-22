@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@layout/fragment_home" >
+    app:startDestination="@id/homeFragment" >
 
     <fragment
         android:id="@+id/homeFragment"
@@ -19,8 +19,9 @@
 
         <action
             android:id="@+id/action_home_to_scan"
-            app:destination="@layout/fragment_scan"
-            app:enterAnim="@anim/nav_default" />
+            app:destination="@id/scanFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim" />
 
         <action
             android:id="@+id/action_home_to_vitals"
