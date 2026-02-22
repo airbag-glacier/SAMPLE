@@ -106,7 +106,11 @@
                         android:layout_marginEnd="@dimen/spacing_small"
                         app:cardElevation="@dimen/card_elevation"
                         app:cardCornerRadius="@dimen/card_corner_radius"
-                        android:clipToOutline="true">
+                        android:clipToOutline="true"
+
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?android:attr/selectableItemBackground">
 
                         <ImageView
                             android:layout_width="match_parent"
