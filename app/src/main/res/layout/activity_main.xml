@@ -206,7 +206,7 @@
                             android:layout_gravity="bottom"
                             android:padding="@dimen/spacing_12"
                             android:text="BE-FAST\nStroke Symptoms"
-                            android:textColor="@color/primaryPink"
+                            android:textColor="@color/white"
                             android:textStyle="bold" />
                     </com.google.android.material.card.MaterialCardView>
 
@@ -283,6 +283,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_gravity="bottom"
+                            android:textColor="@color/primaryPink"
                             android:padding="@dimen/spacing_12"
                             android:text="Check Blood Chem\nChemistry"
                             android:textStyle="bold" />
@@ -309,6 +310,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_gravity="bottom"
+                            android:textColor="@color/primaryPink"
                             android:padding="@dimen/spacing_12"
                             android:text="Update\nRisk Factors"
                             android:textStyle="bold" />
