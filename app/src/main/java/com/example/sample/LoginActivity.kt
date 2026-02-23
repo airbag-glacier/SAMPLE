@@ -14,24 +14,21 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        // Initialize Views
+
         val etEmail = findViewById<TextInputEditText>(R.id.etEmail)
         val etPassword = findViewById<TextInputEditText>(R.id.etPassword)
         val layoutEmail = findViewById<TextInputLayout>(R.id.layoutEmail)
         val layoutPassword = findViewById<TextInputLayout>(R.id.layoutPassword)
         val btnLogin = findViewById<MaterialButton>(R.id.btnLogin)
         val tvSignUp = findViewById<TextView>(R.id.tvSignUp)
-
-        // LOGIN BUTTON LOGIC
+        
         btnLogin.setOnClickListener {
             val email = etEmail.text.toString().trim()
             val password = etPassword.text.toString().trim()
 
-            // Reset errors
             layoutEmail.error = null
             layoutPassword.error = null
 
-            // Simple Validation
             if (email.isEmpty()) {
                 layoutEmail.error = "Email is required"
                 return@setOnClickListener
@@ -41,11 +38,11 @@ class LoginActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // SUCCESS: Navigate to Main Activity
+            // Navigate to Main Activity
             Toast.makeText(this, "Login Successful!", Toast.LENGTH_SHORT).show()
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
-            finish() // Prevents going back to login screen
+            finish() // Prevents going back to log in screen
         }
 
         // SIGN UP TEXT LOGIC (Optional stub)
