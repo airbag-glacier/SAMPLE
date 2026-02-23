@@ -1,5 +1,6 @@
 package com.example.sample
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.TextView
@@ -13,7 +14,6 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
-
 
         val etEmail = findViewById<TextInputEditText>(R.id.etEmail)
         val etPassword = findViewById<TextInputEditText>(R.id.etPassword)
@@ -38,16 +38,29 @@ class LoginActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Navigate to Main Activity
-            Toast.makeText(this, "Login Successful!", Toast.LENGTH_SHORT).show()
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-            finish() // Prevents going back to log in screen
+            // Get SharedPreferences instance
+            val sharedPref = getSharedPreferences("user_credentials", Context.MODE_PRIVATE)
+
+            // Retrieve the saved password for the entered email. The second argument is a default value if the key is not found.
+            val savedPassword = sharedPref.getString(email, null)
+
+            // Check if the saved password matches the entered password
+            if (savedPassword == password) {
+                // Navigate to Main Activity
+                Toast.makeText(this, "Login Successful!", Toast.LENGTH_SHORT).show()
+                val intent = Intent(this, MainActivity::class.java)
+                startActivity(intent)
+                finish() // Prevents going back to the login screen
+            } else {
+                Toast.makeText(this, "Invalid email or password", Toast.LENGTH_SHORT).show()
+            }
         }
 
-        // SIGN UP TEXT LOGIC (Optional stub)
+        // SIGN UP TEXT LOGIC
         tvSignUp.setOnClickListener {
-            Toast.makeText(this, "Navigate to Sign Up Screen", Toast.LENGTH_SHORT).show()
+            // Navigate to SignUpActivity
+            val intent = Intent(this, SignUpActivity::class.java)
+            startActivity(intent)
         }
     }
 }
