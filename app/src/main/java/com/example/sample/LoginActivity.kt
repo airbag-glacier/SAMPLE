@@ -10,6 +10,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 
+
 class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,7 +42,8 @@ class LoginActivity : AppCompatActivity() {
             // Get SharedPreferences instance
             val sharedPref = getSharedPreferences("user_credentials", Context.MODE_PRIVATE)
 
-            // Retrieve the saved password for the entered email. The second argument is a default value if the key is not found.
+            // Retrieve the saved password for the entered email.
+            // The second argument is a default value if the key is not found.
             val savedPassword = sharedPref.getString(email, null)
 
             // Check if the saved password matches the entered password
@@ -55,16 +57,13 @@ class LoginActivity : AppCompatActivity() {
                 Toast.makeText(this, "Invalid email or password", Toast.LENGTH_SHORT).show()
             }
 
-            // Inside LoginActivity.kt, within btnLogin.setOnClickListener
-
-// ... after validating the password
             if (savedPassword == password) {
                 Toast.makeText(this, "Login Successful!", Toast.LENGTH_SHORT).show()
 
                 // Create an Intent to navigate to MainActivity
                 val intent = Intent(this, MainActivity::class.java)
 
-                // *** ADD THIS LINE ***
+
                 // Put the user's email as an extra in the Intent.
                 // We'll use this email as the display name for now.
                 intent.putExtra("USER_EMAIL", email)
