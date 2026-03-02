@@ -11,12 +11,9 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
 
-        // Delay for 3 seconds (3000ms), then move to LoginActivity
-        // In SplashActivity.kt
         Handler(Looper.getMainLooper()).postDelayed({
 
-            // CHANGE THIS LINE:
-            val intent = Intent(this, LoginActivity::class.java) // Go to Login first
+            val intent = Intent(this, LoginActivity::class.java)
 
             startActivity(intent)
             finish()
