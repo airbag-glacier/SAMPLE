@@ -7,9 +7,11 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.CalendarView
+import android.widget.EditText
 import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import com.google.android.material.button.MaterialButton
 
@@ -89,14 +91,41 @@ class CheckupFragment : Fragment() {
 
         // --- LISTENER: Add New Doctor Button ---
         btnAddDoctor.setOnClickListener {
-            // For prototype: Add a generic "New Doctor" to the list
-            val newDocName = "Dr. New Entry ${doctorsList.size + 1} (General)"
-            doctorsList.add(newDocName)
+            // Create a dialog builder
+            val builder = AlertDialog.Builder(requireContext())
+            builder.setTitle("Add New Doctor")
 
-            // Refresh the dropdown list so the new name appears
-            setupDropdown(dropdownDoctor)
+            // Set up the input field programmatically
+            val input = EditText(requireContext())
+            input.hint = "e.g., Dr. Jane Doe (Neurology)"
+            // Add padding so the text isn't flush against the dialog edges
+            input.setPadding(50, 40, 50, 40)
+            builder.setView(input)
 
-            Toast.makeText(requireContext(), "Added $newDocName to database!", Toast.LENGTH_SHORT).show()
+            // Set up the "Add" button inside the dialog
+            builder.setPositiveButton("Add") { dialog, _ ->
+                val newDocName = input.text.toString().trim()
+
+                if (newDocName.isNotEmpty()) {
+                    // Add the user's string to the list
+                    doctorsList.add(newDocName)
+
+                    // Refresh the dropdown so it shows up immediately
+                    setupDropdown(dropdownDoctor)
+
+                    Toast.makeText(requireContext(), "Added $newDocName!", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(requireContext(), "Doctor name cannot be empty", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            // Set up the "Cancel" button
+            builder.setNegativeButton("Cancel") { dialog, _ ->
+                dialog.cancel()
+            }
+
+            // Show the dialog
+            builder.show()
         }
     }
 
