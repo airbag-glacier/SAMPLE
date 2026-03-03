@@ -1,6 +1,5 @@
 package com.example.sample
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.TextView
@@ -9,7 +8,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-
 
 class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,6 +28,7 @@ class LoginActivity : AppCompatActivity() {
             layoutEmail.error = null
             layoutPassword.error = null
 
+            // We still make sure they typed *something*
             if (email.isEmpty()) {
                 layoutEmail.error = "Email is required"
                 return@setOnClickListener
@@ -39,41 +38,19 @@ class LoginActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Get SharedPreferences instance
-            val sharedPref = getSharedPreferences("user_credentials", Context.MODE_PRIVATE)
+            // --- ALL VALIDATION REMOVED ---
+            // Any text entered will immediately succeed.
 
-            // Retrieve the saved password for the entered email.
-            // The second argument is a default value if the key is not found.
-            val savedPassword = sharedPref.getString(email, null)
+            Toast.makeText(this, "Login Successful!", Toast.LENGTH_SHORT).show()
 
-            // Check if the saved password matches the entered password
-            if (savedPassword == password) {
-                // Navigate to Main Activity
-                Toast.makeText(this, "Login Successful!", Toast.LENGTH_SHORT).show()
-                val intent = Intent(this, MainActivity::class.java)
-                startActivity(intent)
-                finish() // Prevents going back to the login screen
-            } else {
-                Toast.makeText(this, "Invalid email or password", Toast.LENGTH_SHORT).show()
-            }
+            // Create an Intent to navigate to MainActivity
+            val intent = Intent(this, MainActivity::class.java)
 
-            if (savedPassword == password) {
-                Toast.makeText(this, "Login Successful!", Toast.LENGTH_SHORT).show()
+            // Put the user's email as an extra in the Intent
+            intent.putExtra("USER_EMAIL", email)
 
-                // Create an Intent to navigate to MainActivity
-                val intent = Intent(this, MainActivity::class.java)
-
-
-                // Put the user's email as an extra in the Intent.
-                // We'll use this email as the display name for now.
-                intent.putExtra("USER_EMAIL", email)
-
-                startActivity(intent)
-                finish()
-            } else {
-                Toast.makeText(this, "Invalid email or password", Toast.LENGTH_SHORT).show()
-            }
-
+            startActivity(intent)
+            finish() // Prevents going back to the login screen
         }
 
         // SIGN UP TEXT LOGIC
