@@ -48,4 +48,10 @@
         android:label="Record Vitals"
         tools:layout="@layout/fragment_vitals" />
 
+    <fragment
+        android:id="@+id/befastFragment"
+        android:name="com.example.sample.BefastFragment"
+        android:label="BE-FAST"
+        tools:layout="@layout/fragment_befast" />
+
 </navigation>
