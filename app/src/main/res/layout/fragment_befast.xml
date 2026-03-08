@@ -42,10 +42,11 @@
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginEnd="12dp"
                     android:orientation="vertical"
                     app:layout_constraintStart_toEndOf="@id/btnBack"
-                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/imgHeaderGirl"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent">
 
@@ -65,6 +66,19 @@
                         android:textSize="12sp"
                         android:textStyle="bold" />
                 </LinearLayout>
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/imgHeaderGirl"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:src="@drawable/be_fast_girl"
+                    android:scaleType="centerCrop"
+                    app:shapeAppearanceOverlay="@style/CircleAppearance"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    tools:ignore="ContentDescription" />
+
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <View
@@ -113,37 +127,45 @@
                     android:layout_height="wrap_content"
                     android:padding="12dp">
 
-                    <TextView
-                        android:id="@+id/titleB"
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="BALANCE"
-                        android:textColor="#D81B60"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
+                        android:layout_marginEnd="8dp"
+                        android:orientation="vertical"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/imgB"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/placeholderB"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent">
 
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="LOSS OF BALANCE,\nHEADACHE OR DIZZINESS"
-                        android:textColor="#757575"
-                        android:textSize="12sp"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/placeholderB"
-                        app:layout_constraintTop_toBottomOf="@id/titleB" />
+                        <TextView
+                            android:id="@+id/titleB"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="BALANCE"
+                            android:textColor="#D81B60"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
 
-                    <View
-                        android:id="@+id/placeholderB"
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="LOSS OF BALANCE,\nHEADACHE OR DIZZINESS"
+                            android:textColor="#757575"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/imgB"
                         android:layout_width="60dp"
                         android:layout_height="60dp"
-                        android:background="#FFCDD2"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/balance_girl"
+                        app:shapeAppearanceOverlay="@style/CircleAppearance"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:ignore="ContentDescription" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -182,37 +204,45 @@
                     android:layout_height="wrap_content"
                     android:padding="12dp">
 
-                    <TextView
-                        android:id="@+id/titleE"
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="EYES"
-                        android:textColor="#D81B60"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
+                        android:layout_marginEnd="8dp"
+                        android:orientation="vertical"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/imgE"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/placeholderE"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent">
 
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="BLURRED VISION\n"
-                        android:textColor="#757575"
-                        android:textSize="12sp"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/placeholderE"
-                        app:layout_constraintTop_toBottomOf="@id/titleE" />
+                        <TextView
+                            android:id="@+id/titleE"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="EYES"
+                            android:textColor="#D81B60"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
 
-                    <View
-                        android:id="@+id/placeholderE"
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="BLURRED VISION\n"
+                            android:textColor="#757575"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/imgE"
                         android:layout_width="60dp"
                         android:layout_height="60dp"
-                        android:background="#FFCDD2"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/eyes"
+                        app:shapeAppearanceOverlay="@style/CircleAppearance"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:ignore="ContentDescription" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -251,37 +281,45 @@
                     android:layout_height="wrap_content"
                     android:padding="12dp">
 
-                    <TextView
-                        android:id="@+id/titleF"
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="FACE"
-                        android:textColor="#D81B60"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
+                        android:layout_marginEnd="8dp"
+                        android:orientation="vertical"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/imgF"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/placeholderF"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent">
 
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="ONE SIDE OF THE FACE IS\nDROOPING"
-                        android:textColor="#757575"
-                        android:textSize="12sp"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/placeholderF"
-                        app:layout_constraintTop_toBottomOf="@id/titleF" />
+                        <TextView
+                            android:id="@+id/titleF"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="FACE"
+                            android:textColor="#D81B60"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
 
-                    <View
-                        android:id="@+id/placeholderF"
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="ONE SIDE OF THE FACE IS\nDROOPING"
+                            android:textColor="#757575"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/imgF"
                         android:layout_width="60dp"
                         android:layout_height="60dp"
-                        android:background="#FFCDD2"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/face_girl"
+                        app:shapeAppearanceOverlay="@style/CircleAppearance"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:ignore="ContentDescription" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -320,37 +358,45 @@
                     android:layout_height="wrap_content"
                     android:padding="12dp">
 
-                    <TextView
-                        android:id="@+id/titleA"
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="ARMS"
-                        android:textColor="#D81B60"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
+                        android:layout_marginEnd="8dp"
+                        android:orientation="vertical"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/imgA"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/placeholderA"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent">
 
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="ARM OR LEG WEAKNESS\n"
-                        android:textColor="#757575"
-                        android:textSize="12sp"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/placeholderA"
-                        app:layout_constraintTop_toBottomOf="@id/titleA" />
+                        <TextView
+                            android:id="@+id/titleA"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="ARMS"
+                            android:textColor="#D81B60"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
 
-                    <View
-                        android:id="@+id/placeholderA"
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="ARM OR LEG WEAKNESS\n"
+                            android:textColor="#757575"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/imgA"
                         android:layout_width="60dp"
                         android:layout_height="60dp"
-                        android:background="#FFCDD2"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/arms_girl"
+                        app:shapeAppearanceOverlay="@style/CircleAppearance"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:ignore="ContentDescription" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -389,37 +435,45 @@
                     android:layout_height="wrap_content"
                     android:padding="12dp">
 
-                    <TextView
-                        android:id="@+id/titleS"
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="SPEECH"
-                        android:textColor="#D81B60"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
+                        android:layout_marginEnd="8dp"
+                        android:orientation="vertical"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/imgS"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/placeholderS"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent">
 
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="SPEECH DIFFICULTY\n"
-                        android:textColor="#757575"
-                        android:textSize="12sp"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/placeholderS"
-                        app:layout_constraintTop_toBottomOf="@id/titleS" />
+                        <TextView
+                            android:id="@+id/titleS"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="SPEECH"
+                            android:textColor="#D81B60"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
 
-                    <View
-                        android:id="@+id/placeholderS"
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="SPEECH DIFFICULTY\n"
+                            android:textColor="#757575"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/imgS"
                         android:layout_width="60dp"
                         android:layout_height="60dp"
-                        android:background="#FFCDD2"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/speech_girl"
+                        app:shapeAppearanceOverlay="@style/CircleAppearance"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:ignore="ContentDescription" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -458,37 +512,45 @@
                     android:layout_height="wrap_content"
                     android:padding="12dp">
 
-                    <TextView
-                        android:id="@+id/titleT"
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="TIME"
-                        android:textColor="#D81B60"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
+                        android:layout_marginEnd="8dp"
+                        android:orientation="vertical"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/imgT"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/placeholderT"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent">
 
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="TIME TO CALL FOR AMBULANCE\nIMMEDIATELY"
-                        android:textColor="#757575"
-                        android:textSize="12sp"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/placeholderT"
-                        app:layout_constraintTop_toBottomOf="@id/titleT" />
+                        <TextView
+                            android:id="@+id/titleT"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="TIME"
+                            android:textColor="#D81B60"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
 
-                    <View
-                        android:id="@+id/placeholderT"
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="TIME TO CALL FOR AMBULANCE\nIMMEDIATELY"
+                            android:textColor="#757575"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/imgT"
                         android:layout_width="60dp"
                         android:layout_height="60dp"
-                        android:background="#FFCDD2"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/time_girl"
+                        app:shapeAppearanceOverlay="@style/CircleAppearance"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:ignore="ContentDescription" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
 
