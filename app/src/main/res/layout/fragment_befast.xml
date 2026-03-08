@@ -120,7 +120,11 @@
                 app:layout_constraintBottom_toBottomOf="@id/circleB"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/circleB"
-                app:layout_constraintTop_toTopOf="@id/circleB">
+                app:layout_constraintTop_toTopOf="@id/circleB"
+
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
