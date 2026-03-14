@@ -17,7 +17,7 @@ import com.google.android.material.button.MaterialButton
 
 class CheckupFragment : Fragment() {
 
-    // SAMPLE LANG HEHE: List of Philippine Doctors ---
+    // SAMPLE LANG HEHE: List of Philippine Doctors
     private val doctorsList = mutableListOf(
         "Dr. Jose Rizal (Ophthalmology)",
         "Dr. Fe Del Mundo (Pediatrics)",
@@ -55,21 +55,20 @@ class CheckupFragment : Fragment() {
         // Note: CalendarView doesn't visually "disable" well, so we rely on the listener logic below
         toggleTimeSelection(radioGroupTime, false)
 
-        //  Doctor is Selected ---
+        //  Doctor is Selected
         dropdownDoctor.setOnItemClickListener { _, _, position, _ ->
             val selectedDoctor = doctorsList[position]
 
-            // Enable the calendar
             calendarView.isEnabled = true
 
-            // Update UI feedback
+            
             tvDateStatus.text = "Checking schedule for $selectedDoctor..."
             tvDateStatus.setTextColor(resources.getColor(android.R.color.darker_gray, null))
 
             Toast.makeText(requireContext(), "Schedule loaded for $selectedDoctor", Toast.LENGTH_SHORT).show()
         }
 
-        //  Date is Clicked ---
+        //  Date is Clicked
         calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
             // Note: 'month' is 0-indexed (0 = Jan, 11 = Dec)
 
