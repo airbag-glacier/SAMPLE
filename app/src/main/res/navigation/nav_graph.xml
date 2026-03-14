@@ -28,6 +28,12 @@
             app:destination="@id/vitalsFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim" />
+
+        <action
+            android:id="@+id/action_home_to_bloodChem"
+            app:destination="@id/bloodChemFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim" />
     </fragment>
 
     <fragment
@@ -53,5 +59,11 @@
         android:name="com.example.sample.BefastFragment"
         android:label="BE-FAST"
         tools:layout="@layout/fragment_befast" />
+
+    <fragment
+        android:id="@+id/bloodChemFragment"
+        android:name="com.example.sample.BloodChemFragment"
+        android:label="Blood Chemistry"
+        tools:layout="@layout/fragment_blood_chem" />
 
 </navigation>

@@ -275,14 +275,17 @@
                     android:orientation="horizontal">
 
                     <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardBloodChem"
                         android:layout_width="@dimen/card_width_large"
                         android:layout_height="match_parent"
                         android:layout_marginEnd="@dimen/spacing_small"
                         app:cardElevation="@dimen/card_elevation"
                         app:cardCornerRadius="@dimen/card_corner_radius"
                         android:clipToOutline="true"
+
                         android:clickable="true"
-                        android:focusable="true">
+                        android:focusable="true"
+                        android:foreground="?android:attr/selectableItemBackground">
 
                         <ImageView
                             android:layout_width="match_parent"
@@ -292,14 +295,13 @@
                             android:src="@drawable/blood_chem"
                             tools:ignore="ContentDescription" />
 
-
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_gravity="bottom"
                             android:textColor="@color/primaryPink"
                             android:padding="@dimen/spacing_12"
-                            android:text="Check Blood \nChemistry"
+                            android:text="Check Blood Chem\nChemistry"
                             android:textStyle="bold" />
                     </com.google.android.material.card.MaterialCardView>
 
