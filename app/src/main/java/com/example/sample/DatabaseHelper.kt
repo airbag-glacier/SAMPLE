@@ -9,11 +9,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
     companion object {
         private const val DATABASE_NAME = "StrokeApp.db"
-        // Version 3 triggers a table refresh for the new Kaggle columns
-        private const val DATABASE_VERSION = 3
+        private const val DATABASE_VERSION = 4
         private const val TABLE_RISK_FACTORS = "RiskFactors"
 
-        // Kaggle Dataset Exact Columns
         private const val COL_ID = "id"
         private const val COL_GENDER = "gender" // TEXT
         private const val COL_AGE = "age" // REAL
@@ -26,6 +24,12 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         private const val COL_BMI = "bmi" // REAL
         private const val COL_SMOKING = "smoking_status" // TEXT
         private const val COL_SYNCED = "is_synced_to_cloud"
+
+        private const val TABLE_USERS = "Users"
+        private const val COL_EMAIL = "email"
+        private const val COL_PASSWORD = "password"
+        private const val COL_NAME = "name"
+        private const val COL_IMAGE_URI = "image_uri"
     }
 
     override fun onCreate(db: SQLiteDatabase) {
@@ -43,14 +47,56 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 + "$COL_SMOKING TEXT,"
                 + "$COL_SYNCED INTEGER DEFAULT 0)")
         db.execSQL(createTable)
+
+        val createUsersTable = ("CREATE TABLE $TABLE_USERS ("
+                + "$COL_EMAIL TEXT PRIMARY KEY,"
+                + "$COL_PASSWORD TEXT,"
+                + "$COL_NAME TEXT,"
+                + "$COL_IMAGE_URI TEXT)")
+        db.execSQL(createUsersTable)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         db.execSQL("DROP TABLE IF EXISTS $TABLE_RISK_FACTORS")
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_USERS") // Add this
         onCreate(db)
     }
+    fun registerUser(email: String, password: String, name: String, imageUri: String): Boolean {
+        val db = this.writableDatabase
+        val contentValues = ContentValues().apply {
+            put(COL_EMAIL, email)
+            put(COL_PASSWORD, password)
+            put(COL_NAME, name)
+            put(COL_IMAGE_URI, imageUri)
+        }
+        val result = db.insert(TABLE_USERS, null, contentValues)
+        db.close()
+        return result != -1L
+    }
 
-    // Accepts a mix of Strings, Ints, and Doubles using 'Any'
+    fun checkUser(email: String, password: String): Boolean {
+        val db = this.readableDatabase
+        val cursor = db.rawQuery("SELECT * FROM $TABLE_USERS WHERE $COL_EMAIL=? AND $COL_PASSWORD=?", arrayOf(email, password))
+        val count = cursor.count
+        cursor.close()
+        db.close()
+        return count > 0
+    }
+
+    fun getUserData(email: String): Map<String, String>? {
+        val db = this.readableDatabase
+        val cursor = db.rawQuery("SELECT $COL_NAME, $COL_IMAGE_URI FROM $TABLE_USERS WHERE $COL_EMAIL=?", arrayOf(email))
+        var userData: Map<String, String>? = null
+        if (cursor.moveToFirst()) {
+            userData = mapOf(
+                "name" to cursor.getString(0),
+                "image_uri" to cursor.getString(1)
+            )
+        }
+        cursor.close()
+        db.close()
+        return userData
+    }
     fun insertRiskFactors(answers: Map<String, Any>): Boolean {
         val db = this.writableDatabase
         val contentValues = ContentValues()
