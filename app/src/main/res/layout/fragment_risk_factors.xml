@@ -25,7 +25,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:layout_marginBottom="8dp">
+                android:layout_marginBottom="16dp">
 
                 <ImageButton
                     android:id="@+id/btnBack"
@@ -46,30 +46,53 @@
                     android:textStyle="bold" />
             </LinearLayout>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:text="Please complete this medical history questionnaire. This information will be shared securely with your doctor."
-                android:textColor="#757575"
-                android:textSize="14sp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="1. Gender" android:textStyle="bold" />
+            <Spinner android:id="@+id/spinGender" android:layout_width="match_parent" android:layout_height="48dp" android:layout_marginBottom="16dp" />
 
-            <include layout="@layout/item_risk_question" android:id="@+id/qHypertension" />
-            <include layout="@layout/item_risk_question" android:id="@+id/qDiabetes" />
-            <include layout="@layout/item_risk_question" android:id="@+id/qSmoking" />
-            <include layout="@layout/item_risk_question" android:id="@+id/qDyslipidemia" />
-            <include layout="@layout/item_risk_question" android:id="@+id/qObesity" />
-            <include layout="@layout/item_risk_question" android:id="@+id/qPriorStroke" />
-            <include layout="@layout/item_risk_question" android:id="@+id/qAtrialFib" />
-            <include layout="@layout/item_risk_question" android:id="@+id/qSedentary" />
-            <include layout="@layout/item_risk_question" android:id="@+id/qAlcohol" />
-            <include layout="@layout/item_risk_question" android:id="@+id/qKidneyDisease" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="2. Age" android:textStyle="bold" />
+            <EditText android:id="@+id/etAge" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="numberDecimal" android:hint="e.g. 45" android:layout_marginBottom="16dp"/>
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="3. Hypertension (High Blood Pressure)" android:textStyle="bold" />
+            <RadioGroup android:id="@+id/rgHypertension" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="16dp">
+                <RadioButton android:id="@+id/rbHypYes" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Yes" android:buttonTint="#D81B60"/>
+                <RadioButton android:id="@+id/rbHypNo" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="No" android:buttonTint="#D81B60"/>
+            </RadioGroup>
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="4. Heart Disease" android:textStyle="bold" />
+            <RadioGroup android:id="@+id/rgHeart" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="16dp">
+                <RadioButton android:id="@+id/rbHeartYes" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Yes" android:buttonTint="#D81B60"/>
+                <RadioButton android:id="@+id/rbHeartNo" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="No" android:buttonTint="#D81B60"/>
+            </RadioGroup>
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="5. Ever Married?" android:textStyle="bold" />
+            <RadioGroup android:id="@+id/rgMarried" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="16dp">
+                <RadioButton android:id="@+id/rbMarYes" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Yes" android:buttonTint="#D81B60"/>
+                <RadioButton android:id="@+id/rbMarNo" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="No" android:buttonTint="#D81B60"/>
+            </RadioGroup>
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="6. Work Type" android:textStyle="bold" />
+            <Spinner android:id="@+id/spinWork" android:layout_width="match_parent" android:layout_height="48dp" android:layout_marginBottom="16dp" />
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="7. Residence Type" android:textStyle="bold" />
+            <RadioGroup android:id="@+id/rgResidence" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="16dp">
+                <RadioButton android:id="@+id/rbUrban" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Urban" android:buttonTint="#D81B60"/>
+                <RadioButton android:id="@+id/rbRural" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Rural" android:buttonTint="#D81B60"/>
+            </RadioGroup>
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="8. Average Glucose Level" android:textStyle="bold" />
+            <EditText android:id="@+id/etGlucose" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="numberDecimal" android:hint="e.g. 105.92" android:layout_marginBottom="16dp"/>
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="9. Body Mass Index (BMI)" android:textStyle="bold" />
+            <EditText android:id="@+id/etBmi" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="numberDecimal" android:hint="e.g. 28.5" android:layout_marginBottom="16dp"/>
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="10. Smoking Status" android:textStyle="bold" />
+            <Spinner android:id="@+id/spinSmoking" android:layout_width="match_parent" android:layout_height="48dp" android:layout_marginBottom="16dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSubmit"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="16dp"
                 android:layout_marginBottom="40dp"
                 android:text="SUBMIT TO DOCTOR"
                 android:textSize="16sp"
@@ -90,44 +113,9 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <ImageView
-            android:id="@+id/btnMenu"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginStart="32dp"
-            android:src="@drawable/ic_menu_24"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/white"
-            tools:ignore="ContentDescription" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/btnCamera"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_camera_24"
-            app:backgroundTint="#AD1453"
-            app:elevation="6dp"
-            app:fabCustomSize="56dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/white"
-            tools:ignore="ContentDescription" />
-
-        <ImageView
-            android:id="@+id/btnHome"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginEnd="32dp"
-            android:src="@drawable/ic_home_24"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/white"
-            tools:ignore="ContentDescription" />
+        <ImageView android:id="@+id/btnMenu" android:layout_width="24dp" android:layout_height="24dp" android:layout_marginStart="32dp" android:src="@drawable/ic_menu_24" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" app:tint="@color/white" tools:ignore="ContentDescription" />
+        <com.google.android.material.floatingactionbutton.FloatingActionButton android:id="@+id/btnCamera" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/ic_camera_24" app:backgroundTint="#AD1453" app:elevation="6dp" app:fabCustomSize="56dp" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" app:tint="@color/white" tools:ignore="ContentDescription" />
+        <ImageView android:id="@+id/btnHome" android:layout_width="24dp" android:layout_height="24dp" android:layout_marginEnd="32dp" android:src="@drawable/ic_home_24" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent" app:tint="@color/white" tools:ignore="ContentDescription" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
