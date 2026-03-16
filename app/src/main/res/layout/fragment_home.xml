@@ -135,7 +135,7 @@
                     </com.google.android.material.card.MaterialCardView>
 
                     <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/action_home_to_vitals"
+                        android:id="@+id/cardVitals"
                         android:layout_width="@dimen/card_width_large"
                         android:layout_height="match_parent"
                         android:layout_marginEnd="@dimen/spacing_small"
@@ -192,6 +192,7 @@
                     android:orientation="horizontal">
 
                     <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardBefast"
                         android:layout_width="@dimen/card_width_xlarge"
                         android:layout_height="match_parent"
                         android:layout_marginEnd="@dimen/spacing_small"
