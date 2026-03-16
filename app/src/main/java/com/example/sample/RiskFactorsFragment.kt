@@ -91,7 +91,7 @@ class RiskFactorsFragment : Fragment() {
         val radioGroup = questionLayout.findViewById<RadioGroup>(R.id.radioGroup)
 
         val selectedId = radioGroup.checkedRadioButtonId
-        if (selectedId == -1) return -1 // -1 means they skipped it
+        if (selectedId == -1) return -1 // -1 means BLANK
 
         val radioButton = questionLayout.findViewById<RadioButton>(selectedId)
         return if (radioButton.text.toString() == "Yes") 1 else 0
