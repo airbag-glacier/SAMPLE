@@ -9,7 +9,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
     companion object {
         private const val DATABASE_NAME = "StrokeApp.db"
-        private const val DATABASE_VERSION = 5 // Upgraded to 5 for the Vitals table
+        private const val DATABASE_VERSION = 6 // Upgraded to 6 for the BloodChem table
 
         private const val TABLE_RISK_FACTORS = "RiskFactors"
         private const val COL_ID = "id"
@@ -31,12 +31,19 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         private const val COL_NAME = "name"
         private const val COL_IMAGE_URI = "image_uri"
 
-        // --- NEW VITALS TABLE CONSTANTS ---
         private const val TABLE_VITALS = "Vitals"
         private const val COL_SYSTOLIC = "systolic"
         private const val COL_DIASTOLIC = "diastolic"
         private const val COL_HEIGHT = "height"
         private const val COL_WEIGHT = "weight"
+
+        // --- NEW BLOOD CHEM TABLE CONSTANTS ---
+        private const val TABLE_BLOOD_CHEM = "BloodChem"
+        private const val COL_TOTAL_CHOL = "total_cholesterol"
+        private const val COL_HDL = "hdl"
+        private const val COL_LDL = "ldl"
+        private const val COL_TRIGLYCERIDES = "triglycerides"
+        private const val COL_FBS = "fbs"
     }
 
     override fun onCreate(db: SQLiteDatabase) {
@@ -62,7 +69,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 + "$COL_IMAGE_URI TEXT)")
         db.execSQL(createUsersTable)
 
-        // --- CREATE VITALS TABLE ---
         val createVitalsTable = ("CREATE TABLE $TABLE_VITALS ("
                 + "$COL_ID INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + "$COL_SYSTOLIC INTEGER,"
@@ -70,12 +76,23 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 + "$COL_HEIGHT INTEGER,"
                 + "$COL_WEIGHT INTEGER)")
         db.execSQL(createVitalsTable)
+
+        // --- CREATE BLOOD CHEM TABLE ---
+        val createBloodChemTable = ("CREATE TABLE $TABLE_BLOOD_CHEM ("
+                + "$COL_ID INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + "$COL_TOTAL_CHOL INTEGER,"
+                + "$COL_HDL INTEGER,"
+                + "$COL_LDL INTEGER,"
+                + "$COL_TRIGLYCERIDES INTEGER,"
+                + "$COL_FBS INTEGER)")
+        db.execSQL(createBloodChemTable)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         db.execSQL("DROP TABLE IF EXISTS $TABLE_RISK_FACTORS")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_USERS")
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_VITALS") // Add this
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_VITALS")
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_BLOOD_CHEM") // Add this
         onCreate(db)
     }
 
@@ -138,7 +155,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return result != -1L
     }
 
-    // --- NEW: VITALS FUNCTIONS ---
+    // --- VITALS FUNCTIONS ---
     fun insertVitals(systolic: Int, diastolic: Int, height: Int, weight: Int): Boolean {
         val db = this.writableDatabase
         val contentValues = ContentValues().apply {
@@ -152,7 +169,22 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return result != -1L
     }
 
-    // --- NEW: DYNAMIC SUMMARY GENERATOR ---
+    // --- NEW: BLOOD CHEM FUNCTIONS ---
+    fun insertBloodChem(totalChol: Int, hdl: Int, ldl: Int, triglycerides: Int, fbs: Int): Boolean {
+        val db = this.writableDatabase
+        val contentValues = ContentValues().apply {
+            put(COL_TOTAL_CHOL, totalChol)
+            put(COL_HDL, hdl)
+            put(COL_LDL, ldl)
+            put(COL_TRIGLYCERIDES, triglycerides)
+            put(COL_FBS, fbs)
+        }
+        val result = db.insert(TABLE_BLOOD_CHEM, null, contentValues)
+        db.close()
+        return result != -1L
+    }
+
+    // --- DYNAMIC SUMMARY GENERATOR ---
     fun getUserHealthSummary(): String {
         val db = this.readableDatabase
         var age = "--"
@@ -160,18 +192,16 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         var bmi = "--"
         var bp = "--/--"
 
-        // 1. Get Age, Gender, and BMI from the newest RiskFactors entry
         val cursorRisk = db.rawQuery("SELECT $COL_AGE, $COL_GENDER, $COL_BMI FROM $TABLE_RISK_FACTORS ORDER BY $COL_ID DESC LIMIT 1", null)
         if (cursorRisk.moveToFirst()) {
             val ageVal = cursorRisk.getDouble(0)
-            age = if (ageVal > 0) ageVal.toInt().toString() else "--" // Removes decimal for age
+            age = if (ageVal > 0) ageVal.toInt().toString() else "--"
             gender = cursorRisk.getString(1) ?: "--"
             val bmiVal = cursorRisk.getDouble(2)
             bmi = if (bmiVal > 0) String.format("%.1f", bmiVal) else "--"
         }
         cursorRisk.close()
 
-        // 2. Get Blood Pressure from the newest Vitals entry
         val cursorVitals = db.rawQuery("SELECT $COL_SYSTOLIC, $COL_DIASTOLIC FROM $TABLE_VITALS ORDER BY $COL_ID DESC LIMIT 1", null)
         if (cursorVitals.moveToFirst()) {
             val sys = cursorVitals.getInt(0)
@@ -188,7 +218,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val db = this.readableDatabase
         val profile = mutableMapOf<String, String>()
 
-        // 1. Basic User Data
         val cursorUser = db.rawQuery("SELECT $COL_NAME, $COL_EMAIL, $COL_IMAGE_URI FROM $TABLE_USERS WHERE $COL_EMAIL=?", arrayOf(email))
         if (cursorUser.moveToFirst()) {
             profile["name"] = cursorUser.getString(0) ?: "Unknown"
@@ -197,7 +226,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         }
         cursorUser.close()
 
-        // 2. Risk Factors (Age, Gender, BMI, Smoking)
         val cursorRisk = db.rawQuery("SELECT $COL_AGE, $COL_GENDER, $COL_BMI, $COL_SMOKING FROM $TABLE_RISK_FACTORS ORDER BY $COL_ID DESC LIMIT 1", null)
         if (cursorRisk.moveToFirst()) {
             profile["age"] = cursorRisk.getDouble(0).toInt().toString()
@@ -209,7 +237,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         }
         cursorRisk.close()
 
-        // 3. Vitals (BP, Height, Weight)
         val cursorVitals = db.rawQuery("SELECT $COL_SYSTOLIC, $COL_DIASTOLIC, $COL_HEIGHT, $COL_WEIGHT FROM $TABLE_VITALS ORDER BY $COL_ID DESC LIMIT 1", null)
         if (cursorVitals.moveToFirst()) {
             profile["bp"] = "${cursorVitals.getInt(0)}/${cursorVitals.getInt(1)}"
@@ -224,4 +251,3 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return profile
     }
 }
-

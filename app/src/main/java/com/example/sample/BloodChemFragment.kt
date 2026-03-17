@@ -34,7 +34,7 @@ class BloodChemFragment : Fragment() {
 
         val btnSaveBloodChem = view.findViewById<MaterialButton>(R.id.btnSaveBloodChem)
 
-        // GENERATE DROPDOWN DATA (Creating realistic ranges in steps)
+        // GENERATE DROPDOWN DATA
         val cholesterolRange = (100..350 step 5).map { it.toString() }
         val hdlRange = (20..100 step 2).map { it.toString() }
         val ldlRange = (40..250 step 5).map { it.toString() }
@@ -56,20 +56,31 @@ class BloodChemFragment : Fragment() {
             val tri = etTriglycerides.text.toString().trim()
             val fbs = etFbs.text.toString().trim()
 
-            // Basic validation (ensure at least one thing is filled out)
+            // Basic validation
             if (totalChol.isEmpty() && hdl.isEmpty() && ldl.isEmpty() && tri.isEmpty() && fbs.isEmpty()) {
                 Toast.makeText(requireContext(), "Please select at least one value to save.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            Toast.makeText(requireContext(), "Blood Chemistry Records Saved!", Toast.LENGTH_LONG).show()
+            // --- SAVE TO SQLITE DATABASE ---
+            val dbHelper = DatabaseHelper(requireContext())
+            val isSaved = dbHelper.insertBloodChem(
+                totalChol.toIntOrNull() ?: 0,
+                hdl.toIntOrNull() ?: 0,
+                ldl.toIntOrNull() ?: 0,
+                tri.toIntOrNull() ?: 0,
+                fbs.toIntOrNull() ?: 0
+            )
 
-
-            findNavController().popBackStack()
+            if (isSaved) {
+                Toast.makeText(requireContext(), "Blood Chemistry Records Saved!", Toast.LENGTH_LONG).show()
+                findNavController().popBackStack()
+            } else {
+                Toast.makeText(requireContext(), "Database Error. Could not save.", Toast.LENGTH_SHORT).show()
+            }
         }
 
         // Bottom Navigation Setup
-
         val btnCamera = view.findViewById<FloatingActionButton>(R.id.btnCamera)
         btnCamera?.setOnClickListener {
             findNavController().navigate(R.id.action_home_to_scan)
