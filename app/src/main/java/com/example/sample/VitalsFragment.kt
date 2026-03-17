@@ -41,13 +41,27 @@ class VitalsFragment : Fragment() {
 
 
         btnSave.setOnClickListener {
-            // Here you would save to database. For now, we show a confirmation.
-            Toast.makeText(requireContext(), "Vitals Saved Successfully!", Toast.LENGTH_SHORT).show()
+            // Get values from the UI dropdowns
+            val sys = dropdownSystolic.text.toString().toIntOrNull() ?: 0
+            val dia = dropdownDiastolic.text.toString().toIntOrNull() ?: 0
 
+            val dropdownHeight = view.findViewById<AutoCompleteTextView>(R.id.dropdownHeight)
+            val dropdownWeight = view.findViewById<AutoCompleteTextView>(R.id.dropdownWeight)
+            val height = dropdownHeight.text.toString().toIntOrNull() ?: 0
+            val weight = dropdownWeight.text.toString().toIntOrNull() ?: 0
 
+            // Save to Database
+            val dbHelper = DatabaseHelper(requireContext())
+            val isSaved = dbHelper.insertVitals(sys, dia, height, weight)
+
+            if (isSaved) {
+                Toast.makeText(requireContext(), "Vitals Saved Successfully!", Toast.LENGTH_SHORT).show()
+                // Go back to the Home Screen automatically to see the updated header!
+                findNavController().popBackStack()
+            } else {
+                Toast.makeText(requireContext(), "Failed to save vitals.", Toast.LENGTH_SHORT).show()
+            }
         }
-
-        // ... existing dropdown setup code ...
 
 // NAVIGATION LOGIC
         val btnHome = view.findViewById<View>(R.id.btnHome)

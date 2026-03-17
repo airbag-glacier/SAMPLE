@@ -75,6 +75,15 @@ class HomeFragment : Fragment() {
                     val uri = imageUriString.toUri()
                     view.findViewById<ImageView>(R.id.imgProfile).setImageURI(uri)
                 }
+            } // ... (Keep your existing profile image code above this) ...
+
+            // --- DYNAMICALLY LOAD VITALS & RISK FACTORS ---
+            val healthSummary = dbHelper.getUserHealthSummary()
+            view.findViewById<TextView>(R.id.tvDetails).text = healthSummary
+
+            // --- MAKE "SEE DETAILS >" CLICKABLE ---
+            view.findViewById<TextView>(R.id.tvSeeDetails).setOnClickListener {
+                findNavController().navigate(R.id.action_home_to_vitals)
             }
         }
     }
