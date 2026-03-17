@@ -246,8 +246,32 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             profile["bp"] = "--/--"; profile["height"] = "--"; profile["weight"] = "--"
         }
         cursorVitals.close()
+
+
+        db.close()
+
+
+        // 4. Blood Chemistry (Total Chol, HDL, LDL, Triglycerides, FBS)
+        val cursorBloodChem = db.rawQuery("SELECT $COL_TOTAL_CHOL, $COL_HDL, $COL_LDL, $COL_TRIGLYCERIDES, $COL_FBS FROM $TABLE_BLOOD_CHEM ORDER BY $COL_ID DESC LIMIT 1", null)
+        if (cursorBloodChem.moveToFirst()) {
+            profile["total_chol"] = cursorBloodChem.getInt(0).toString()
+            profile["hdl"] = cursorBloodChem.getInt(1).toString()
+            profile["ldl"] = cursorBloodChem.getInt(2).toString()
+            profile["triglycerides"] = cursorBloodChem.getInt(3).toString()
+            profile["fbs"] = cursorBloodChem.getInt(4).toString()
+        } else {
+            profile["total_chol"] = "--"
+            profile["hdl"] = "--"
+            profile["ldl"] = "--"
+            profile["triglycerides"] = "--"
+            profile["fbs"] = "--"
+        }
+        cursorBloodChem.close()
         db.close()
 
         return profile
     }
-}
+
+
+
+    }

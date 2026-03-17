@@ -115,6 +115,31 @@
                     <TextView android:id="@+id/tvFullBp" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Blood Pressure: --/--" android:textSize="16sp" android:layout_marginBottom="8dp"/>
                     <TextView android:id="@+id/tvSmoking" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Smoking Status: --" android:textSize="16sp" />
                 </LinearLayout>
+
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Blood Chemistry" android:textColor="#D81B60" android:textStyle="bold" android:layout_marginBottom="12dp"/>
+
+                    <TextView android:id="@+id/tvTotalChol" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Total Cholesterol: -- mg/dL" android:textSize="16sp" android:layout_marginBottom="8dp"/>
+                    <TextView android:id="@+id/tvHdlLdl" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="HDL / LDL: -- / -- mg/dL" android:textSize="16sp" android:layout_marginBottom="8dp"/>
+                    <TextView android:id="@+id/tvTriglycerides" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Triglycerides: -- mg/dL" android:textSize="16sp" android:layout_marginBottom="8dp"/>
+                    <TextView android:id="@+id/tvFbs" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Fasting Blood Sugar: -- mg/dL" android:textSize="16sp" />
+                </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
