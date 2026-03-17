@@ -84,4 +84,18 @@
         android:label="Risk Factors"
         tools:layout="@layout/fragment_risk_factors" />
 
+    <fragment
+        android:id="@+id/profileDetailsFragment"
+        android:name="com.example.sample.ProfileDetailsFragment"
+        android:label="Profile Details"
+        tools:layout="@layout/fragment_profile_details" >
+
+        <action
+            android:id="@+id/action_home_to_profileDetails"
+            app:destination="@id/profileDetailsFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim" />
+
+    </fragment>
+
 </navigation>

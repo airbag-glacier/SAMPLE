@@ -183,4 +183,45 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
         return "$age, $gender | BMI: $bmi | BP: $bp"
     }
+
+    fun getFullUserProfile(email: String): Map<String, String> {
+        val db = this.readableDatabase
+        val profile = mutableMapOf<String, String>()
+
+        // 1. Basic User Data
+        val cursorUser = db.rawQuery("SELECT $COL_NAME, $COL_EMAIL, $COL_IMAGE_URI FROM $TABLE_USERS WHERE $COL_EMAIL=?", arrayOf(email))
+        if (cursorUser.moveToFirst()) {
+            profile["name"] = cursorUser.getString(0) ?: "Unknown"
+            profile["email"] = cursorUser.getString(1) ?: "Unknown"
+            profile["image_uri"] = cursorUser.getString(2) ?: ""
+        }
+        cursorUser.close()
+
+        // 2. Risk Factors (Age, Gender, BMI, Smoking)
+        val cursorRisk = db.rawQuery("SELECT $COL_AGE, $COL_GENDER, $COL_BMI, $COL_SMOKING FROM $TABLE_RISK_FACTORS ORDER BY $COL_ID DESC LIMIT 1", null)
+        if (cursorRisk.moveToFirst()) {
+            profile["age"] = cursorRisk.getDouble(0).toInt().toString()
+            profile["gender"] = cursorRisk.getString(1) ?: "--"
+            profile["bmi"] = String.format("%.1f", cursorRisk.getDouble(2))
+            profile["smoking"] = cursorRisk.getString(3) ?: "--"
+        } else {
+            profile["age"] = "--"; profile["gender"] = "--"; profile["bmi"] = "--"; profile["smoking"] = "--"
+        }
+        cursorRisk.close()
+
+        // 3. Vitals (BP, Height, Weight)
+        val cursorVitals = db.rawQuery("SELECT $COL_SYSTOLIC, $COL_DIASTOLIC, $COL_HEIGHT, $COL_WEIGHT FROM $TABLE_VITALS ORDER BY $COL_ID DESC LIMIT 1", null)
+        if (cursorVitals.moveToFirst()) {
+            profile["bp"] = "${cursorVitals.getInt(0)}/${cursorVitals.getInt(1)}"
+            profile["height"] = cursorVitals.getInt(2).toString()
+            profile["weight"] = cursorVitals.getInt(3).toString()
+        } else {
+            profile["bp"] = "--/--"; profile["height"] = "--"; profile["weight"] = "--"
+        }
+        cursorVitals.close()
+        db.close()
+
+        return profile
+    }
 }
+
