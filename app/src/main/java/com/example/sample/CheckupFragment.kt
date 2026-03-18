@@ -47,7 +47,6 @@ class CheckupFragment : Fragment() {
         val radioGroupTime = view.findViewById<RadioGroup>(R.id.radioGroupTime)
         val btnAddDoctor = view.findViewById<MaterialButton>(R.id.btnAddDoctor)
 
-
         setupDropdown(dropdownDoctor)
 
         // LOCKING controls initially
