@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" android:required="true" />
 
+    <uses-permission android:name="android.permission.CALL_PHONE" />
 
     <application
         android:usesCleartextTraffic="true"
@@ -15,6 +16,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.SAMPLE">
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${AIzaSyB3e_EIj_quIlEm3_jdB7B8RaLsIDaqryw}" />
 
         <activity
             android:name=".SplashActivity"
