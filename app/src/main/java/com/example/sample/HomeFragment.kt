@@ -1,18 +1,17 @@
 package com.example.sample
 
 import android.content.Intent
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.net.toUri
-
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class HomeFragment : Fragment() {
 
@@ -26,88 +25,46 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
-        val btnCamera = view.findViewById<FloatingActionButton>(R.id.btnCamera)
-        btnCamera?.setOnClickListener {
+        view.findViewById<FloatingActionButton>(R.id.btnCamera)?.setOnClickListener {
             findNavController().navigate(R.id.action_home_to_scan)
         }
 
-        // SETUP MENU BUTTON (Developer Credits & Restart)
-        val btnMenu = view.findViewById<ImageView>(R.id.btnMenu)
-        btnMenu?.setOnClickListener {
+        view.findViewById<ImageView>(R.id.btnMenu)?.setOnClickListener {
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle("DeTechStroke")
                 .setMessage("Developers:\nGabriel Garcia\nPhoebe Andrei Quan\nNatsuki Ushijima\n\n© 2026 All Rights Reserved.")
                 .setPositiveButton("Restart App") { _, _ ->
-                    // This logic gets the default launch activity (your Splash/Login screen)
-                    // and clears the entire backstack so the app truly restarts.
                     val intent = requireContext().packageManager.getLaunchIntentForPackage(requireContext().packageName)
                     intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
                     startActivity(intent)
                     requireActivity().finish()
                 }
-                .setNegativeButton("Close", null) // Just closes the dialog
+                .setNegativeButton("Close", null)
                 .show()
         }
 
+        view.findViewById<View>(R.id.cardCheckup)?.setOnClickListener { findNavController().navigate(R.id.action_homeFragment_to_checkupFragment) }
+        view.findViewById<View>(R.id.cardVitals)?.setOnClickListener { findNavController().navigate(R.id.action_home_to_vitals) }
+        view.findViewById<View>(R.id.cardBefast)?.setOnClickListener { findNavController().navigate(R.id.action_home_to_befast) }
+        view.findViewById<View>(R.id.cardBloodChem)?.setOnClickListener { findNavController().navigate(R.id.action_home_to_bloodChem) }
+        view.findViewById<View>(R.id.cardRiskFactors)?.setOnClickListener { findNavController().navigate(R.id.action_home_to_riskFactors) }
+        view.findViewById<TextView>(R.id.tvSeeDetails)?.setOnClickListener { findNavController().navigate(R.id.action_home_to_profileDetails) }
 
-        val cardCheckup = view.findViewById<View>(R.id.cardCheckup)
-        cardCheckup?.setOnClickListener {
-            findNavController().navigate(R.id.action_homeFragment_to_checkupFragment)
-        }
-
-
-        val cardVitals = view.findViewById<View>(R.id.cardVitals)
-        cardVitals?.setOnClickListener {
-            findNavController().navigate(R.id.action_home_to_vitals)
-        }
-
-
-        val cardBefast = view.findViewById<View>(R.id.cardBefast)
-        cardBefast?.setOnClickListener {
-            findNavController().navigate(R.id.action_home_to_befast)
-        }
-
-
-        val cardBloodChem = view.findViewById<View>(R.id.cardBloodChem)
-        cardBloodChem?.setOnClickListener {
-            findNavController().navigate(R.id.action_home_to_bloodChem)
-        }
-
-
-        val cardRiskFactors = view.findViewById<View>(R.id.cardRiskFactors)
-        cardRiskFactors?.setOnClickListener {
-            findNavController().navigate(R.id.action_home_to_riskFactors)
-        }
-
-
+        // FIX: Use USER_ID (Long) instead of Email
         val dbHelper = DatabaseHelper(requireContext())
-        val userEmail = requireActivity().intent.getStringExtra("USER_EMAIL")
+        val userId = requireActivity().intent?.getLongExtra("USER_ID", -1L) ?: -1L
 
-        if (userEmail != null) {
-            val userData = dbHelper.getUserData(userEmail)
+        if (userId != -1L) {
+            val userData = dbHelper.getUserData(userId)
             if (userData != null) {
-                // Set Name
                 view.findViewById<TextView>(R.id.tvName).text = userData["name"]
-
-                // Set Profile Image
                 val imageUriString = userData["image_uri"]
                 if (!imageUriString.isNullOrEmpty()) {
-                    val uri = imageUriString.toUri()
-                    view.findViewById<ImageView>(R.id.imgProfile).setImageURI(uri)
+                    view.findViewById<ImageView>(R.id.imgProfile).setImageURI(imageUriString.toUri())
                 }
             }
-
-
-            val healthSummary = dbHelper.getUserHealthSummary()
-            view.findViewById<TextView>(R.id.tvDetails).text = healthSummary
-
-        }
-
-        view.findViewById<TextView>(R.id.tvSeeDetails).setOnClickListener {
-            findNavController().navigate(R.id.action_home_to_profileDetails)
+            // FIX: Pass userId to health summary
+            view.findViewById<TextView>(R.id.tvDetails).text = dbHelper.getUserHealthSummary(userId)
         }
     }
-
-
 }

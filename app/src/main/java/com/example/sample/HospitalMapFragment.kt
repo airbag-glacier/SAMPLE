@@ -66,7 +66,7 @@ class HospitalMapFragment : Fragment(), OnMapReadyCallback {
         tvNearestHospital = view.findViewById(R.id.tvNearestHospital)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
-        // 1. Initialize Google Places API securely using the key in your Manifest
+        // Initialize Google Places API
         val appInfo = requireContext().packageManager.getApplicationInfo(requireContext().packageName, PackageManager.GET_META_DATA)
         val apiKey = appInfo.metaData.getString("com.google.android.geo.API_KEY")
 
@@ -75,11 +75,11 @@ class HospitalMapFragment : Fragment(), OnMapReadyCallback {
         }
         placesClient = Places.createClient(requireContext())
 
-        // 2. Initialize the Map
+        // Initialize
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        // 3. Setup Dialer
+        // Setup Dialer
         btnCallEmergency.setOnClickListener {
             emergencyPhoneNumber?.let { number ->
                 val dialIntent = Intent(Intent.ACTION_DIAL)
@@ -109,8 +109,20 @@ class HospitalMapFragment : Fragment(), OnMapReadyCallback {
                 val currentLatLng = LatLng(location.latitude, location.longitude)
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 14f))
 
-                // Fetch real data!
-                fetchNearestHospitalFromPlacesAPI(currentLatLng)
+                // SAFELY LAUNCH GOOGLE MAPS
+                tvNearestHospital.text = "Hospitals found in your area."
+                btnCallEmergency.isEnabled = true
+
+                btnCallEmergency.setOnClickListener {
+                    val gmmIntentUri = Uri.parse("geo:${location.latitude},${location.longitude}?q=hospitals")
+                    val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+                    mapIntent.setPackage("com.google.android.apps.maps")
+                    try {
+                        startActivity(mapIntent)
+                    } catch (e: Exception) {
+                        Toast.makeText(requireContext(), "Google Maps app is not installed.", Toast.LENGTH_SHORT).show()
+                    }
+                }
             } else {
                 Toast.makeText(requireContext(), "Searching for GPS signal...", Toast.LENGTH_SHORT).show()
             }

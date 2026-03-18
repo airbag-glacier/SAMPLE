@@ -62,23 +62,21 @@ class BloodChemFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            // --- SAVE TO SQLITE DATABASE ---
+//SAVE TO SQLITE DATABASE
             val dbHelper = DatabaseHelper(requireContext())
-            val isSaved = dbHelper.insertBloodChem(
-                totalChol.toIntOrNull() ?: 0,
-                hdl.toIntOrNull() ?: 0,
-                ldl.toIntOrNull() ?: 0,
-                tri.toIntOrNull() ?: 0,
-                fbs.toIntOrNull() ?: 0
-            )
+            val userId = requireActivity().intent?.getLongExtra("USER_ID", -1L) ?: -1L
 
-            if (isSaved) {
-                Toast.makeText(requireContext(), "Blood Chemistry Records Saved!", Toast.LENGTH_LONG).show()
-                findNavController().popBackStack()
-            } else {
-                Toast.makeText(requireContext(), "Database Error. Could not save.", Toast.LENGTH_SHORT).show()
+            if (userId != -1L) {
+                // ERD only tracks Cholesterol right now, so we pass the totalChol
+                val isSaved = dbHelper.updateBloodChemToERD(userId, totalChol.toDoubleOrNull() ?: 0.0)
+
+                if (isSaved) {
+                    Toast.makeText(requireContext(), "Blood Chemistry Records Saved!", Toast.LENGTH_LONG).show()
+                    findNavController().popBackStack()
+                } else {
+                    Toast.makeText(requireContext(), "Database Error. Could not save.", Toast.LENGTH_SHORT).show()
+                }
             }
-        }
 
         // Bottom Navigation Setup
         val btnCamera = view.findViewById<FloatingActionButton>(R.id.btnCamera)
@@ -91,4 +89,4 @@ class BloodChemFragment : Fragment() {
             findNavController().popBackStack(R.id.homeFragment, false)
         }
     }
-}
+}}
