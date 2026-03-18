@@ -1,110 +1,171 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
-    android:fillViewport="true">
+    android:background="@color/white">
 
-    <LinearLayout
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="@dimen/spacing_large">
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavBar">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Schedule Checkup"
-            android:textColor="#D81B60"
-            android:textSize="@dimen/text_title"
-            android:textStyle="bold"
-            android:layout_marginBottom="@dimen/spacing_large"/>
-
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Select your Doctor"
-            app:boxStrokeColor="#D81B60"
-            app:hintTextColor="#D81B60"
-            app:startIconDrawable="@android:drawable/ic_menu_my_calendar"
-            app:startIconTint="#D81B60">
+            android:orientation="vertical"
+            android:padding="@dimen/spacing_large">
 
-            <AutoCompleteTextView
-                android:id="@+id/dropdownDoctor"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Schedule Checkup"
+                android:textColor="#D81B60"
+                android:textSize="@dimen/text_title"
+                android:textStyle="bold"
+                android:layout_marginBottom="@dimen/spacing_large"/>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="none"
-                android:padding="@dimen/spacing_medium"
-                android:text="Choose a Doctor..." />
-        </com.google.android.material.textfield.TextInputLayout>
+                android:hint="Select your Doctor"
+                app:boxStrokeColor="#D81B60"
+                app:hintTextColor="#D81B60"
+                app:startIconDrawable="@android:drawable/ic_menu_my_calendar"
+                app:startIconTint="#D81B60">
 
-        <TextView
-            android:id="@+id/tvDateStatus"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/spacing_medium"
-            android:text="Select a doctor to view availability."
-            android:textAlignment="center"
-            android:textColor="#757575"
-            android:textStyle="italic" />
+                <AutoCompleteTextView
+                    android:id="@+id/dropdownDoctor"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:padding="@dimen/spacing_medium"
+                    android:text="Choose a Doctor..." />
+            </com.google.android.material.textfield.TextInputLayout>
 
-        <CalendarView
-            android:id="@+id/calendarView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/spacing_medium"
-            android:theme="@style/Theme.AppCompat.Light"
-            android:weekDayTextAppearance="@style/TextAppearance.AppCompat.Medium" />
+            <TextView
+                android:id="@+id/tvDateStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_medium"
+                android:text="Select a doctor to view availability."
+                android:textAlignment="center"
+                android:textColor="#757575"
+                android:textStyle="italic" />
 
-        <TextView
+            <CalendarView
+                android:id="@+id/calendarView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_medium"
+                android:theme="@style/Theme.AppCompat.Light"
+                android:weekDayTextAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Available Time Slots"
+                android:textColor="#333333"
+                android:textSize="@dimen/text_subheader"
+                android:textStyle="bold"
+                android:layout_marginTop="@dimen/spacing_large"
+                android:layout_marginBottom="@dimen/spacing_12"/>
+
+            <RadioGroup
+                android:id="@+id/radioGroupTime"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center">
+
+                <RadioButton
+                    android:id="@+id/rbMorning"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="09:00 AM"
+                    android:buttonTint="#D81B60"
+                    android:textColor="#333333"/>
+
+                <RadioButton
+                    android:id="@+id/rbAfternoon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="02:00 PM"
+                    android:buttonTint="#D81B60"
+                    android:textColor="#333333"
+                    android:layout_marginStart="@dimen/spacing_large"/>
+            </RadioGroup>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAddDoctor"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/button_height"
+                android:layout_marginTop="@dimen/spacing_xlarge"
+                android:layout_marginBottom="@dimen/spacing_large"
+                android:text="+ Add New Doctor"
+                android:textSize="@dimen/text_header"
+                android:textStyle="bold"
+                app:backgroundTint="#D81B60"
+                app:cornerRadius="@dimen/card_corner_radius_small"
+                app:elevation="@dimen/card_elevation"/>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/bottomNavBar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/nav_bar_height"
+        android:background="#D81B60"
+        android:elevation="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageView
+            android:id="@+id/btnMenu"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginStart="32dp"
+            android:src="@drawable/ic_menu_24"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/white"
+            tools:ignore="ContentDescription" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btnCamera"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Available Time Slots"
-            android:textColor="#333333"
-            android:textSize="@dimen/text_subheader"
-            android:textStyle="bold"
-            android:layout_marginTop="@dimen/spacing_large"
-            android:layout_marginBottom="@dimen/spacing_12"/>
+            android:src="@drawable/ic_camera_24"
+            app:backgroundTint="#AD1453"
+            app:elevation="6dp"
+            app:fabCustomSize="56dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/white"
+            tools:ignore="ContentDescription" />
 
-        <RadioGroup
-            android:id="@+id/radioGroupTime"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center">
+        <ImageView
+            android:id="@+id/btnHome"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="32dp"
+            android:src="@drawable/ic_home_24"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/white"
+            tools:ignore="ContentDescription" />
 
-            <RadioButton
-                android:id="@+id/rbMorning"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="09:00 AM"
-                android:buttonTint="#D81B60"
-                android:textColor="#333333"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <RadioButton
-                android:id="@+id/rbAfternoon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="02:00 PM"
-                android:buttonTint="#D81B60"
-                android:textColor="#333333"
-                android:layout_marginStart="@dimen/spacing_large"/>
-        </RadioGroup>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnAddDoctor"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/button_height"
-            android:layout_marginTop="@dimen/spacing_xlarge"
-            android:text="+ Add New Doctor"
-            android:textSize="@dimen/text_header"
-            android:textStyle="bold"
-            app:backgroundTint="#D81B60"
-            app:cornerRadius="@dimen/card_corner_radius_small"
-            app:elevation="@dimen/card_elevation"/>
-
-    </LinearLayout>
-</ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

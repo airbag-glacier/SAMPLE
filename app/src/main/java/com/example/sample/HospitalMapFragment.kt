@@ -129,7 +129,7 @@ class HospitalMapFragment : Fragment(), OnMapReadyCallback {
 
     @SuppressLint("MissingPermission")
     private fun fetchNearestHospitalFromPlacesAPI(userLocation: LatLng) {
-        // FindCurrentPlaceRequest is the standard way to find nearby places in newer SDK versions
+
         val placeFields = listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.PHONE_NUMBER, Place.Field.TYPES)
         val request = FindCurrentPlaceRequest.newInstance(placeFields)
 
