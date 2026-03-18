@@ -19,12 +19,12 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="${AIzaSyB3e_EIj_quIlEm3_jdB7B8RaLsIDaqryw}" />
+            android:value="AIzaSyB3e_EIj_quIlEm3_jdB7B8RaLsIDaqryw" />
 
         <activity
             android:name=".SplashActivity"
             android:exported="true"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+            android:theme="@style/Theme.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -34,6 +34,8 @@
         <activity android:name=".LoginActivity" />
 
         <activity android:name=".MainActivity" />
+
+        <activity android:name=".SignUpActivity" />
 
     </application>
 
