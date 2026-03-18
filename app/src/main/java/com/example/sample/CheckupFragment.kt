@@ -1,5 +1,6 @@
 package com.example.sample
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,12 +9,16 @@ import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.CalendarView
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class CheckupFragment : Fragment() {
 
@@ -124,6 +129,32 @@ class CheckupFragment : Fragment() {
 
             // Show the dialog
             builder.show()
+        }
+
+        val btnCamera = view.findViewById<FloatingActionButton>(R.id.btnCamera)
+        btnCamera?.setOnClickListener {
+            findNavController().navigate(R.id.action_home_to_scan)
+        }
+
+        val btnHome = view.findViewById<ImageView>(R.id.btnHome)
+        btnHome?.setOnClickListener {
+            findNavController().popBackStack(R.id.homeFragment, false)
+        }
+
+        view.findViewById<ImageView>(R.id.btnMenu)?.setOnClickListener {
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("DeTechStroke")
+                .setMessage("Developers:\nGabriel Garcia\nPhoebe Andrei Quan\nNatsuki Ushijima\n\n© 2026 All Rights Reserved.")
+                .setPositiveButton("Restart App") { _, _ ->
+                    val intent = requireContext().packageManager.getLaunchIntentForPackage(requireContext().packageName)
+                    if (intent != null) {
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+                        startActivity(intent)
+                        requireActivity().finish()
+                    }
+                }
+                .setNegativeButton("Close", null)
+                .show()
         }
     }
 

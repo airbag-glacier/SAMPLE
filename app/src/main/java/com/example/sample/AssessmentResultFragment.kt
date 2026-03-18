@@ -40,7 +40,7 @@ class AssessmentResultFragment : Fragment() {
         } else {
             Toast.makeText(requireContext(), "Error: User Session Not Found", Toast.LENGTH_SHORT).show()
         }
-
+//NAVIGATION TO HOME SCREEN
         view.findViewById<MaterialButton>(R.id.btnReturnHome).setOnClickListener {
             findNavController().popBackStack(R.id.homeFragment, false)
         }
