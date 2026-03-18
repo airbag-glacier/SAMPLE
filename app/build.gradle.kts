@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
 android {
@@ -68,5 +69,14 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    // Google Maps
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
+
+    // Google Location Services (to find the user's current spot)
+    implementation("com.google.android.gms:play-services-location:21.2.0")
+
+    // Google Places SDK (to find the hospitals)
+    implementation("com.google.android.libraries.places:places:3.3.0")
 
 }
