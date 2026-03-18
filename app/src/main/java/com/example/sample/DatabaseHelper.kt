@@ -9,7 +9,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
     companion object {
         private const val DATABASE_NAME = "DeTechStroke.db"
-        private const val DATABASE_VERSION = 1
+        // BUMPED TO VERSION 2 to trigger onUpgrade and recreate tables with new columns
+        private const val DATABASE_VERSION = 2
 
         // --- 1. USER TABLE (Hybrid: ERD + Auth) ---
         private const val TABLE_USER = "User"
@@ -39,6 +40,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         // --- 3. EMERGENCY CONTACTS TABLE ---
         private const val TABLE_EMERGENCY_CONTACTS = "EmergencyContacts"
         private const val COL_CONTACT_ID = "contact_id"
+        private const val COL_CONTACT_NAME = "name"
+        private const val COL_RELATIONSHIP = "relationship"
+        private const val COL_IS_PRIMARY = "is_primary"
         private const val COL_PHONE_NUMBER = "phone_number"
 
         // --- 4. FACIAL SCAN SCHEDULE TABLE ---
@@ -67,15 +71,14 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     }
 
     override fun onCreate(db: SQLiteDatabase) {
-        // 1. Create User Table (Now includes email & password for local auth)
         val createUserTable = ("CREATE TABLE $TABLE_USER ("
                 + "$COL_USER_ID INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + "$COL_USER_NAME TEXT,"
                 + "$COL_EMAIL TEXT UNIQUE,"
                 + "$COL_PASSWORD TEXT,"
                 + "$COL_IMAGE_URI TEXT,"
-                + "$COL_AGE INTEGER," // Can be updated later in the profile
-                + "$COL_SEX TEXT)")   // Can be updated later in the profile
+                + "$COL_AGE INTEGER,"
+                + "$COL_SEX TEXT)")
         db.execSQL(createUserTable)
 
         val createHealthProfileTable = ("CREATE TABLE $TABLE_HEALTH_PROFILE ("
@@ -95,9 +98,13 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 + "FOREIGN KEY($COL_USER_ID) REFERENCES $TABLE_USER($COL_USER_ID) ON DELETE CASCADE)")
         db.execSQL(createHealthProfileTable)
 
+        // UPDATED: Added name, relationship, and is_primary
         val createEmergencyContactsTable = ("CREATE TABLE $TABLE_EMERGENCY_CONTACTS ("
                 + "$COL_CONTACT_ID INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + "$COL_USER_ID INTEGER,"
+                + "$COL_CONTACT_NAME TEXT,"
+                + "$COL_RELATIONSHIP TEXT,"
+                + "$COL_IS_PRIMARY INTEGER DEFAULT 0,"
                 + "$COL_PHONE_NUMBER TEXT,"
                 + "FOREIGN KEY($COL_USER_ID) REFERENCES $TABLE_USER($COL_USER_ID) ON DELETE CASCADE)")
         db.execSQL(createEmergencyContactsTable)
@@ -145,12 +152,10 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
     fun registerUser(email: String, password: String, name: String, imageUri: String): Boolean {
         val db = this.writableDatabase
-
-        // Check if email already exists
         val cursor = db.rawQuery("SELECT * FROM $TABLE_USER WHERE $COL_EMAIL = ?", arrayOf(email))
         if (cursor.count > 0) {
             cursor.close()
-            return false // Email exists
+            return false
         }
         cursor.close()
 
@@ -165,11 +170,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return result != -1L
     }
 
-    // Returns the user_id if successful, or -1 if failed
     fun authenticateUser(email: String, password: String): Long {
         val db = this.readableDatabase
         val cursor = db.rawQuery("SELECT $COL_USER_ID FROM $TABLE_USER WHERE $COL_EMAIL = ? AND $COL_PASSWORD = ?", arrayOf(email, password))
-
         var userId = -1L
         if (cursor.moveToFirst()) {
             userId = cursor.getLong(0)
@@ -181,7 +184,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     fun getUserData(userId: Long): Map<String, String>? {
         val db = this.readableDatabase
         val cursor = db.rawQuery("SELECT $COL_USER_NAME, $COL_IMAGE_URI FROM $TABLE_USER WHERE $COL_USER_ID = ?", arrayOf(userId.toString()))
-
         var userData: Map<String, String>? = null
         if (cursor.moveToFirst()) {
             userData = mapOf(
@@ -196,7 +198,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     fun getUserHealthSummary(userId: Long): String {
         val db = this.readableDatabase
         val cursor = db.rawQuery("SELECT * FROM $TABLE_HEALTH_PROFILE WHERE $COL_USER_ID = ?", arrayOf(userId.toString()))
-
         val summary = if (cursor.moveToFirst()) {
             "Health Profile Configured. Tap to view."
         } else {
@@ -210,10 +211,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     // ERD DATA MAPPING FUNCTIONS
     // ==========================================
 
-    /**
-     * Because HealthRiskFactorProfile is 1-to-1, we "Upsert" (Insert or Update)
-     * a profile for the specific user.
-     */
     private fun ensureProfileExists(userId: Long) {
         val db = this.writableDatabase
         val cursor = db.rawQuery("SELECT $COL_PROFILE_ID FROM $TABLE_HEALTH_PROFILE WHERE $COL_USER_ID = ?", arrayOf(userId.toString()))
@@ -245,12 +242,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     fun updateRiskFactorsToERD(userId: Long, age: Int, hypertension: Int, cardiacDisease: Int, bmi: Double, smoker: Int, diabetes: Int): Boolean {
         ensureProfileExists(userId)
         val db = this.writableDatabase
-
-        // Update Age in User Table
         val userValues = ContentValues().apply { put(COL_AGE, age) }
         db.update(TABLE_USER, userValues, "$COL_USER_ID = ?", arrayOf(userId.toString()))
 
-        // Update Health Profile
         val profileValues = ContentValues().apply {
             put(COL_HYPERTENSION, hypertension)
             put(COL_CARDIAC_DISEASE, cardiacDisease)
@@ -267,7 +261,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val db = this.readableDatabase
         val map = mutableMapOf<String, String>()
 
-        // Default fallbacks
         map["name"] = "Unknown"
         map["email"] = "Unknown"
         map["age"] = "N/A"
@@ -278,7 +271,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         map["smoker"] = "N/A"
         map["image_uri"] = ""
 
-        // Join query based on the ERD relations
         val query = """
             SELECT u.$COL_USER_NAME, u.$COL_EMAIL, u.$COL_AGE, u.$COL_SEX, u.$COL_IMAGE_URI,
                    h.$COL_BMI, h.$COL_CHOLESTEROL, h.$COL_HYPERTENSION, h.$COL_SMOKER
@@ -320,15 +312,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return result != -1L
     }
 
-    /**
-     * Retrieves the most recent YOLOv10 scan for a specific user.
-     * Returns a map with "detected" (Boolean) and "timestamp" (String), or null if no scans exist.
-     */
     fun getLatestFacialScan(userId: Long): Map<String, Any>? {
         val db = this.readableDatabase
-        // Order by scan_id descending to get the newest one first
         val cursor = db.rawQuery("SELECT $COL_ASYMMETRIC_DETECTED, $COL_TIMESTAMP FROM $TABLE_SCAN_RESULT WHERE $COL_USER_ID = ? ORDER BY $COL_SCAN_ID DESC LIMIT 1", arrayOf(userId.toString()))
-
         var scanData: Map<String, Any>? = null
         if (cursor.moveToFirst()) {
             scanData = mapOf(
@@ -338,5 +324,55 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         }
         cursor.close()
         return scanData
+    }
+
+    // ==========================================
+    // EMERGENCY CONTACTS FUNCTIONS
+    // ==========================================
+
+    // UPDATED: Now accepts name, relationship, and isPrimary
+    fun insertEmergencyContact(userId: Long, name: String, relationship: String, isPrimary: Int, phoneNumber: String): Boolean {
+        val db = this.writableDatabase
+        val values = ContentValues().apply {
+            put(COL_USER_ID, userId)
+            put(COL_CONTACT_NAME, name)
+            put(COL_RELATIONSHIP, relationship)
+            put(COL_IS_PRIMARY, isPrimary)
+            put(COL_PHONE_NUMBER, phoneNumber)
+        }
+        val result = db.insert(TABLE_EMERGENCY_CONTACTS, null, values)
+        db.close()
+        return result != -1L
+    }
+
+    // UPDATED: Now returns a list of maps containing all the contact details
+    fun getEmergencyContacts(userId: Long): List<Map<String, String>> {
+        val contactList = mutableListOf<Map<String, String>>()
+        val db = this.readableDatabase
+
+        val cursor = db.rawQuery("SELECT $COL_CONTACT_ID, $COL_CONTACT_NAME, $COL_RELATIONSHIP, $COL_IS_PRIMARY, $COL_PHONE_NUMBER FROM $TABLE_EMERGENCY_CONTACTS WHERE $COL_USER_ID = ?", arrayOf(userId.toString()))
+
+        if (cursor.moveToFirst()) {
+            do {
+                val contactMap = mapOf(
+                    "contact_id" to cursor.getString(0),
+                    "name" to (cursor.getString(1) ?: ""),
+                    "relationship" to (cursor.getString(2) ?: ""),
+                    "is_primary" to cursor.getString(3),
+                    "phone_number" to (cursor.getString(4) ?: "")
+                )
+                contactList.add(contactMap)
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        return contactList
+    }
+
+    // UPDATED: Now deletes by the specific contact_id for better accuracy
+    fun deleteEmergencyContact(contactId: Long): Boolean {
+        val db = this.writableDatabase
+        val rows = db.delete(TABLE_EMERGENCY_CONTACTS, "$COL_CONTACT_ID = ?", arrayOf(contactId.toString()))
+        db.close()
+        return rows > 0
     }
 }
