@@ -23,21 +23,24 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.button.MaterialButton
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.CircularBounds
+import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.net.PlacesClient
+import com.google.android.libraries.places.api.net.SearchNearbyRequest
+
 
 class HospitalMapFragment : Fragment(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var placesClient: PlacesClient
     private lateinit var btnCallEmergency: MaterialButton
     private lateinit var tvNearestHospital: TextView
 
-    // The number that will be passed to the phone's dialer
     private var emergencyPhoneNumber: String? = null
+    private val defaultLocation = LatLng(15.4828, 120.5943) // Tarlac City Default
 
-    // Default coordinates to use if GPS fails or permissions are denied
-    private val defaultLocation = LatLng(15.4828, 120.5943)
-
-    // 1. Setup Permission Launcher
     private val requestLocationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -45,7 +48,6 @@ class HospitalMapFragment : Fragment(), OnMapReadyCallback {
             enableUserLocation()
         } else {
             Toast.makeText(requireContext(), "Location permission needed to find hospitals.", Toast.LENGTH_LONG).show()
-            // Fallback to default map location
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, 14f))
         }
     }
@@ -64,14 +66,22 @@ class HospitalMapFragment : Fragment(), OnMapReadyCallback {
         tvNearestHospital = view.findViewById(R.id.tvNearestHospital)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
+        // 1. Initialize Google Places API securely using the key in your Manifest
+        val appInfo = requireContext().packageManager.getApplicationInfo(requireContext().packageName, PackageManager.GET_META_DATA)
+        val apiKey = appInfo.metaData.getString("com.google.android.geo.API_KEY")
+
+        if (apiKey != null && !Places.isInitialized()) {
+            Places.initialize(requireContext(), apiKey)
+        }
+        placesClient = Places.createClient(requireContext())
+
         // 2. Initialize the Map
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        // 3. Setup Dialer Button Click Listener
+        // 3. Setup Dialer
         btnCallEmergency.setOnClickListener {
             emergencyPhoneNumber?.let { number ->
-                // Implicit Intent: Opens the Android Dialer automatically
                 val dialIntent = Intent(Intent.ACTION_DIAL)
                 dialIntent.data = Uri.parse("tel:$number")
                 startActivity(dialIntent)
@@ -83,7 +93,6 @@ class HospitalMapFragment : Fragment(), OnMapReadyCallback {
         mMap = googleMap
         mMap.uiSettings.isZoomControlsEnabled = true
 
-        // Check Permissions
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             enableUserLocation()
         } else {
@@ -98,10 +107,9 @@ class HospitalMapFragment : Fragment(), OnMapReadyCallback {
         fusedLocationClient.lastLocation.addOnSuccessListener { location ->
             if (location != null) {
                 val currentLatLng = LatLng(location.latitude, location.longitude)
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 14f))
 
-                // Once we have the user's location, we simulate fetching the nearest hospital
-                // TODO: Replace this mock function with the actual Google Places API JSON parsing
+                // Fetch real data!
                 fetchNearestHospitalFromPlacesAPI(currentLatLng)
             } else {
                 Toast.makeText(requireContext(), "Searching for GPS signal...", Toast.LENGTH_SHORT).show()
@@ -109,27 +117,55 @@ class HospitalMapFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-    /**
-     * This function simulates a successful Google Places API response.
-     * In production, you will pass the LatLng to your Python server or use the Places SDK.
-     */
+    @SuppressLint("MissingPermission")
     private fun fetchNearestHospitalFromPlacesAPI(userLocation: LatLng) {
-        // MOCK DATA: Simulating a hospital found 800 meters away
-        val mockHospitalName = "Provincial General Hospital"
-        val mockHospitalPhone = "0459821234"
-        val mockHospitalLocation = LatLng(userLocation.latitude + 0.005, userLocation.longitude + 0.005)
+        // We want the Place's Name, Coordinates, and Phone Number
+        val placeFields = listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.PHONE_NUMBER)
 
-        // 1. Drop a red marker on the map for the hospital
-        mMap.addMarker(
-            MarkerOptions()
-                .position(mockHospitalLocation)
-                .title(mockHospitalName)
-                .snippet("Emergency: $mockHospitalPhone")
-        )
+        // Define a search area: 5000 meters (5km) radius around the user
+        val circle = CircularBounds.newInstance(userLocation, 5000.0)
 
-        // 2. Update the UI to allow the user to call immediately
-        tvNearestHospital.text = "Nearest: $mockHospitalName"
-        emergencyPhoneNumber = mockHospitalPhone
-        btnCallEmergency.isEnabled = true
+        val searchNearbyRequest = SearchNearbyRequest.builder(circle, placeFields)
+            .setIncludedTypes(listOf("hospital")) // Strictly filter for hospitals
+            .setMaxResultCount(5) // Grab the top 5 closest
+            .build()
+
+        placesClient.searchNearby(searchNearbyRequest)
+            .addOnSuccessListener { response ->
+                val places = response.places
+                if (places.isNotEmpty()) {
+
+                    // Plot all found hospitals on the map
+                    for (place in places) {
+                        place.latLng?.let { latLng ->
+                            mMap.addMarker(
+                                MarkerOptions()
+                                    .position(latLng)
+                                    .title(place.name)
+                                    .snippet("Phone: ${place.phoneNumber ?: "N/A"}")
+                            )
+                        }
+                    }
+
+                    // The Places API usually returns results in order of distance.
+                    // We bind the 1st one (the absolute closest) to the UI.
+                    val nearestHospital = places[0]
+                    tvNearestHospital.text = "Nearest: ${nearestHospital.name}"
+
+                    if (!nearestHospital.phoneNumber.isNullOrEmpty()) {
+                        emergencyPhoneNumber = nearestHospital.phoneNumber
+                        btnCallEmergency.isEnabled = true
+                    } else {
+                        tvNearestHospital.text = "${nearestHospital.name} (No phone listed)"
+                        btnCallEmergency.isEnabled = false
+                    }
+
+                } else {
+                    tvNearestHospital.text = "No hospitals found within 5km."
+                }
+            }
+            .addOnFailureListener { exception ->
+                Toast.makeText(requireContext(), "Error finding hospitals. Check internet connection.", Toast.LENGTH_LONG).show()
+            }
     }
 }

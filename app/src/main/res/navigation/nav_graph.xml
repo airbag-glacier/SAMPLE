@@ -110,4 +110,25 @@
         android:label="Assessment Result"
         tools:layout="@layout/fragment_assessment_result" />
 
+    <fragment
+        android:id="@+id/emergencyContactsFragment"
+        android:name="com.example.sample.EmergencyContactsFragment"
+        android:label="Emergency Contacts"
+        tools:layout="@layout/fragment_emergency_contacts">
+
+        <action
+            android:id="@+id/action_emergencyContacts_to_hospitalMap"
+            app:destination="@id/hospitalMapFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/hospitalMapFragment"
+        android:name="com.example.sample.HospitalMapFragment"
+        android:label="Nearest Hospital"
+        tools:layout="@layout/fragment_hospital_map" />
+
 </navigation>
