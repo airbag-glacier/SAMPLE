@@ -46,6 +46,12 @@
             app:destination="@id/befastFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim" />
+
+        <action
+            android:id="@+id/action_home_to_profileDetails"
+            app:destination="@id/profileDetailsFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim" />
     </fragment>
 
     <fragment
@@ -88,15 +94,7 @@
         android:id="@+id/profileDetailsFragment"
         android:name="com.example.sample.ProfileDetailsFragment"
         android:label="Profile Details"
-        tools:layout="@layout/fragment_profile_details" >
-
-        <action
-            android:id="@+id/action_home_to_profileDetails"
-            app:destination="@id/profileDetailsFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim" />
-
-    </fragment>
+        tools:layout="@layout/fragment_profile_details" />
 
     <action
         android:id="@+id/action_riskFactors_to_assessmentResult"

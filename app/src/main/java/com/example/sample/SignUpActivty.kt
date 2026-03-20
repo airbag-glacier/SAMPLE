@@ -1,5 +1,6 @@
 package com.example.sample
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
@@ -15,8 +16,12 @@ class SignUpActivity : AppCompatActivity() {
     private var selectedImageUri: Uri? = null
     private lateinit var imgProfileUpload: ShapeableImageView
 
-    private val pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+    // 1. Upgraded to OpenDocument to allow permanent URI access
+    private val pickImage = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
         uri?.let {
+            // 2. Tell Android to lock this permission so the Home Screen can read it forever!
+            contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+
             selectedImageUri = it
             imgProfileUpload.setImageURI(it)
         }
@@ -35,7 +40,8 @@ class SignUpActivity : AppCompatActivity() {
         imgProfileUpload = findViewById(R.id.imgProfileUpload)
 
         imgProfileUpload.setOnClickListener {
-            pickImage.launch("image/*")
+            // 3. OpenDocument requires an Array of file types instead of a basic string
+            pickImage.launch(arrayOf("image/*"))
         }
 
         btnSignUp.setOnClickListener {

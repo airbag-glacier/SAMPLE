@@ -46,9 +46,25 @@ class ProfileDetailsFragment : Fragment() {
             view.findViewById<TextView>(R.id.tvFullBp).text = "Hypertension: ${profile["hypertension"]}"
             view.findViewById<TextView>(R.id.tvSmoking).text = "Smoker: ${profile["smoker"]}"
 
-            val imageUriString = profile["image_uri"]
-            if (!imageUriString.isNullOrEmpty()) {
-                view.findViewById<ImageView>(R.id.imgFullProfile).setImageURI(imageUriString.toUri())
+            val userId = requireActivity().intent.getLongExtra("USER_ID", -1L)
+
+            if (userId != -1L) {
+                val dbHelper = DatabaseHelper(requireContext())
+
+                val userProfile = dbHelper.getFullUserProfile(userId)
+
+
+
+
+                val imageUriString = userProfile["image_uri"]
+                if (!imageUriString.isNullOrEmpty()) {
+                    val profileImageView = view.findViewById<ImageView>(R.id.imgProfile)
+                    try {
+                        profileImageView.setImageURI(android.net.Uri.parse(imageUriString))
+                    } catch (e: SecurityException) {
+                        profileImageView.setImageResource(R.drawable.pink_profile_image)
+                    }
+                }
             }
         }
     }

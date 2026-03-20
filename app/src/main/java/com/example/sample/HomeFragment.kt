@@ -52,7 +52,6 @@ class HomeFragment : Fragment() {
         view.findViewById<View>(R.id.cardRiskFactors)?.setOnClickListener { findNavController().navigate(R.id.action_home_to_riskFactors) }
         view.findViewById<TextView>(R.id.tvSeeDetails)?.setOnClickListener { findNavController().navigate(R.id.action_home_to_profileDetails) }
 
-        // FIX: Use USER_ID (Long) instead of Email
         val dbHelper = DatabaseHelper(requireContext())
         val userId = requireActivity().intent?.getLongExtra("USER_ID", -1L) ?: -1L
 
@@ -60,12 +59,20 @@ class HomeFragment : Fragment() {
             val userData = dbHelper.getUserData(userId)
             if (userData != null) {
                 view.findViewById<TextView>(R.id.tvName).text = userData["name"]
+
                 val imageUriString = userData["image_uri"]
+                val profileImageView = view.findViewById<ImageView>(R.id.imgProfile)
+
                 if (!imageUriString.isNullOrEmpty()) {
-                    view.findViewById<ImageView>(R.id.imgProfile).setImageURI(imageUriString.toUri())
+                    try {
+                        profileImageView.setImageURI(imageUriString.toUri())
+                    } catch (e: SecurityException) {
+                        // If Android revoked permission, silently fall back to default
+                        profileImageView.setImageResource(R.drawable.pink_profile_image)
+                    }
                 }
             }
-            // FIX: Pass userId to health summary
+            // Pass userId to health summary
             view.findViewById<TextView>(R.id.tvDetails).text = dbHelper.getUserHealthSummary(userId)
         }
     }
