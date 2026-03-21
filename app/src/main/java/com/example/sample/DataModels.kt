@@ -50,3 +50,16 @@ data class SyncResponse(
     val message: String?,
     val error: String?
 )
+
+// Add to DataModels.kt
+data class LoginCredentials(
+    val email: String,
+    val passwordHash: String // Always hash passwords in production!
+)
+
+data class LoginResponse(
+    val success: Boolean,
+    val message: String?,
+    @com.google.gson.annotations.SerializedName("user_data")
+    val userData: CloudSyncPayload?
+)

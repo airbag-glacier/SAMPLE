@@ -8,4 +8,8 @@ interface CloudSyncApi {
     // Targets the @app.route('/sync_to_cloud') endpoint we will build in Python
     @POST("sync_to_cloud")
     fun pushDataToCloud(@Body payload: CloudSyncPayload): Call<SyncResponse>
+
+    // Add inside your existing Retrofit Interface
+    @POST("login_and_sync")
+    fun loginUser(@Body credentials: LoginCredentials): Call<LoginResponse>
 }
