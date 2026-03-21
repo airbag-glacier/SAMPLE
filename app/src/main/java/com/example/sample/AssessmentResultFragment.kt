@@ -37,6 +37,8 @@ class AssessmentResultFragment : Fragment() {
 
             // 2. Fetch and Display the latest YOLOv10 Facial Scan
             updateYoloStatusUI(view, dbHelper, userId)
+
+            CloudSyncManager(requireContext()).syncLocalDatabaseToCloud(userId)
         } else {
             Toast.makeText(requireContext(), "Error: User Session Not Found", Toast.LENGTH_SHORT).show()
         }
@@ -44,6 +46,8 @@ class AssessmentResultFragment : Fragment() {
         view.findViewById<MaterialButton>(R.id.btnReturnHome).setOnClickListener {
             findNavController().popBackStack(R.id.homeFragment, false)
         }
+
+
     }
 
     private fun saveAssessmentToDatabase(dbHelper: DatabaseHelper, userId: Long, riskPercentage: Int) {
