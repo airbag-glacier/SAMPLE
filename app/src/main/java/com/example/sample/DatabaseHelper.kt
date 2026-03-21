@@ -8,6 +8,13 @@ import android.database.sqlite.SQLiteOpenHelper
 class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     companion object {
+
+        // --- 7. APPOINTMENTS TABLE ---
+        private const val TABLE_APPOINTMENTS = "Appointments"
+        private const val COL_APT_ID = "apt_id"
+        private const val COL_DOCTOR_NAME = "doctor_name"
+        private const val COL_APT_DATE = "apt_date"
+        private const val COL_APT_TIME = "apt_time"
         private const val DATABASE_NAME = "DeTechStroke.db"
         // BUMPED TO VERSION 2 to trigger onUpgrade and recreate tables with new columns
         private const val DATABASE_VERSION = 2
@@ -71,6 +78,16 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     }
 
     override fun onCreate(db: SQLiteDatabase) {
+
+        val createAppointmentsTable = ("CREATE TABLE $TABLE_APPOINTMENTS ("
+                + "$COL_APT_ID INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + "$COL_USER_ID INTEGER,"
+                + "$COL_DOCTOR_NAME TEXT,"
+                + "$COL_APT_DATE TEXT,"
+                + "$COL_APT_TIME TEXT,"
+                + "FOREIGN KEY($COL_USER_ID) REFERENCES $TABLE_USER($COL_USER_ID) ON DELETE CASCADE)")
+        db.execSQL(createAppointmentsTable)
+
         val createUserTable = ("CREATE TABLE $TABLE_USER ("
                 + "$COL_USER_ID INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + "$COL_USER_NAME TEXT,"
@@ -143,6 +160,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.execSQL("DROP TABLE IF EXISTS $TABLE_EMERGENCY_CONTACTS")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_HEALTH_PROFILE")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_USER")
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_APPOINTMENTS")
         onCreate(db)
     }
 
@@ -374,5 +392,36 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val rows = db.delete(TABLE_EMERGENCY_CONTACTS, "$COL_CONTACT_ID = ?", arrayOf(contactId.toString()))
         db.close()
         return rows > 0
+    }
+
+    fun insertAppointment(userId: Long, doctorName: String, aptDate: String, aptTime: String): Boolean {
+        val db = this.writableDatabase
+        val values = ContentValues().apply {
+            put(COL_USER_ID, userId)
+            put(COL_DOCTOR_NAME, doctorName)
+            put(COL_APT_DATE, aptDate)
+            put(COL_APT_TIME, aptTime)
+        }
+        val result = db.insert(TABLE_APPOINTMENTS, null, values)
+        db.close()
+        return result != -1L
+    }
+
+    fun getAppointments(userId: Long): List<Map<String, String>> {
+        val aptList = mutableListOf<Map<String, String>>()
+        val db = this.readableDatabase
+        val cursor = db.rawQuery("SELECT $COL_DOCTOR_NAME, $COL_APT_DATE, $COL_APT_TIME FROM $TABLE_APPOINTMENTS WHERE $COL_USER_ID = ?", arrayOf(userId.toString()))
+
+        if (cursor.moveToFirst()) {
+            do {
+                aptList.add(mapOf(
+                    "doctor_name" to (cursor.getString(0) ?: ""),
+                    "apt_date" to (cursor.getString(1) ?: ""),
+                    "apt_time" to (cursor.getString(2) ?: "")
+                ))
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        return aptList
     }
 }

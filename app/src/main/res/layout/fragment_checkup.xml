@@ -100,19 +100,30 @@
                     android:textColor="#333333"
                     android:layout_marginStart="@dimen/spacing_large"/>
             </RadioGroup>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSaveAppointment"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="24dp"
+                android:text="SAVE APPOINTMENT"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:backgroundTint="#4CAF50"
+                app:cornerRadius="8dp"
+                app:elevation="2dp"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnAddDoctor"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/button_height"
-                android:layout_marginTop="@dimen/spacing_xlarge"
-                android:layout_marginBottom="@dimen/spacing_large"
+                android:layout_height="56dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="24dp"
                 android:text="+ Add New Doctor"
-                android:textSize="@dimen/text_header"
+                android:textSize="16sp"
                 android:textStyle="bold"
                 app:backgroundTint="#D81B60"
-                app:cornerRadius="@dimen/card_corner_radius_small"
-                app:elevation="@dimen/card_elevation"/>
+                app:cornerRadius="8dp"
+                app:elevation="2dp"/>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

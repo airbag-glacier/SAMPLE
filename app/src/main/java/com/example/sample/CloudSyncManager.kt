@@ -21,13 +21,15 @@ class CloudSyncManager(private val context: Context) {
         val profileData = dbHelper.getFullUserProfile(userId)
         val contactsData = dbHelper.getEmergencyContacts(userId)
         val latestScanData = dbHelper.getLatestFacialScan(userId)
+        val appointmentsData = dbHelper.getAppointments(userId)
 
-        // Assemble Master JSON Payload
+        //PAYLOAD ASSEMBLY
         val syncPayload = CloudSyncPayload(
             userId = userId,
             userProfile = profileData,
             emergencyContacts = contactsData,
-            latestFacialScan = latestScanData
+            latestFacialScan = latestScanData,
+            appointments = appointmentsData
         )
 
         // Build Retrofit Client
