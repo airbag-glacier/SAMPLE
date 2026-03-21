@@ -28,3 +28,25 @@ data class PredictionResponse(
 
     val error: String?
 )
+
+// The master payload containing all local SQLite data for the user
+data class CloudSyncPayload(
+    @com.google.gson.annotations.SerializedName("user_id")
+    val userId: Long,
+
+    @com.google.gson.annotations.SerializedName("user_profile")
+    val userProfile: Map<String, String>?,
+
+    @com.google.gson.annotations.SerializedName("emergency_contacts")
+    val emergencyContacts: List<Map<String, String>>,
+
+    @com.google.gson.annotations.SerializedName("latest_facial_scan")
+    val latestFacialScan: Map<String, Any>?
+)
+
+// The response from your Python server confirming the Google Cloud SQL write
+data class SyncResponse(
+    val success: Boolean,
+    val message: String?,
+    val error: String?
+)
