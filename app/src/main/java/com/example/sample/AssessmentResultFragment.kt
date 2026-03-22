@@ -12,6 +12,7 @@ import com.google.android.material.button.MaterialButton
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class AssessmentResultFragment : Fragment() {
 
@@ -38,7 +39,8 @@ class AssessmentResultFragment : Fragment() {
             // 2. Fetch and Display the latest YOLOv10 Facial Scan
             updateYoloStatusUI(view, dbHelper, userId)
 
-            CloudSyncManager(requireContext()).syncLocalDatabaseToCloud(userId)
+            // 3. Trigger the Pop-up Dialog
+            showRiskDialog(riskPercentage, userId)
         } else {
             Toast.makeText(requireContext(), "Error: User Session Not Found", Toast.LENGTH_SHORT).show()
         }
@@ -90,5 +92,36 @@ class AssessmentResultFragment : Fragment() {
         } else {
             tvYoloStatus.text = "No facial scan data found. Please take a face scan using the camera tab to complete your assessment."
         }
+    }
+
+    private fun showRiskDialog(riskPercentage: Int, userId: Long) {
+        // Calculate the severity
+        val riskLevel = when {
+            riskPercentage < 30 -> "Low"
+            riskPercentage < 60 -> "Moderate"
+            else -> "High"
+        }
+
+        // Set a dynamic message based on the risk
+        val recommendationMessage = when (riskLevel) {
+            "High" -> "CRITICAL: Please consult a doctor immediately and proceed to the nearest hospital."
+            "Moderate" -> "WARNING: We recommend scheduling a check-up with your doctor soon."
+            else -> "Good news! Keep maintaining a healthy lifestyle."
+        }
+
+        // Build and display the pop-up
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("DeTechStroke Assessment Result")
+            .setMessage("Risk Level: $riskLevel ($riskPercentage%)\n\n$recommendationMessage")
+            .setPositiveButton("Sync to Cloud") { dialog, _ ->
+                // Trigger the cloud sync ONLY when they click this button
+                Toast.makeText(requireContext(), "Syncing to Doctor's Dashboard...", Toast.LENGTH_SHORT).show()
+                CloudSyncManager(requireContext()).syncLocalDatabaseToCloud(userId)
+            }
+            .setNegativeButton("Close") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setCancelable(false) // Prevents them from clicking outside to close it
+            .show()
     }
 }
