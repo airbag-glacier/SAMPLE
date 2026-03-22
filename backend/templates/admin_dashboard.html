@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeTechStroke | Doctor Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .navbar-custom { background-color: #D81B60; }
+        .navbar-custom .navbar-brand { color: white; font-weight: bold; }
+        .card-header-custom { background-color: #343a40; color: white; }
+        .risk-high { background-color: #f8d7da !important; color: #842029; font-weight: bold;}
+        .risk-moderate { background-color: #fff3cd !important; color: #664d03; }
+        .risk-low { background-color: #d1e7dd !important; color: #0f5132; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-custom shadow-sm">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">🩺 DeTechStroke Clinical Dashboard</a>
+        <span class="navbar-text text-white">
+                Admin Secure Session
+            </span>
+    </div>
+</nav>
+
+<div class="container mt-5">
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <h5 class="text-muted">Total Monitored Patients</h5>
+                    <h2 class="display-5 text-primary">{{ patients|length }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 bg-dark text-white">
+                <div class="card-body">
+                    <h5>System Status</h5>
+                    <p class="mb-0">✅ Google Cloud SQL Connection: <strong>Active</strong></p>
+                    <p class="mb-0">✅ Edge AI Syncing: <strong>Online</strong></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-header card-header-custom">
+            <h5 class="mb-0">Live Patient Risk Directory</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Patient Name</th>
+                        <th>Contact Email</th>
+                        <th>Age</th>
+                        <th>BMI</th>
+                        <th>Hypertension</th>
+                        <th>AI Facial Droop Status</th>
+                        <th>Clinical Risk Level (LR)</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for patient in patients %}
+                    <tr>
+                        <td><strong>{{ patient.name }}</strong></td>
+                        <td>{{ patient.email }}</td>
+                        <td>{{ patient.age }}</td>
+                        <td>{{ patient.bmi }}</td>
+                        <td>{{ patient.hypertension }}</td>
+
+                        {% if patient.latest_facial_droop == 'Detected' %}
+                        <td class="text-danger fw-bold">⚠️ Detected</td>
+                        {% else %}
+                        <td class="text-success">Normal</td>
+                        {% endif %}
+
+                        {% if patient.latest_clinical_risk == 'High' %}
+                        <td class="risk-high">High Risk</td>
+                        {% elif patient.latest_clinical_risk == 'Moderate' %}
+                        <td class="risk-moderate">Moderate Risk</td>
+                        {% elif patient.latest_clinical_risk == 'Low' %}
+                        <td class="risk-low">Low Risk</td>
+                        {% else %}
+                        <td>{{ patient.latest_clinical_risk }}</td>
+                        {% endif %}
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">No patient data synced yet. Run a test on the Android app!</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4 mb-5 text-muted">
+        <small>Data synced securely via Google Cloud SQL • DeTechStroke Architecture</small>
+    </div>
+</div>
+
+</body>
+</html>
