@@ -2,6 +2,7 @@ package com.example.sample
 
 import android.content.Context
 import android.graphics.Bitmap
+import androidx.privacysandbox.tools.core.model.Method
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.support.common.FileUtil
 import org.tensorflow.lite.support.common.ops.NormalizeOp
