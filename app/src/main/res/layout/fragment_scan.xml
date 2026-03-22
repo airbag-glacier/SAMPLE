@@ -1,100 +1,172 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#000000">
+package com.example.sample
 
-    <androidx.camera.view.PreviewView
-        android:id="@+id/viewFinder"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+import android.Manifest
+import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Button
+import android.widget.ImageButton
+import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.camera.core.*
+import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
 
-    <com.example.sample.ScannerOverlayView
-        android:id="@+id/overlayView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+class ScanFragment : Fragment() {
 
-    <TextView
-        android:id="@+id/tvTopInstruction"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Position your face\ninside the frame."
-        android:textColor="@color/primaryPink"
-        android:textSize="@dimen/text_title"
-        android:textStyle="bold"
-        android:textAlignment="center"
-        app:layout_constraintVertical_bias="0.1"
-        app:layout_constraintBottom_toTopOf="@id/faceFrame"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    private var imageCapture: ImageCapture? = null
+    private lateinit var viewFinder: PreviewView
+    private lateinit var strokeDetector: StrokeDetector
+    
+    // UI Elements from your XML
+    private lateinit var tvTopInstruction: TextView
+    private lateinit var tvBottomHint: TextView
 
-    <ImageView
-        android:id="@+id/faceFrame"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:src="@drawable/face_guide_overlay"
-        app:layout_constraintWidth_percent="0.85"
-        app:layout_constraintDimensionRatio="3:4"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.45"
-        tools:ignore="ContentDescription" />
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            startCamera()
+        } else {
+            Toast.makeText(requireContext(), "Camera permission is required.", Toast.LENGTH_LONG).show()
+            findNavController().popBackStack()
+        }
+    }
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/bottomInstructionContainer"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="@drawable/bg_scan_instruction"
-        android:padding="@dimen/spacing_large"
-        android:layout_marginBottom="@dimen/spacing_large"
-        android:layout_marginHorizontal="@dimen/spacing_medium"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_scan, container, false)
+    }
 
-        <TextView
-            android:id="@+id/tvBottomHint"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="Remove any accessories that might block your face.\nYour face will be automatically scanned."
-            android:textColor="@color/white"
-            android:textSize="@dimen/text_body"
-            android:lineSpacingExtra="4dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-    <Button
-        android:id="@+id/btnCapture"
-        android:layout_width="0dp"
-        android:layout_height="60dp"
-        android:layout_marginBottom="16dp"
-        android:layout_marginHorizontal="@dimen/spacing_medium"
-        android:backgroundTint="@color/primaryPink"
-        android:text="Capture"
-        android:textColor="@color/white"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@id/bottomInstructionContainer"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        // Initialize UI
+        viewFinder = view.findViewById(R.id.viewFinder)
+        tvTopInstruction = view.findViewById(R.id.tvTopInstruction)
+        tvBottomHint = view.findViewById(R.id.tvBottomHint)
+        
+        // Initialize local AI Brain
+        strokeDetector = StrokeDetector(requireContext())
 
-    <ImageButton
-        android:id="@+id/btnBack"
-        android:layout_width="@dimen/icon_button_size"
-        android:layout_height="@dimen/icon_button_size"
-        android:layout_margin="@dimen/spacing_medium"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:src="@drawable/baseline_arrow_back_24"
-        app:tint="@color/white"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        // Back Button
+        view.findViewById<ImageButton>(R.id.btnBack).setOnClickListener {
+            findNavController().popBackStack()
+        }
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        // Capture Button
+        view.findViewById<Button>(R.id.btnCapture).setOnClickListener {
+            takePhoto()
+        }
+
+        // Permission Check
+        if (allPermissionsGranted()) {
+            startCamera()
+        } else {
+            requestPermissionLauncher.launch(Manifest.permission.CAMERA)
+        }
+    }
+
+    private fun startCamera() {
+        val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
+
+        cameraProviderFuture.addListener({
+            val cameraProvider = cameraProviderFuture.get()
+
+            val preview = Preview.Builder().build().also {
+                it.setSurfaceProvider(viewFinder.surfaceProvider)
+            }
+
+            imageCapture = ImageCapture.Builder().build()
+
+            // Default to Front Camera for Face Scans
+            val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
+
+            try {
+                cameraProvider.unbindAll()
+                cameraProvider.bindToLifecycle(
+                    viewLifecycleOwner, cameraSelector, preview, imageCapture
+                )
+            } catch (exc: Exception) {
+                Toast.makeText(requireContext(), "Failed to bind camera.", Toast.LENGTH_SHORT).show()
+            }
+        }, ContextCompat.getMainExecutor(requireContext()))
+    }
+
+    private fun takePhoto() {
+        val imageCapture = imageCapture ?: return
+
+        // Temporary file for the AI to read
+        val photoFile = File(requireContext().cacheDir, "temp_scan.jpg")
+        val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
+
+        // Update UI to show processing state
+        tvTopInstruction.text = "Processing..."
+        tvBottomHint.text = "Please stay still while the AI analyzes your facial symmetry."
+
+        imageCapture.takePicture(
+            outputOptions,
+            ContextCompat.getMainExecutor(requireContext()),
+            object : ImageCapture.OnImageSavedCallback {
+                override fun onError(exc: ImageCaptureException) {
+                    tvTopInstruction.text = "Position your face\ninside the frame."
+                    Toast.makeText(requireContext(), "Capture failed.", Toast.LENGTH_SHORT).show()
+                }
+
+                override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+                    // RUN LOCAL OFFLINE DETECTION
+                    lifecycleScope.launch(Dispatchers.Default) {
+                        val bitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
+                        
+                        // Local YOLOv10 Inference
+                        val detectionCount = strokeDetector.detect(bitmap)
+
+                        withContext(Dispatchers.Main) {
+                            showResultDialog(detectionCount)
+                            // Reset instructions for next time
+                            tvTopInstruction.text = "Position your face\ninside the frame."
+                        }
+                    }
+                }
+            }
+        )
+    }
+
+    private fun showResultDialog(count: Int) {
+        val title: String
+        val message: String
+
+        if (count > 0) {
+            title = "Warning: Asymmetry Detected"
+            message = "The AI found $count indicators of facial drooping. This can be a sign of a stroke. Please seek medical attention immediately."
+        } else {
+            title = "Scan Complete"
+            message = "No significant facial drooping was detected at this time."
+        }
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton("Finish") { _, _ -> findNavController().popBackStack() }
+            .setCancelable(false)
+            .show()
+    }
+
+    private fun allPermissionsGranted() = ContextCompat.checkSelfPermission(
+        requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+}
