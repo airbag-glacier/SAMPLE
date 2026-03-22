@@ -28,9 +28,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.json.JSONObject
-import java.net.HttpURLConnection
-import java.net.URL
 
 class RiskFactorsFragment : Fragment() {
 
@@ -40,7 +37,7 @@ class RiskFactorsFragment : Fragment() {
     // Specific text options expected by the Kaggle model
     private val genderOptions = arrayOf("Male", "Female", "Other")
     private val workOptions = arrayOf("Private", "Self-employed", "Government", "Student", "Never worked")
-    private val smokingOptions = arrayOf("Formerly smoked", "Never smoked", "Smokes")
+    private val smokingOptions = arrayOf("Formerly smoked", "Never smoked", "Smokes", "Unknown") // Added Unknown to match Kaggle
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -65,7 +62,7 @@ class RiskFactorsFragment : Fragment() {
         val btnCamera = view.findViewById<FloatingActionButton>(R.id.btnCamera)
         btnCamera?.setOnClickListener {
             // Directly navigate to the scanner
-            findNavController().navigate(R.id.action_global_scan)
+            findNavController().navigate(R.id.action_global_scan) // Assuming this action exists in your nav graph
         }
         view.findViewById<ImageView>(R.id.btnHome)?.setOnClickListener { findNavController().popBackStack(R.id.homeFragment, false) }
     }
@@ -131,8 +128,9 @@ class RiskFactorsFragment : Fragment() {
                 diabetes = isDiabetic
             )
 
+            // THE CRITICAL FIX IS HERE
             if (isSaved) {
-                syncToDoctorDatabase(answers) // Send full Kaggle data to Python server
+                runOfflineRiskAssessment(answers) // Run local TFLite model and background sync
             } else {
                 Toast.makeText(requireContext(), "Database Error.", Toast.LENGTH_SHORT).show()
             }
@@ -141,62 +139,81 @@ class RiskFactorsFragment : Fragment() {
         }
     }
 
-    // --- SERVER SYNC & NAVIGATION ---
-    private fun syncToDoctorDatabase(answers: Map<String, Any>) {
+    // --- OFFLINE AI INFERENCE & CLOUD SYNC ---
+    private fun runOfflineRiskAssessment(answers: Map<String, Any>) {
         val loadingDialog = showThemedLoadingDialog()
+        val userId = requireActivity().intent.getLongExtra("USER_ID", -1L)
 
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                val jsonObject = JSONObject()
-                for ((key, value) in answers) {
-                    jsonObject.put(key, value)
+                // 1. KOTLIN DUMMY ENCODING (Replicating Pandas pd.get_dummies)
+                // Note: The array size (e.g., 21) must perfectly match the number of columns in your Kaggle dataset
+                val encodedFeatures = FloatArray(21)
+
+                // Base Numerical Features
+                encodedFeatures[0] = (answers["age"] as Double).toFloat()
+                encodedFeatures[1] = (answers["hypertension"] as Int).toFloat()
+                encodedFeatures[2] = (answers["heart_disease"] as Int).toFloat()
+                encodedFeatures[3] = (answers["avg_glucose_level"] as Double).toFloat()
+                encodedFeatures[4] = (answers["bmi"] as Double).toFloat()
+
+                // Categorical Features (One-Hot Encoding)
+                val gender = answers["gender"] as String
+                if (gender == "Female") encodedFeatures[5] = 1f
+                else if (gender == "Male") encodedFeatures[6] = 1f
+                else encodedFeatures[7] = 1f // Other
+
+                val everMarried = answers["ever_married"] as String
+                if (everMarried == "No") encodedFeatures[8] = 1f
+                else encodedFeatures[9] = 1f // Yes
+
+                val workType = answers["work_type"] as String
+                when (workType) {
+                    "Govt_job" -> encodedFeatures[10] = 1f
+                    "Never_worked" -> encodedFeatures[11] = 1f
+                    "Private" -> encodedFeatures[12] = 1f
+                    "Self-employed" -> encodedFeatures[13] = 1f
+                    "children" -> encodedFeatures[14] = 1f
                 }
 
-                // REMEMBER: Verify your laptop's Wi-Fi IP address!
-                val url = URL("http://192.168.1.15:5000/predict_risk")
-                val connection = url.openConnection() as HttpURLConnection
-                connection.requestMethod = "POST"
-                connection.setRequestProperty("Content-Type", "application/json; charset=utf-8")
-                connection.setRequestProperty("Accept", "application/json")
-                connection.doOutput = true
+                val residence = answers["Residence_type"] as String
+                if (residence == "Rural") encodedFeatures[15] = 1f
+                else encodedFeatures[16] = 1f // Urban
 
-                connection.outputStream.use { os ->
-                    val input = jsonObject.toString().toByteArray(Charsets.UTF_8)
-                    os.write(input, 0, input.size)
+                val smoke = answers["smoking_status"] as String
+                when (smoke) {
+                    "Unknown" -> encodedFeatures[17] = 1f
+                    "formerly smoked" -> encodedFeatures[18] = 1f
+                    "never smoked" -> encodedFeatures[19] = 1f
+                    "smokes" -> encodedFeatures[20] = 1f
                 }
 
-                if (connection.responseCode == HttpURLConnection.HTTP_OK) {
-                    val response = connection.inputStream.bufferedReader().use { it.readText() }
-                    val responseJson = JSONObject(response)
+                // 2. RUN TENSORFLOW LITE INFERENCE
+                val riskDetector = ClinicalRiskDetector(requireContext())
+                val riskProbability = riskDetector.predictRisk(encodedFeatures)
+                riskDetector.close() // Prevent memory leaks
 
-                    if (responseJson.getBoolean("success")) {
-                        val percentage = (responseJson.getDouble("risk_score") * 100).toInt()
+                val percentage = (riskProbability * 100).toInt()
 
-                        withContext(Dispatchers.Main) {
-                            loadingDialog.dismiss()
+                // 3. BACKGROUND CLOUD BACKUP
+                // Silently push the new data to the Google Cloud SQL Database
+                if (userId != -1L) {
+                    CloudSyncManager(requireContext()).syncLocalDatabaseToCloud(userId)
+                }
 
-                            // Navigate directly to the new Assessment Result Fragment!
-                            val bundle = Bundle().apply {
-                                putInt("RISK_PERCENTAGE", percentage)
-                            }
-                            findNavController().navigate(R.id.action_riskFactors_to_assessmentResult, bundle)
-                        }
-                    } else {
-                        withContext(Dispatchers.Main) {
-                            loadingDialog.dismiss()
-                            Toast.makeText(requireContext(), "Error: ${responseJson.getString("error")}", Toast.LENGTH_LONG).show()
-                        }
+                withContext(Dispatchers.Main) {
+                    loadingDialog.dismiss()
+                    // Navigate to Results Screen
+                    val bundle = Bundle().apply {
+                        putInt("RISK_PERCENTAGE", percentage)
                     }
-                } else {
-                    withContext(Dispatchers.Main) {
-                        loadingDialog.dismiss()
-                        Toast.makeText(requireContext(), "Failed to connect to server.", Toast.LENGTH_LONG).show()
-                    }
+                    findNavController().navigate(R.id.action_riskFactors_to_assessmentResult, bundle)
                 }
+
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     loadingDialog.dismiss()
-                    Toast.makeText(requireContext(), "Network Error: Is the Python server running?", Toast.LENGTH_LONG).show()
+                    Toast.makeText(requireContext(), "Offline AI Error: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -208,7 +225,7 @@ class RiskFactorsFragment : Fragment() {
             setPadding(50, 50, 50, 50)
             gravity = android.view.Gravity.CENTER_VERTICAL
             addView(ProgressBar(requireContext()).apply { indeterminateTintList = ColorStateList.valueOf(appThemeColor) })
-            addView(TextView(requireContext()).apply { text = "Syncing with doctor's database..."; textSize = 16f; setPadding(30, 0, 0, 0); setTextColor(Color.BLACK) })
+            addView(TextView(requireContext()).apply { text = "Analyzing Risk Factors locally..."; textSize = 16f; setPadding(30, 0, 0, 0); setTextColor(Color.BLACK) })
         }
         return MaterialAlertDialogBuilder(requireContext()).setView(layout).setCancelable(false).show()
     }

@@ -16,7 +16,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class LoginActivity : AppCompatActivity() {
 
-
     private val baseUrl = "http://192.168.1.15:5000/"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -98,7 +97,6 @@ class LoginActivity : AppCompatActivity() {
 
         Log.d("SyncDown", "Rebuilding local database for User ID: $userId")
 
-        // 1. Save the User Profile
         cloudData.userProfile?.let { profile ->
             dbHelper.updateRiskFactorsToERD(
                 userId = userId,
@@ -111,7 +109,6 @@ class LoginActivity : AppCompatActivity() {
             )
         }
 
-        // 2. Save the Emergency Contacts
         cloudData.emergencyContacts.forEach { contact ->
             dbHelper.insertEmergencyContact(
                 userId = userId,
@@ -127,6 +124,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun navigateToHome(userId: Long) {
+        // Change MainActivity::class.java to whatever your Dashboard/Host Activity is named!
         val intent = Intent(this, MainActivity::class.java)
         intent.putExtra("USER_ID", userId)
         startActivity(intent)

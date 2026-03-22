@@ -10,6 +10,10 @@ android {
         version = release(36)
     }
 
+    androidResources {
+        noCompress.add("tflite")
+    }
+
     defaultConfig {
         applicationId = "com.example.sample"
         minSdk = 26
