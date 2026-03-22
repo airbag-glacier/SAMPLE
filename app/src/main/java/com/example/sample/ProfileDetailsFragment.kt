@@ -58,7 +58,9 @@ class ProfileDetailsFragment : Fragment() {
 
                 val imageUriString = userProfile["image_uri"]
                 if (!imageUriString.isNullOrEmpty()) {
-                    val profileImageView = view.findViewById<ImageView>(R.id.imgProfile)
+                    // FIXED: Changed R.id.imgProfile to R.id.imgFullProfile
+                    val profileImageView = view.findViewById<ImageView>(R.id.imgFullProfile)
+
                     try {
                         profileImageView.setImageURI(android.net.Uri.parse(imageUriString))
                     } catch (e: SecurityException) {

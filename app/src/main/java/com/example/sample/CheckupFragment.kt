@@ -140,7 +140,11 @@ class CheckupFragment : Fragment() {
         }
 
         // Bottom Nav Logic
-        view.findViewById<FloatingActionButton>(R.id.btnCamera)?.setOnClickListener { findNavController().navigate(R.id.action_home_to_scan) }
+        val btnCamera = view.findViewById<FloatingActionButton>(R.id.btnCamera)
+        btnCamera?.setOnClickListener {
+            // Directly navigate to the scanner
+            findNavController().navigate(R.id.action_global_scan)
+        }
         view.findViewById<ImageView>(R.id.btnHome)?.setOnClickListener { findNavController().popBackStack(R.id.homeFragment, false) }
         view.findViewById<ImageView>(R.id.btnMenu)?.setOnClickListener {
             MaterialAlertDialogBuilder(requireContext())

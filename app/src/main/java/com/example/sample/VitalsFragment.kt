@@ -18,16 +18,49 @@ import kotlin.math.pow
 
 class VitalsFragment : Fragment() {
 
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_vitals, container, false)
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Back Button Logic
+        val btnBackVitals = view.findViewById<ImageView>(R.id.btnBackVitals)
+        btnBackVitals?.setOnClickListener {
+            findNavController().popBackStack()
+        }
+        //  Find all the Dropdown UI Elements
+        val dropdownSystolic = view.findViewById<AutoCompleteTextView>(R.id.dropdownSystolic)
+        val dropdownDiastolic = view.findViewById<AutoCompleteTextView>(R.id.dropdownDiastolic)
+        val dropdownHeartRate = view.findViewById<AutoCompleteTextView>(R.id.dropdownHeartRate)
+        val dropdownOxygen = view.findViewById<AutoCompleteTextView>(R.id.dropdownOxygen)
+        val dropdownHeight = view.findViewById<AutoCompleteTextView>(R.id.dropdownHeight)
+        val dropdownWeight = view.findViewById<AutoCompleteTextView>(R.id.dropdownWeight)
 
+        // 2. Generate the Number Ranges for the Dropdowns
+        val systolicRange = (70..250 step 1).map { it.toString() }
+        val diastolicRange = (40..150 step 1).map { it.toString() }
+        val hrRange = (40..200 step 1).map { it.toString() }
+        val oxygenRange = (70..100 step 1).map { it.toString() }
+        val heightRange = (100..250 step 1).map { it.toString() }
+        val weightRange = (30..200 step 1).map { it.toString() }
+
+        // 3. Attach the Data to the Dropdowns using ArrayAdapters
+        dropdownSystolic.setAdapter(ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, systolicRange))
+        dropdownDiastolic.setAdapter(ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, diastolicRange))
+        dropdownHeartRate.setAdapter(ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, hrRange))
+        dropdownOxygen.setAdapter(ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, oxygenRange))
+        dropdownHeight.setAdapter(ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, heightRange))
+        dropdownWeight.setAdapter(ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, weightRange))
+
+
+        // Save Button Logic
         val btnSave = view.findViewById<MaterialButton>(R.id.btnSaveVitals)
         btnSave.setOnClickListener {
-            val dropdownHeight = view.findViewById<AutoCompleteTextView>(R.id.dropdownHeight)
-            val dropdownWeight = view.findViewById<AutoCompleteTextView>(R.id.dropdownWeight)
-
             val heightCm = dropdownHeight.text.toString().toDoubleOrNull() ?: 0.0
             val weightKg = dropdownWeight.text.toString().toDoubleOrNull() ?: 0.0
 
@@ -53,9 +86,11 @@ class VitalsFragment : Fragment() {
                 }
             }
         }
+
+        // Bottom Navigation Logic
         val btnCamera = view.findViewById<FloatingActionButton>(R.id.btnCamera)
         btnCamera?.setOnClickListener {
-            findNavController().navigate(R.id.action_home_to_scan)
+            findNavController().navigate(R.id.action_global_scan)
         }
 
         val btnHome = view.findViewById<ImageView>(R.id.btnHome)

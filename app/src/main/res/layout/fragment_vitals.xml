@@ -22,14 +22,32 @@
             android:orientation="vertical"
             android:padding="@dimen/spacing_large">
 
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Record Vitals"
-                android:textColor="@color/primaryPink"
-                android:textSize="@dimen/text_title"
-                android:textStyle="bold"
-                android:layout_marginBottom="@dimen/spacing_large"/>
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="@dimen/spacing_large">
+
+                <ImageButton
+                    android:id="@+id/btnBackVitals"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="-12dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/baseline_arrow_back_24"
+                    app:tint="@color/primaryPink"
+                    tools:ignore="ContentDescription" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_small"
+                    android:text="Record Vitals"
+                    android:textColor="@color/primaryPink"
+                    android:textSize="@dimen/text_title"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
             <TextView
                 android:layout_width="wrap_content"

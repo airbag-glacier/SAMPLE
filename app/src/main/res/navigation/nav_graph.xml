@@ -5,6 +5,12 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/homeFragment" >
 
+    <action
+        android:id="@+id/action_global_scan"
+        app:destination="@id/scanFragment"
+        app:enterAnim="@anim/nav_default_enter_anim"
+        app:exitAnim="@anim/nav_default_exit_anim" />
+
     <fragment
         android:id="@+id/homeFragment"
         android:name="com.example.sample.HomeFragment"
