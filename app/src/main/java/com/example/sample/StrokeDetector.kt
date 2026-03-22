@@ -2,7 +2,6 @@ package com.example.sample
 
 import android.content.Context
 import android.graphics.Bitmap
-import androidx.privacysandbox.tools.core.model.Method
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.support.common.FileUtil
 import org.tensorflow.lite.support.common.ops.NormalizeOp
@@ -33,7 +32,7 @@ class StrokeDetector(context: Context) {
 
         // Pre-process (Standard 640x640 for YOLOv10)
         val imageProcessor = ImageProcessor.Builder()
-            .add(ResizeOp(inputSize, inputSize, ResizeOp.Method.BILINEAR))
+            .add(ResizeOp(inputSize, inputSize, ResizeOp.ResizeMethod.BILINEAR))
             .add(NormalizeOp(0f, 255f))
             .build()
 
