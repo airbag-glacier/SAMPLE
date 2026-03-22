@@ -6,9 +6,7 @@ plugins {
 
 android {
     namespace = "com.example.sample"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 35
 
     androidResources {
         noCompress.add("tflite")
@@ -17,7 +15,7 @@ android {
     defaultConfig {
         applicationId = "com.example.sample"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -40,9 +38,6 @@ android {
     buildFeatures {
         compose = true
     }
-    aaptOptions {
-        noCompress("tflite")
-    }
 }
 
 dependencies {
@@ -54,11 +49,10 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
-    implementation("androidx.core:core-splashscreen:1.2.0")
+    implementation("androidx.core:core-splashscreen:1.0.1")
     // Navigation Component
         implementation("androidx.navigation:navigation-fragment-ktx:2.7.7")
         implementation("androidx.navigation:navigation-ui-ktx:2.7.7")
-    implementation(libs.androidx.tools.core)
 
     // CameraX (For the Face Scan)
     val camerax_version = "1.3.0" // Check for the latest version
@@ -80,8 +74,6 @@ dependencies {
 
     // Google Maps
     implementation("com.google.android.gms:play-services-maps:18.2.0")
-
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
 
     implementation("com.google.android.libraries.places:places:3.3.0")
 
