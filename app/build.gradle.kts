@@ -8,10 +8,6 @@ android {
     namespace = "com.example.sample"
     compileSdk = 35
 
-    androidResources {
-        noCompress.add("tflite")
-    }
-
     defaultConfig {
         applicationId = "com.example.sample"
         minSdk = 26
@@ -49,41 +45,40 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    
+    // UI Support
+    implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.core:core-splashscreen:1.0.1")
-    // Navigation Component
-        implementation("androidx.navigation:navigation-fragment-ktx:2.7.7")
-        implementation("androidx.navigation:navigation-ui-ktx:2.7.7")
+    implementation(libs.androidx.cardview)
 
-    // CameraX (For the Face Scan)
-    val camerax_version = "1.3.0" // Check for the latest version
+    // Navigation
+    implementation("androidx.navigation:navigation-fragment-ktx:2.7.7")
+    implementation("androidx.navigation:navigation-ui-ktx:2.7.7")
+
+    // CameraX
+    val camerax_version = "1.3.0"
     implementation("androidx.camera:camera-core:${camerax_version}")
     implementation("androidx.camera:camera-camera2:${camerax_version}")
     implementation("androidx.camera:camera-lifecycle:${camerax_version}")
     implementation("androidx.camera:camera-view:${camerax_version}")
 
-        // UI Components (Material Design)
-        implementation("com.google.android.material:material:1.11.0")
-    implementation(libs.androidx.cardview)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-    debugImplementation(libs.androidx.compose.ui.tooling)
-    debugImplementation(libs.androidx.compose.ui.test.manifest)
-
-    // Google Maps
+    // Google Services
     implementation("com.google.android.gms:play-services-maps:18.2.0")
-
     implementation("com.google.android.libraries.places:places:3.3.0")
-
     implementation("com.google.android.gms:play-services-location:21.2.0")
 
+    // Networking
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
-    // TensorFlow Lite for YOLOv10
+    // TensorFlow Lite
     implementation("org.tensorflow:tensorflow-lite:2.14.0")
     implementation("org.tensorflow:tensorflow-lite-support:0.4.4")
 
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
