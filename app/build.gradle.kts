@@ -72,9 +72,13 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
-    // TensorFlow Lite
-    implementation("org.tensorflow:tensorflow-lite:2.14.0")
-    implementation("org.tensorflow:tensorflow-lite-support:0.4.4")
+// 1. Use the newest core engine (bypasses core manifest bugs)
+    implementation("org.tensorflow:tensorflow-lite:2.17.0")
+
+    // 2. Use ONLY the Support API, and block the duplicate old engine
+    implementation("org.tensorflow:tensorflow-lite-support-api:0.4.4") {
+        exclude(group = "org.tensorflow", module = "tensorflow-lite-api")
+    }
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

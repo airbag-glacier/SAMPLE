@@ -12,8 +12,8 @@ import java.nio.MappedByteBuffer
 
 class StrokeDetector(context: Context) {
     private var interpreter: Interpreter? = null
-    
-    private val inputSize = 640 
+
+    private val inputSize = 640
 
     init {
         try {
@@ -61,7 +61,7 @@ class StrokeDetector(context: Context) {
             val confidence = detections[i][4]
             val classId = detections[i][5].toInt()
 
-            if (confidence > 0.30f) { // 45% threshold
+            if (confidence > 0.30f) { // 30% threshold
                 labels[classId]?.let { symptom ->
                     if (!foundSymptoms.contains(symptom)) {
                         foundSymptoms.add(symptom)

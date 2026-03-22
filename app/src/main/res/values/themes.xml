@@ -1,5 +1,6 @@
 <resources>
     <style name="Theme.SAMPLE" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+
     </style>
 
     <style name="Theme.Splash" parent="Theme.SplashScreen">
