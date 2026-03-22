@@ -69,8 +69,15 @@ class BloodChemFragment : Fragment() {
             val userId = requireActivity().intent?.getLongExtra("USER_ID", -1L) ?: -1L
 
             if (userId != -1L) {
-                // ERD only tracks Cholesterol right now, so we pass the totalChol
-                val isSaved = dbHelper.updateBloodChemToERD(userId, totalChol.toDoubleOrNull() ?: 0.0)
+                // Pass ALL 5 values to the database!
+                val isSaved = dbHelper.updateBloodChemToERD(
+                    userId = userId,
+                    totalChol = totalChol.toDoubleOrNull() ?: 0.0,
+                    hdl = hdl.toDoubleOrNull() ?: 0.0,
+                    ldl = ldl.toDoubleOrNull() ?: 0.0,
+                    tri = tri.toDoubleOrNull() ?: 0.0,
+                    fbs = fbs.toDoubleOrNull() ?: 0.0
+                )
 
                 if (isSaved) {
                     Toast.makeText(requireContext(), "Blood Chemistry Records Saved!", Toast.LENGTH_LONG).show()
@@ -78,6 +85,9 @@ class BloodChemFragment : Fragment() {
                 } else {
                     Toast.makeText(requireContext(), "Database Error. Could not save.", Toast.LENGTH_SHORT).show()
                 }
+            } else {
+                // Failsafe: Let you know if the app forgot who is logged in
+                Toast.makeText(requireContext(), "Error: User Session Lost.", Toast.LENGTH_SHORT).show()
             }
         }
 

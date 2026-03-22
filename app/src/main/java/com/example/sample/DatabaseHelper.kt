@@ -35,7 +35,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         private const val COL_HYPERTENSION = "hypertension"
         private const val COL_DIABETES = "diabetes"
         private const val COL_SMOKER = "smoker"
-        private const val COL_CHOLESTEROL = "cholesterol_level"
+
         private const val COL_STROKE_HISTORY = "stroke_history"
         private const val COL_CARDIAC_DISEASE = "cardiac_disease"
         private const val COL_OBESE = "obese"
