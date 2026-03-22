@@ -296,19 +296,15 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val db = this.readableDatabase
         val map = mutableMapOf<String, String>()
 
-        map["name"] = "Unknown"
-        map["email"] = "Unknown"
-        map["age"] = "N/A"
-        map["sex"] = "N/A"
-        map["bmi"] = "N/A"
-        map["cholesterol"] = "N/A"
-        map["hypertension"] = "N/A"
-        map["smoker"] = "N/A"
+        // Initialize all keys to "N/A" so the app doesn't crash if a value is missing
+        val keys = listOf("name", "email", "age", "sex", "bmi", "cholesterol", "hdl", "ldl", "tri", "fbs", "hypertension", "smoker", "image_uri")
+        keys.forEach { map[it] = "N/A" }
         map["image_uri"] = ""
 
         val query = """
             SELECT u.$COL_USER_NAME, u.$COL_EMAIL, u.$COL_AGE, u.$COL_SEX, u.$COL_IMAGE_URI,
-                   h.$COL_BMI, h.$COL_CHOLESTEROL, h.$COL_HYPERTENSION, h.$COL_SMOKER
+                   h.$COL_BMI, h.$COL_CHOLESTEROL, h.$COL_HYPERTENSION, h.$COL_SMOKER,
+                   h.$COL_HDL, h.$COL_LDL, h.$COL_TRIGLYCERIDES, h.$COL_FBS
             FROM $TABLE_USER u
             LEFT JOIN $TABLE_HEALTH_PROFILE h ON u.$COL_USER_ID = h.$COL_USER_ID
             WHERE u.$COL_USER_ID = ?
@@ -325,6 +321,10 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             map["cholesterol"] = cursor.getString(6) ?: "N/A"
             map["hypertension"] = if (cursor.getInt(7) == 1) "Yes" else "No"
             map["smoker"] = if (cursor.getInt(8) == 1) "Yes" else "No"
+            map["hdl"] = cursor.getString(9) ?: "N/A"
+            map["ldl"] = cursor.getString(10) ?: "N/A"
+            map["tri"] = cursor.getString(11) ?: "N/A"
+            map["fbs"] = cursor.getString(12) ?: "N/A"
         }
         cursor.close()
         return map
