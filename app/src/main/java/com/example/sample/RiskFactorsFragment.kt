@@ -169,11 +169,11 @@ class RiskFactorsFragment : Fragment() {
 
                 val workType = answers["work_type"] as String
                 when (workType) {
-                    "Govt_job" -> encodedFeatures[10] = 1f
-                    "Never_worked" -> encodedFeatures[11] = 1f
+                    "Government" -> encodedFeatures[10] = 1f
+                    "Never worked" -> encodedFeatures[11] = 1f
                     "Private" -> encodedFeatures[12] = 1f
                     "Self-employed" -> encodedFeatures[13] = 1f
-                    "children" -> encodedFeatures[14] = 1f
+                    "Student" -> encodedFeatures[14] = 1f
                 }
 
                 val residence = answers["Residence_type"] as String
@@ -183,9 +183,9 @@ class RiskFactorsFragment : Fragment() {
                 val smoke = answers["smoking_status"] as String
                 when (smoke) {
                     "Unknown" -> encodedFeatures[17] = 1f
-                    "formerly smoked" -> encodedFeatures[18] = 1f
-                    "never smoked" -> encodedFeatures[19] = 1f
-                    "smokes" -> encodedFeatures[20] = 1f
+                    "Formerly smoked" -> encodedFeatures[18] = 1f
+                    "Never smoked" -> encodedFeatures[19] = 1f
+                    "Smokes" -> encodedFeatures[20] = 1f
                 }
 
                 // 2. RUN TENSORFLOW LITE INFERENCE
@@ -195,11 +195,6 @@ class RiskFactorsFragment : Fragment() {
 
                 val percentage = (riskProbability * 100).toInt()
 
-                // 3. BACKGROUND CLOUD BACKUP
-                // Silently push the new data to the Google Cloud SQL Database
-                if (userId != -1L) {
-                    CloudSyncManager(requireContext()).syncLocalDatabaseToCloud(userId)
-                }
 
                 withContext(Dispatchers.Main) {
                     loadingDialog.dismiss()

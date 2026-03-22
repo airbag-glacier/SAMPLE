@@ -16,8 +16,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         private const val COL_APT_DATE = "apt_date"
         private const val COL_APT_TIME = "apt_time"
         private const val DATABASE_NAME = "DeTechStroke.db"
-        // BUMPED TO VERSION 2 to trigger onUpgrade and recreate tables with new columns
-        private const val DATABASE_VERSION = 2
+
+        private const val DATABASE_VERSION = 3
 
         // --- 1. USER TABLE (Hybrid: ERD + Auth) ---
         private const val TABLE_USER = "User"
@@ -70,6 +70,13 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         private const val COL_RISK_ID = "risk_id"
         private const val COL_LR_PREDICTION = "lr_prediction"
         private const val COL_RISK_LEVEL = "risk_level"
+
+
+        private const val COL_CHOLESTEROL = "cholesterol_level"
+        private const val COL_HDL = "hdl_level"               // ADD THIS
+        private const val COL_LDL = "ldl_level"               // ADD THIS
+        private const val COL_TRIGLYCERIDES = "triglycerides" // ADD THIS
+        private const val COL_FBS = "fasting_blood_sugar"     // ADD THIS
     }
 
     override fun onConfigure(db: SQLiteDatabase) {
@@ -112,6 +119,10 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 + "$COL_PHYSICAL_INABILITY INTEGER,"
                 + "$COL_ALCOHOLIC INTEGER,"
                 + "$COL_BMI REAL,"
+                + "$COL_HDL REAL,"                 // <-- ADD THIS
+                + "$COL_LDL REAL,"                 // <-- ADD THIS
+                + "$COL_TRIGLYCERIDES REAL,"       // <-- ADD THIS
+                + "$COL_FBS REAL,"
                 + "FOREIGN KEY($COL_USER_ID) REFERENCES $TABLE_USER($COL_USER_ID) ON DELETE CASCADE)")
         db.execSQL(createHealthProfileTable)
 
@@ -248,10 +259,16 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return rows > 0
     }
 
-    fun updateBloodChemToERD(userId: Long, totalCholesterol: Double): Boolean {
+    fun updateBloodChemToERD(userId: Long, totalChol: Double, hdl: Double, ldl: Double, tri: Double, fbs: Double): Boolean {
         ensureProfileExists(userId)
         val db = this.writableDatabase
-        val values = ContentValues().apply { put(COL_CHOLESTEROL, totalCholesterol) }
+        val values = ContentValues().apply {
+            put(COL_CHOLESTEROL, totalChol)
+            put(COL_HDL, hdl)
+            put(COL_LDL, ldl)
+            put(COL_TRIGLYCERIDES, tri)
+            put(COL_FBS, fbs)
+        }
         val rows = db.update(TABLE_HEALTH_PROFILE, values, "$COL_USER_ID = ?", arrayOf(userId.toString()))
         db.close()
         return rows > 0
