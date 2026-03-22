@@ -12,7 +12,7 @@ app = Flask(__name__)
 db_user = os.environ.get("DB_USER", "root")
 db_pass = os.environ.get("DB_PASS", "your_cloud_password")
 db_name = os.environ.get("DB_NAME", "detechstroke_db")
-db_host = os.environ.get("DB_HOST", "127.0.0.1")  # Cloud SQL IP
+db_host = os.environ.get("DB_HOST", "127.0.0.1")  # Replace with Cloud SQL IP
 
 print("Initializing Google Cloud SQL Connection Pool...")
 db_pool = sqlalchemy.create_engine(
