@@ -18,7 +18,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.SAMPLE">
+        android:theme="@style/Theme.SAMPLE"
+        tools:replace="android:allowBackup">
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -27,7 +28,7 @@
         <activity
             android:name=".SplashActivity"
             android:exported="true"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+            android:theme="@style/Theme.Splash">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -35,11 +36,14 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".LoginActivity" />
+        <activity android:name=".LoginActivity"
+            android:exported="false" />
 
-        <activity android:name=".MainActivity" />
+        <activity android:name=".MainActivity"
+            android:exported="false" />
 
-        <activity android:name=".SignUpActivity" />
+        <activity android:name=".SignUpActivity"
+            android:exported="false" />
 
     </application>
 
