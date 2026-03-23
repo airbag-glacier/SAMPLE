@@ -82,12 +82,12 @@ class SignUpActivity : AppCompatActivity() {
             }
 
             // --- 3. PROCEED TO DATABASE ---
-            
+
             val isInserted = dbHelper.registerUser(email, password, name, imageUriString)
 
             if (isInserted) {
                 Toast.makeText(this, "Sign Up Successful!", Toast.LENGTH_SHORT).show()
-                finish() // Closes the sign-up screen and returns to Login
+                finish() // Closes the sign-up screen and returns to Log in
             } else {
                 Toast.makeText(this, "Email already exists!", Toast.LENGTH_SHORT).show()
             }
