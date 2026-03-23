@@ -107,19 +107,39 @@ class EmergencyContactsFragment : Fragment() {
             findNavController().popBackStack(R.id.homeFragment, false)
         }
 
+// Bottom Navigation: Upgraded List Menu Dialog
         view.findViewById<ImageView>(R.id.btnMenu)?.setOnClickListener {
+            val menuOptions = arrayOf("Assessment Result", "Emergency Contacts", "About / Credits", "Restart App")
+
             MaterialAlertDialogBuilder(requireContext())
-                .setTitle("DeTechStroke")
-                .setMessage("Developers:\nGabriel Garcia\nPhoebe Andrei Quan\nNatsuki Ushijima\n\n© 2026 All Rights Reserved.")
-                .setPositiveButton("Restart App") { _, _ ->
-                    val intent = requireContext().packageManager.getLaunchIntentForPackage(requireContext().packageName)
-                    if (intent != null) {
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
-                        startActivity(intent)
-                        requireActivity().finish()
+                .setTitle("DeTechStroke Menu")
+                .setItems(menuOptions) { _, which ->
+                    when (which) {
+                        0 -> findNavController().navigate(R.id.action_global_assessmentResult)
+
+                        1 -> findNavController().navigate(R.id.action_global_emergencyContacts)
+
+                        2 -> {
+                            // Show the developer credits in a secondary pop-up
+                            MaterialAlertDialogBuilder(requireContext())
+                                .setTitle("DeTechStroke")
+                                .setMessage("Developers:\nGabriel Garcia\nPhoebe Andrei Quan\nNatsuki Ushijima\n\n© 2026 All Rights Reserved.")
+                                .setPositiveButton("Close", null)
+                                .show()
+                        }
+
+                        3 -> {
+                            // Restart App Logic
+                            val intent = requireContext().packageManager.getLaunchIntentForPackage(requireContext().packageName)
+                            if (intent != null) {
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+                                startActivity(intent)
+                                requireActivity().finish()
+                            }
+                        }
                     }
                 }
-                .setNegativeButton("Close", null)
+                .setNegativeButton("Close Menu", null)
                 .show()
         }
     }

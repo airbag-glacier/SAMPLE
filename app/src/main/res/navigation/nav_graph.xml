@@ -11,6 +11,18 @@
         app:enterAnim="@anim/nav_default_enter_anim"
         app:exitAnim="@anim/nav_default_exit_anim" />
 
+    <action
+        android:id="@+id/action_global_assessmentResult"
+        app:destination="@id/assessmentResultFragment"
+        app:enterAnim="@anim/nav_default_enter_anim"
+        app:exitAnim="@anim/nav_default_exit_anim" />
+
+    <action
+        android:id="@+id/action_global_emergencyContacts"
+        app:destination="@id/emergencyContactsFragment"
+        app:enterAnim="@anim/nav_default_enter_anim"
+        app:exitAnim="@anim/nav_default_exit_anim" />
+
     <fragment
         android:id="@+id/homeFragment"
         android:name="com.example.sample.HomeFragment"
