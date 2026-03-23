@@ -11,7 +11,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 class CloudSyncManager(private val context: Context) {
 
     // Ensure this matches your Python Flask server's Wi-Fi IP address
-    private val BASE_URL = "http://192.168.1.15:5000/"
+    private val BASE_URL = "http://192.168.1.8:5000/"
 
     fun syncLocalDatabaseToCloud(userId: Long) {
         val dbHelper = DatabaseHelper(context)
