@@ -40,6 +40,8 @@ class ClinicalRiskDetector(context: Context) {
         for (value in encodedFeatures) {
             inputBuffer.putFloat(value)
         }
+        //rewinds the memory cursor to the beginning of the buffer
+        inputBuffer.rewind()
 
         // Prepare Output Buffer
         val outputBuffer = Array(1) { FloatArray(1) }
