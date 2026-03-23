@@ -43,13 +43,12 @@ class ProfileDetailsFragment : Fragment() {
             view.findViewById<TextView>(R.id.tvFullBp).text = "Hypertension: ${profile["hypertension"]}"
             view.findViewById<TextView>(R.id.tvSmoking).text = "Smoker: ${profile["smoker"]}"
 
-            // MAPPING DATA TO YOUR TABLE
-            // We find the specific TextViews in your XML table and set their text individually
-            view.findViewById<TextView>(R.id.tvTotalChol).text = profile["cholesterol"]
-            view.findViewById<TextView>(R.id.tvHDL).text = profile["hdl"]
-            view.findViewById<TextView>(R.id.tvLDL).text = profile["ldl"]
-            view.findViewById<TextView>(R.id.tvTriglycerides).text = profile["tri"]
-            view.findViewById<TextView>(R.id.tvFbs).text = profile["fbs"]
+// MAPPING DATA FOR BLOOD CHEM TABLE
+            view.findViewById<TextView>(R.id.tvTotalChol).text = "Total Cholesterol: ${profile["cholesterol"]} mg/dL"
+            view.findViewById<TextView>(R.id.tvHDL).text = "HDL: ${profile["hdl"]} mg/dL"
+            view.findViewById<TextView>(R.id.tvLDL).text = "LDL: ${profile["ldl"]} mg/dL"
+            view.findViewById<TextView>(R.id.tvTriglycerides).text = "Triglycerides: ${profile["tri"]} mg/dL"
+            view.findViewById<TextView>(R.id.tvFbs).text = "Fasting Blood Sugar: ${profile["fbs"]} mg/dL"
 
             // Image handling
             val imageUriString = profile["image_uri"]
