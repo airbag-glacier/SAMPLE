@@ -10,6 +10,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.textfield.TextInputEditText
 
+
 class SignUpActivity : AppCompatActivity() {
 
     private lateinit var dbHelper: DatabaseHelper
@@ -50,17 +51,45 @@ class SignUpActivity : AppCompatActivity() {
             val password = etPassword.text.toString().trim()
             val imageUriString = selectedImageUri?.toString() ?: ""
 
-            if (name.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty()) {
-                val isInserted = dbHelper.registerUser(email, password, name, imageUriString)
+            // --- 1. VALIDATION RULES ---
 
-                if (isInserted) {
-                    Toast.makeText(this, "Sign Up Successful!", Toast.LENGTH_SHORT).show()
-                    finish()
-                } else {
-                    Toast.makeText(this, "Email already exists!", Toast.LENGTH_SHORT).show()
-                }
-            } else {
+            // Check if email ends with an allowed domain
+            val isValidEmail = email.endsWith("@gmail.com") ||
+                    email.endsWith("@student.tsu.edu.ph") ||
+                    email.endsWith("@yahoo.com")
+
+            // Check password strength criteria
+            val hasMinLength = password.length >= 12
+            val hasNumber = password.any { it.isDigit() }
+            val hasSpecialChar = password.any { !it.isLetterOrDigit() }
+            val isValidPassword = hasMinLength && hasNumber && hasSpecialChar
+
+            // --- 2. ENFORCE RULES ---
+
+            if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener // Stops execution here
+            }
+
+            if (!isValidEmail) {
+                Toast.makeText(this, "Please use a valid Gmail, Yahoo, or TSU email", Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
+
+            if (!isValidPassword) {
+                Toast.makeText(this, "Password must be 12+ chars with a number and special character", Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
+
+            // --- 3. PROCEED TO DATABASE ---
+            
+            val isInserted = dbHelper.registerUser(email, password, name, imageUriString)
+
+            if (isInserted) {
+                Toast.makeText(this, "Sign Up Successful!", Toast.LENGTH_SHORT).show()
+                finish() // Closes the sign-up screen and returns to Login
+            } else {
+                Toast.makeText(this, "Email already exists!", Toast.LENGTH_SHORT).show()
             }
         }
     }
