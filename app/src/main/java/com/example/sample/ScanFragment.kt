@@ -117,17 +117,21 @@ class ScanFragment : Fragment() {
                 val bitmap = BitmapFactory.decodeFile(file.absolutePath)
 
                 // 1. EXECUTE LOCAL TFLITE MODEL
-                val foundSymptoms = strokeDetector.detect(bitmap)
+                // Capture the full ScanResult object
+                val scanResult = strokeDetector.detect(bitmap)
+
+                // Extract just the list of text symptoms for the UI
+                val symptomList = scanResult.symptoms
 
                 // 2. SAVE TO SQLITE DATABASE
-                saveScanToDatabase(foundSymptoms.isNotEmpty())
+                saveScanToDatabase(symptomList.isNotEmpty())
 
                 withContext(Dispatchers.Main) {
                     // Clean up the temp image
                     if (file.exists()) file.delete()
 
-                    // Show Emergency Dialog
-                    showResultDialog(foundSymptoms)
+                    // Show Emergency Dialog using the extracted list
+                    showResultDialog(symptomList)
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
