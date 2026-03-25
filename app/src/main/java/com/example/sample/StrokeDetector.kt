@@ -2,7 +2,6 @@ package com.example.sample
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.util.Log
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.support.common.FileUtil
 import org.tensorflow.lite.support.common.ops.NormalizeOp
@@ -28,8 +27,9 @@ class StrokeDetector(context: Context) {
         }
     }
 
-    fun detect(bitmap: Bitmap): List<String> {
-        val tInterpreter = interpreter ?: return emptyList()
+    // FIX 1: Strict return type
+    fun detect(bitmap: Bitmap): ScanResult {
+        val tInterpreter = interpreter ?: return ScanResult(0f, 0f, listOf("Error: Model not loaded"))
 
         val imageProcessor = ImageProcessor.Builder()
             .add(ResizeOp(inputSize, inputSize, ResizeOp.ResizeMethod.BILINEAR))
@@ -41,14 +41,13 @@ class StrokeDetector(context: Context) {
         tensorImage = imageProcessor.process(tensorImage)
 
         val outputBuffer = Array(1) { Array(300) { FloatArray(6) } }
-
         tInterpreter.run(tensorImage.buffer, outputBuffer)
 
-        // Lists to store Y-coordinates for comparison
-        val leftEyeY = mutableListOf<Float>()
-        val rightEyeY = mutableListOf<Float>()
-        val leftLipY = mutableListOf<Float>()
-        val rightLipY = mutableListOf<Float>()
+        // FIX 3: Store pairs of (Y-Coordinate, Confidence) to find the best box
+        var bestLeftEye: Pair<Float, Float>? = null
+        var bestRightEye: Pair<Float, Float>? = null
+        var bestLeftLip: Pair<Float, Float>? = null
+        var bestRightLip: Pair<Float, Float>? = null
 
         val detections = outputBuffer[0]
 
@@ -56,41 +55,47 @@ class StrokeDetector(context: Context) {
             val confidence = detections[i][4]
             val classId = detections[i][5].toInt()
 
-            // Calculate center Y coordinate: (Ymin + Ymax) / 2
-            val yCenter = (detections[i][1] + detections[i][3]) / 2f
-
             if (confidence > 0.40f) {
+                // FIX 2: Normalize the Y-coordinate to a 0.0 - 1.0 scale
+                val yCenter = ((detections[i][1] + detections[i][3]) / 2f) / inputSize
+
+                // Update if this is the highest confidence detection we've seen for this class
                 when (classId) {
-                    1 -> leftEyeY.add(yCenter)
-                    2 -> rightEyeY.add(yCenter)
-                    3 -> leftLipY.add(yCenter)
-                    4 -> rightLipY.add(yCenter)
+                    1 -> if (bestLeftEye == null || confidence > bestLeftEye.second) bestLeftEye = Pair(yCenter, confidence)
+                    2 -> if (bestRightEye == null || confidence > bestRightEye.second) bestRightEye = Pair(yCenter, confidence)
+                    3 -> if (bestLeftLip == null || confidence > bestLeftLip.second) bestLeftLip = Pair(yCenter, confidence)
+                    4 -> if (bestRightLip == null || confidence > bestRightLip.second) bestRightLip = Pair(yCenter, confidence)
                 }
             }
         }
 
-        // 5. Calculate Asymmetry
+        // Calculate Asymmetry
+        var eyeAsymmetryFlag = 0.0f
+        var mouthAsymmetryFlag = 0.0f
         val foundSymptoms = mutableListOf<String>()
-        val droopThreshold = 0.035f // Adjusted for noticeable droop (approx 3.5% of image height)
+
+        val droopThreshold = 0.035f // 3.5% of image height
 
         // Eye Comparison
-        if (leftEyeY.isNotEmpty() && rightEyeY.isNotEmpty()) {
-            val eyeDiff = abs(leftEyeY[0] - rightEyeY[0])
-            Log.d("StrokeDetector", "Eye Y-Diff: $eyeDiff")
+        if (bestLeftEye != null && bestRightEye != null) {
+            val eyeDiff = abs(bestLeftEye.first - bestRightEye.first)
             if (eyeDiff > droopThreshold) {
+                eyeAsymmetryFlag = 1.0f
                 foundSymptoms.add("Noticeable Eye Asymmetry")
             }
         }
 
         // Lip Corner Comparison
-        if (leftLipY.isNotEmpty() && rightLipY.isNotEmpty()) {
-            val lipDiff = abs(leftLipY[0] - rightLipY[0])
-            Log.d("StrokeDetector", "Lip Y-Diff: $lipDiff")
+        if (bestLeftLip != null && bestRightLip != null) {
+            val lipDiff = abs(bestLeftLip.first - bestRightLip.first)
             if (lipDiff > droopThreshold) {
+                mouthAsymmetryFlag = 1.0f
                 foundSymptoms.add("Noticeable Mouth Droop")
             }
         }
 
-        return foundSymptoms
+        return ScanResult(eyeAsymmetryFlag, mouthAsymmetryFlag, foundSymptoms)
     }
 }
+
+data class ScanResult(val eyeAsymmetry: Float, val mouthAsymmetry: Float, val symptoms: List<String>)

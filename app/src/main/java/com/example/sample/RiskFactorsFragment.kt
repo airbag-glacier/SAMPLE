@@ -188,9 +188,9 @@ class RiskFactorsFragment : Fragment() {
 
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                // 1. KOTLIN DUMMY ENCODING (Replicating Pandas pd.get_dummies)
-                // Note: The array size (e.g., 21) must perfectly match the number of columns in your Kaggle dataset
-                val encodedFeatures = FloatArray(21)
+                // 1. KOTLIN DUMMY ENCODING
+                // 🛑 CHANGED SIZE FROM 21 TO 23 to fit the new facial data!
+                val encodedFeatures = FloatArray(23)
 
                 // Base Numerical Features
                 encodedFeatures[0] = (answers["age"] as Double).toFloat()
@@ -230,13 +230,29 @@ class RiskFactorsFragment : Fragment() {
                     "Smokes" -> encodedFeatures[20] = 1f
                 }
 
+                // ==========================================
+                // 🚀 NEW STEP: INJECT YOLOv10 FACIAL DATA
+                // ==========================================
+                // Fetch the latest scan result from SQLite
+                val latestScan = dbHelper.getLatestFacialScan(userId)
+
+                if (latestScan != null && latestScan["detected"] as Boolean) {
+                    // Stroke symptoms detected in the face
+                    encodedFeatures[21] = 1f // eye_asymmetry
+                    encodedFeatures[22] = 1f // mouth_asymmetry
+                } else {
+                    // Normal face or no scan taken yet
+                    encodedFeatures[21] = 0f
+                    encodedFeatures[22] = 0f
+                }
+                // ==========================================
+
                 // 2. RUN TENSORFLOW LITE INFERENCE
                 val riskDetector = ClinicalRiskDetector(requireContext())
                 val riskProbability = riskDetector.predictRisk(encodedFeatures)
                 riskDetector.close() // Prevent memory leaks
 
                 val percentage = (riskProbability * 100).toInt()
-
 
                 withContext(Dispatchers.Main) {
                     loadingDialog.dismiss()
