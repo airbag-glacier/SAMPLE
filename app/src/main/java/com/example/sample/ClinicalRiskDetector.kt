@@ -3,15 +3,16 @@ package com.example.sample
 import android.content.Context
 import android.util.Log
 import org.tensorflow.lite.Interpreter
-import org.tensorflow.lite.support.common.FileUtil
+import java.io.FileInputStream
 import java.nio.MappedByteBuffer
+import java.nio.channels.FileChannel
 
 class ClinicalRiskDetector(context: Context) {
     private var interpreter: Interpreter? = null
 
     init {
         try {
-            val model: MappedByteBuffer = FileUtil.loadMappedFile(context, "clinical_risk_model.tflite")
+            val model = loadModelFile(context, "clinical_risk_model.tflite")
             val options = Interpreter.Options().apply {
                 setNumThreads(2)
             }
@@ -22,11 +23,14 @@ class ClinicalRiskDetector(context: Context) {
         }
     }
 
-    fun predictRisk(encodedFeatures: FloatArray): Float {
-        // TRAP DOOR: If the model failed to load, return a negative number so the UI shows -100%
-        val tInterpreter = interpreter ?: return -1.0f
+    private fun loadModelFile(context: Context, modelName: String): MappedByteBuffer {
+        val fileDescriptor = context.assets.openFd(modelName)
+        val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
+        return inputStream.channel.map(FileChannel.MapMode.READ_ONLY, fileDescriptor.startOffset, fileDescriptor.declaredLength)
+    }
 
-        // Bypass the clunky ByteBuffer and let TFLite process the raw arrays directly
+    fun predictRisk(encodedFeatures: FloatArray): Float {
+        val tInterpreter = interpreter ?: return -1.0f
         val inputArray = arrayOf(encodedFeatures)
         val outputArray = Array(1) { FloatArray(1) }
 
@@ -35,7 +39,7 @@ class ClinicalRiskDetector(context: Context) {
             return outputArray[0][0]
         } catch (e: Exception) {
             Log.e("ML_ERROR", "Inference crashed: ${e.message}")
-            return -1.0f // Return -100% if the TFLite math crashes
+            return -1.0f
         }
     }
 

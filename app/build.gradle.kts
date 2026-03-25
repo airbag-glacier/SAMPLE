@@ -33,7 +33,7 @@ android {
     }
     buildFeatures {
         compose = true
-        mlModelBinding = true
+        mlModelBinding = false
     }
 }
 
@@ -56,8 +56,7 @@ dependencies {
     // Navigation
     implementation("androidx.navigation:navigation-fragment-ktx:2.7.7")
     implementation("androidx.navigation:navigation-ui-ktx:2.7.7")
-    implementation(libs.tensorflow.lite.support)
-    implementation(libs.tensorflow.lite.metadata)
+
 
     // CameraX
     val camerax_version = "1.3.0"
@@ -75,13 +74,8 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
-// 1. Use the newest core engine (bypasses core manifest bugs)
-    implementation("org.tensorflow:tensorflow-lite:2.17.0")
+    implementation("com.google.ai.edge.litert:litert:1.0.1")
 
-    // 2. Use ONLY the Support API, and block the duplicate old engine
-    implementation("org.tensorflow:tensorflow-lite-support-api:0.4.4") {
-        exclude(group = "org.tensorflow", module = "tensorflow-lite-api")
-    }
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -90,6 +84,3 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
 
-configurations.all {
-    exclude(group = "com.google.ai.edge.litert", module = "litert-api")
-}
