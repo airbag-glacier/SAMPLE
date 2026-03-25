@@ -29,7 +29,7 @@ class StrokeDetector(context: Context) {
 
     // FIX 1: Strict return type
     fun detect(bitmap: Bitmap): ScanResult {
-        val tInterpreter = interpreter ?: return ScanResult(0f, 0f, listOf("Error: Model not loaded"))
+        val tInterpreter = interpreter ?: return ScanResult(0f, 0f, emptyList())
 
         val imageProcessor = ImageProcessor.Builder()
             .add(ResizeOp(inputSize, inputSize, ResizeOp.ResizeMethod.BILINEAR))

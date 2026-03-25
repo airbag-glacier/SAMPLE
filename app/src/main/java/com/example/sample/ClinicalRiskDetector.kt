@@ -1,10 +1,9 @@
 package com.example.sample
 
 import android.content.Context
+import android.util.Log
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.support.common.FileUtil
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
 import java.nio.MappedByteBuffer
 
 class ClinicalRiskDetector(context: Context) {
@@ -12,48 +11,34 @@ class ClinicalRiskDetector(context: Context) {
 
     init {
         try {
-            // Load the converted TFLite model from the assets folder
             val model: MappedByteBuffer = FileUtil.loadMappedFile(context, "clinical_risk_model.tflite")
             val options = Interpreter.Options().apply {
-                setNumThreads(2) // 2 threads are plenty for a lightweight clinical model
+                setNumThreads(2)
             }
             interpreter = Interpreter(model, options)
         } catch (e: Exception) {
+            Log.e("ML_ERROR", "Failed to load Clinical Model: ${e.message}")
             e.printStackTrace()
         }
     }
 
-    /**
-     * Predicts the stroke risk probability.
-     * @param encodedFeatures A FloatArray containing the perfectly formatted data.
-     * @return A Float between 0.0 and 1.0 representing the risk percentage.
-     */
     fun predictRisk(encodedFeatures: FloatArray): Float {
-        val tInterpreter = interpreter ?: return 0f
+        // TRAP DOOR: If the model failed to load, return a negative number so the UI shows -100%
+        val tInterpreter = interpreter ?: return -1.0f
 
-        // Prepare Input Buffer
-        val inputBuffer = ByteBuffer.allocateDirect(4 * encodedFeatures.size).apply {
-            order(ByteOrder.nativeOrder())
+        // Bypass the clunky ByteBuffer and let TFLite process the raw arrays directly
+        val inputArray = arrayOf(encodedFeatures)
+        val outputArray = Array(1) { FloatArray(1) }
+
+        try {
+            tInterpreter.run(inputArray, outputArray)
+            return outputArray[0][0]
+        } catch (e: Exception) {
+            Log.e("ML_ERROR", "Inference crashed: ${e.message}")
+            return -1.0f // Return -100% if the TFLite math crashes
         }
-
-        // Load the array data into the memory buffer
-        for (value in encodedFeatures) {
-            inputBuffer.putFloat(value)
-        }
-        //rewinds the memory cursor to the beginning of the buffer
-        inputBuffer.rewind()
-
-        // Prepare Output Buffer
-        val outputBuffer = Array(1) { FloatArray(1) }
-
-        // Run the algo Inference
-        tInterpreter.run(inputBuffer, outputBuffer)
-
-        // Return the predicted probability (e.g., 0.75 for 75% risk)
-        return outputBuffer[0][0]
     }
 
-    // Always close the interpreter when the app shuts down to prevent memory leaks
     fun close() {
         interpreter?.close()
     }
