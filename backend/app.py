@@ -15,8 +15,11 @@ db_name = os.environ.get("DB_NAME", "detechstroke_db")
 db_host = os.environ.get("DB_HOST", "127.0.0.1")  # Replace with Cloud SQL IP
 
 print("Initializing Google Cloud SQL Connection Pool...")
+# Add the port directly to the host variable or the f-string
+db_port = os.environ.get("DB_PORT", "3307")
+
 db_pool = sqlalchemy.create_engine(
-    f"mysql+pymysql://{db_user}:{db_pass}@{db_host}/{db_name}",
+    f"mysql+pymysql://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}",
     pool_size=5,
     max_overflow=2,
     pool_timeout=30,
@@ -195,15 +198,15 @@ def admin_dashboard():
                 FROM users u
                 LEFT JOIN user_profiles p ON u.id = p.user_id
                 LEFT JOIN (
-                    SELECT user_id, risk_level, lr_prediction 
-                    FROM risk_assessments 
-                    ORDER BY timestamp DESC LIMIT 1
-                ) r ON u.id = r.user_id
+                    SELECT user_id, risk_level, lr_prediction,
+                           ROW_NUMBER() OVER(PARTITION BY user_id ORDER BY timestamp DESC) as rn
+                    FROM risk_assessments
+                ) r ON u.id = r.user_id AND r.rn = 1
                 LEFT JOIN (
-                    SELECT user_id, asymmetric_detected 
-                    FROM facial_scans 
-                    ORDER BY timestamp DESC LIMIT 1
-                ) f ON u.id = f.user_id
+                    SELECT user_id, asymmetric_detected,
+                           ROW_NUMBER() OVER(PARTITION BY user_id ORDER BY timestamp DESC) as rn
+                    FROM facial_scans
+                ) f ON u.id = f.user_id AND f.rn = 1
             """)
             patients = conn.execute(query).fetchall()
 
