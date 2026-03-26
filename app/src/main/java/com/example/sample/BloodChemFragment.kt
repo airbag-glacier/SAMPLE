@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -26,6 +27,11 @@ class BloodChemFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Back Button Logic
+        view.findViewById<ImageButton>(R.id.btnBack)?.setOnClickListener {
+            findNavController().popBackStack()
+        }
 
         // Find the Dropdown Inputs
         val etTotalCholesterol = view.findViewById<AutoCompleteTextView>(R.id.etTotalCholesterol)

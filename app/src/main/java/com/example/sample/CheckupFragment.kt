@@ -48,6 +48,11 @@ class CheckupFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Back Button Logic
+        view.findViewById<ImageButton>(R.id.btnBack)?.setOnClickListener {
+            findNavController().popBackStack()
+        }
+
         val dropdownDoctor = view.findViewById<AutoCompleteTextView>(R.id.dropdownDoctor)
         val calendarView = view.findViewById<CalendarView>(R.id.calendarView)
         val tvDateStatus = view.findViewById<TextView>(R.id.tvDateStatus)
