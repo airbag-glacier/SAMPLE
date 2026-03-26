@@ -45,7 +45,7 @@ data class CloudSyncPayload(
     @com.google.gson.annotations.SerializedName("latest_facial_scan")
     val latestFacialScan: Map<String, Any>?,
 
-    // ADD THIS LINE FOR YOUR LOGISTIC REGRESSION RESULTS
+   
     @com.google.gson.annotations.SerializedName("latest_risk_assessment")
     val latestRiskAssessment: Map<String, Any>?
 )
