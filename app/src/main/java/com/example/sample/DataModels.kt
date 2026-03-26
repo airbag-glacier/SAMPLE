@@ -30,27 +30,16 @@ data class PredictionResponse(
 )
 
 data class CloudSyncPayload(
-    @com.google.gson.annotations.SerializedName("user_id")
-    val userId: Long,
-
-    @com.google.gson.annotations.SerializedName("user_profile")
-    val userProfile: Map<String, String>?,
-
-    @com.google.gson.annotations.SerializedName("emergency_contacts")
-    val emergencyContacts: List<Map<String, String>>,
-
-    @com.google.gson.annotations.SerializedName("appointments")
-    val appointments: List<Map<String, String>>,
-
-    @com.google.gson.annotations.SerializedName("latest_facial_scan")
-    val latestFacialScan: Map<String, Any>?,
-
-   
-    @com.google.gson.annotations.SerializedName("latest_risk_assessment")
-    val latestRiskAssessment: Map<String, Any>?
+    @SerializedName("user_id") val userId: Long,
+    @SerializedName("user_name") val userName: String,
+    @SerializedName("user_email") val userEmail: String,
+    @SerializedName("user_profile") val userProfile: Map<String, String>?,
+    @SerializedName("emergency_contacts") val emergencyContacts: List<Map<String, String>>,
+    @SerializedName("appointments") val appointments: List<Map<String, String>>,
+    @SerializedName("latest_facial_scan") val latestFacialScan: Map<String, Any>?,
+    @SerializedName("latest_risk_assessment") val latestRiskAssessment: Map<String, Any>?
 )
 
-// The response from your Python server confirming the Google Cloud SQL write
 data class SyncResponse(
     val success: Boolean,
     val message: String?,

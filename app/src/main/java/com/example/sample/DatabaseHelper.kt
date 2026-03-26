@@ -17,7 +17,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         private const val COL_APT_TIME = "apt_time"
         private const val DATABASE_NAME = "DeTechStroke.db"
 
-        private const val DATABASE_VERSION = 3
+        private const val DATABASE_VERSION = 4
 
         // --- 1. USER TABLE (Hybrid: ERD + Auth) ---
         private const val TABLE_USER = "User"
@@ -66,7 +66,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         private const val COL_TIMESTAMP = "timestamp"
 
         // --- 6. RISK ASSESSMENT RESULT TABLE ---
-        private const val TABLE_RISK_ASSESSMENT = "RiskAssessmentResult"
+        private const val TABLE_RISK_ASSESSMENT = "risk_assessments"
         private const val COL_RISK_ID = "risk_id"
         private const val COL_LR_PREDICTION = "lr_prediction"
         private const val COL_RISK_LEVEL = "risk_level"
@@ -296,19 +296,20 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val db = this.readableDatabase
         val map = mutableMapOf<String, String>()
 
-        // Initialize all keys to "N/A" so the app doesn't crash if a value is missing
-        val keys = listOf("name", "email", "age", "sex", "bmi", "cholesterol", "hdl", "ldl", "tri", "fbs", "hypertension", "smoker", "image_uri")
+        // Added diabetes, stroke_history, and cardiac_disease
+        val keys = listOf("name", "email", "age", "sex", "bmi", "cholesterol", "hdl", "ldl", "tri", "fbs", "hypertension", "smoker", "diabetes", "stroke_history", "cardiac_disease", "image_uri")
         keys.forEach { map[it] = "N/A" }
         map["image_uri"] = ""
 
         val query = """
-            SELECT u.$COL_USER_NAME, u.$COL_EMAIL, u.$COL_AGE, u.$COL_SEX, u.$COL_IMAGE_URI,
-                   h.$COL_BMI, h.$COL_CHOLESTEROL, h.$COL_HYPERTENSION, h.$COL_SMOKER,
-                   h.$COL_HDL, h.$COL_LDL, h.$COL_TRIGLYCERIDES, h.$COL_FBS
-            FROM $TABLE_USER u
-            LEFT JOIN $TABLE_HEALTH_PROFILE h ON u.$COL_USER_ID = h.$COL_USER_ID
-            WHERE u.$COL_USER_ID = ?
-        """
+        SELECT u.$COL_USER_NAME, u.$COL_EMAIL, u.$COL_AGE, u.$COL_SEX, u.$COL_IMAGE_URI,
+               h.$COL_BMI, h.$COL_CHOLESTEROL, h.$COL_HYPERTENSION, h.$COL_SMOKER,
+               h.$COL_HDL, h.$COL_LDL, h.$COL_TRIGLYCERIDES, h.$COL_FBS,
+               h.$COL_DIABETES, h.$COL_STROKE_HISTORY, h.$COL_CARDIAC_DISEASE
+        FROM $TABLE_USER u
+        LEFT JOIN $TABLE_HEALTH_PROFILE h ON u.$COL_USER_ID = h.$COL_USER_ID
+        WHERE u.$COL_USER_ID = ?
+    """
 
         val cursor = db.rawQuery(query, arrayOf(userId.toString()))
         if (cursor.moveToFirst()) {
@@ -325,6 +326,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             map["ldl"] = cursor.getString(10) ?: "N/A"
             map["tri"] = cursor.getString(11) ?: "N/A"
             map["fbs"] = cursor.getString(12) ?: "N/A"
+            map["diabetes"] = if (cursor.getInt(13) == 1) "Yes" else "No"
+            map["stroke_history"] = if (cursor.getInt(14) == 1) "Yes" else "No"
+            map["cardiac_disease"] = if (cursor.getInt(15) == 1) "Yes" else "No"
         }
         cursor.close()
         return map
@@ -440,5 +444,24 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         }
         cursor.close()
         return aptList
+    }
+    fun getLatestRiskAssessment(userId: Long): Map<String, Any>? {
+        val db = this.readableDatabase
+        // looks for the newest entry for specific user
+        val query = "SELECT lr_prediction, risk_level, timestamp FROM risk_assessments WHERE user_id = ? ORDER BY timestamp DESC LIMIT 1"
+        val cursor = db.rawQuery(query, arrayOf(userId.toString()))
+
+        var result: Map<String, Any>? = null
+
+        if (cursor.moveToFirst()) {
+            result = mapOf(
+                "lr_prediction" to cursor.getDouble(cursor.getColumnIndexOrThrow("lr_prediction")),
+                "risk_level" to cursor.getString(cursor.getColumnIndexOrThrow("risk_level")),
+                "timestamp" to cursor.getString(cursor.getColumnIndexOrThrow("timestamp"))
+            )
+        }
+
+        cursor.close()
+        return result
     }
 }

@@ -48,10 +48,13 @@
         </div>
     </div>
 
-    <div class="card shadow-sm border-0">
-        <div class="card-header card-header-custom">
-            <h5 class="mb-0">Live Patient Risk Directory</h5>
-        </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+        <h5 class="mb-0 text-muted">Patient Risk Directory</h5>
+        <a href="/download_report" class="btn btn-success shadow-sm">
+            📥 Download Master Report (PDF)
+        </a>
+    </div>
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover table-bordered mb-0">
@@ -64,9 +67,10 @@
                         <th>Hypertension</th>
                         <th>AI Facial Droop Status</th>
                         <th>Clinical Risk Level (LR)</th>
-                    </tr>
+                        <th>Action</th> </tr>
                     </thead>
                     <tbody>
+
                     {% for patient in patients %}
                     <tr>
                         <td><strong>{{ patient.name }}</strong></td>
@@ -90,10 +94,12 @@
                         {% else %}
                         <td>{{ patient.latest_clinical_risk }}</td>
                         {% endif %}
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="7" class="text-center py-4 text-muted">No patient data synced yet. Run a test on the Android app!</td>
+
+                        <td>
+                            <a href="/download_patient/{{ patient.id }}" class="btn btn-sm btn-outline-danger shadow-sm">
+                                📄 Record
+                            </a>
+                        </td>
                     </tr>
                     {% endfor %}
                     </tbody>

@@ -8,6 +8,12 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.Base64
+import java.io.ByteArrayOutputStream
+import java.io.File
+
 
 class CloudSyncManager(private val context: Context) {
 
@@ -21,16 +27,30 @@ class CloudSyncManager(private val context: Context) {
         // Extract records from local SQLite
         val profileData = dbHelper.getFullUserProfile(userId)
         val contactsData = dbHelper.getEmergencyContacts(userId)
-        val latestScanData = dbHelper.getLatestFacialScan(userId)
+        var latestScanData = dbHelper.getLatestFacialScan(userId)
         val appointmentsData = dbHelper.getAppointments(userId)
+        val latestRiskData = dbHelper.getLatestRiskAssessment(userId)
 
-        //PAYLOAD ASSEMBLY
+        val imagePath = latestScanData?.get("image_path") as? String ?: ""
+
+        val base64Image = encodeImageToBase64(imagePath)
+
+
+        if (latestScanData != null && base64Image != null) {
+            val mutableScanData = latestScanData.toMutableMap()
+            mutableScanData["image_base64"] = base64Image
+            latestScanData = mutableScanData
+        }
+
         val syncPayload = CloudSyncPayload(
+            userName = profileData["name"] ?: "Unknown User", // Use brackets for Maps
+            userEmail = profileData["email"] ?: "N/A",        // Use brackets for Maps
             userId = userId,
             userProfile = profileData,
             emergencyContacts = contactsData,
+            appointments = appointmentsData,
             latestFacialScan = latestScanData,
-            appointments = appointmentsData
+            latestRiskAssessment = latestRiskData
         )
 
         //LOGGING OF PAYLOAD: Verifying if the data is being sent
@@ -61,4 +81,38 @@ class CloudSyncManager(private val context: Context) {
             }
         })
     }
+
+
+
+    fun encodeImageToBase64(imagePath: String): String? {
+        return try {
+            val file = File(imagePath)
+            if (!file.exists()) return null
+
+            // 1. Load the original image
+            val originalBitmap = BitmapFactory.decodeFile(file.absolutePath)
+
+            // 2. Resize it so it doesn't crash the database! (Max 800px)
+            val maxWidth = 800
+            val maxHeight = 800
+            val scale = Math.min(
+                maxWidth.toFloat() / originalBitmap.width,
+                maxHeight.toFloat() / originalBitmap.height
+            )
+            val scaledWidth = (scale * originalBitmap.width).toInt()
+            val scaledHeight = (scale * originalBitmap.height).toInt()
+            val resizedBitmap = Bitmap.createScaledBitmap(originalBitmap, scaledWidth, scaledHeight, true)
+
+            // 3. Compress and Encode the smaller image
+            val outputStream = ByteArrayOutputStream()
+            resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 60, outputStream)
+            val byteArray = outputStream.toByteArray()
+
+            Base64.encodeToString(byteArray, Base64.NO_WRAP)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
 }
