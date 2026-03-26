@@ -1,5 +1,6 @@
 package com.example.sample
 
+import com.google.gson.Gson
 import android.content.Context
 import android.util.Log
 import retrofit2.Call
@@ -11,7 +12,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 class CloudSyncManager(private val context: Context) {
 
     // Ensure this matches your Python Flask server's Wi-Fi IP address
-    private val BASE_URL = "http://192.168.1.8:5000/"
+    private val BASE_URL = "http://192.168.254.121:5000/"
 
     fun syncLocalDatabaseToCloud(userId: Long) {
         val dbHelper = DatabaseHelper(context)
@@ -32,9 +33,14 @@ class CloudSyncManager(private val context: Context) {
             appointments = appointmentsData
         )
 
-        // Build Retrofit Client
+        //LOGGING OF PAYLOAD: Verifying if the data is being sent
+        val gson = Gson()
+        val jsonPayload = gson.toJson(syncPayload)
+        Log.d("CloudSync", "DATA BEING SENT TO CLOUD: $jsonPayload")
+
+        // Retrofit Client
         val retrofit = Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(BASE_URL) // Use the variable that ends in a slash
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
