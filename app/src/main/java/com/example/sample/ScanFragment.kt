@@ -30,6 +30,9 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import android.content.Context
+import android.graphics.Bitmap
+import java.io.FileOutputStream
 
 class ScanFragment : Fragment() {
 
@@ -113,36 +116,45 @@ class ScanFragment : Fragment() {
     private fun runOfflineInference(file: File) {
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                // Convert the saved image file into a Bitmap for TensorFlow
-                val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+                // Convert the saved image file into a raw Bitmap
+                val rawBitmap = BitmapFactory.decodeFile(file.absolutePath)
+                if (rawBitmap == null) {
+                    throw Exception("Camera failed to process the image.")
+                }
 
-                // 1. EXECUTE LOCAL TFLITE MODEL
-                // Capture the full ScanResult object
-                val scanResult = strokeDetector.detect(bitmap)
+                // --- NEW CODE: Resize the giant photo to fit YOLO's strict input size ---
+                // NOTE: Change 640 to 224 or 320 if your specific TFLite model requires a smaller square!
+                val resizedBitmap = Bitmap.createScaledBitmap(rawBitmap, 640, 640, true)
 
-                // Extract just the list of text symptoms for the UI
+                // 1. EXECUTE LOCAL TFLITE MODEL (Hand it the tiny resized one!)
+                val scanResult = strokeDetector.detect(resizedBitmap)
                 val symptomList = scanResult.symptoms
 
+                // Save the original high-quality image to internal storage for the Cloud/Doctor
+                val savedFilePath = saveYoloImageToInternalStorage(requireContext(), rawBitmap)
+
                 // 2. SAVE TO SQLITE DATABASE
-                saveScanToDatabase(symptomList.isNotEmpty())
+                saveScanToDatabase(symptomList.isNotEmpty(), savedFilePath)
 
                 withContext(Dispatchers.Main) {
-                    // Clean up the temp image
+                    // Clean up the temp camera image
                     if (file.exists()) file.delete()
 
-                    // Show Emergency Dialog using the extracted list
+                    // Show Emergency Dialog
                     showResultDialog(symptomList)
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    Log.e("TFLite", "Inference Error: ${e.message}")
+                    // THIS WILL PRINT THE ENTIRE RED CRASH LOG:
+                    Log.e("TFLite", "Inference Error", e)
                     Toast.makeText(requireContext(), "AI Analysis failed.", Toast.LENGTH_SHORT).show()
                 }
             }
         }
     }
 
-    private fun saveScanToDatabase(isAsymmetric: Boolean) {
+    // Notice we added 'imagePath: String' to the parentheses here:
+    private fun saveScanToDatabase(isAsymmetric: Boolean, imagePath: String) {
         val dbHelper = DatabaseHelper(requireContext())
         val userId = requireActivity().intent.getLongExtra("USER_ID", -1L)
 
@@ -153,9 +165,13 @@ class ScanFragment : Fragment() {
             val values = android.content.ContentValues().apply {
                 put("user_id", userId)
                 put("asymmetric_detected", if (isAsymmetric) 1 else 0)
-                put("confidence", 0.85) // Placeholder until you extract confidence from TFLite array
+                put("confidence", 0.85)
                 put("timestamp", timestamp)
+
+                // --- NEW CODE: Write the path into the database! ---
+                put("image_path", imagePath)
             }
+
             db.insert("FacialScanResult", null, values)
             db.close()
 
@@ -192,5 +208,21 @@ class ScanFragment : Fragment() {
                 .setCancelable(false)
                 .show()
         }
+    }
+
+    fun saveYoloImageToInternalStorage(context: Context, scanBitmap: Bitmap): String {
+        // 1. Create a unique filename
+        val filename = "yolo_scan_${System.currentTimeMillis()}.jpg"
+
+        // 2. Point to the app's secure internal storage directory (No permissions needed!)
+        val file = File(context.filesDir, filename)
+
+        // 3. Save the image
+        FileOutputStream(file).use { outStream ->
+            scanBitmap.compress(Bitmap.CompressFormat.JPEG, 70, outStream)
+        }
+
+        // 4. Return this exact path to save into your local SQLite Database!
+        return file.absolutePath
     }
 }

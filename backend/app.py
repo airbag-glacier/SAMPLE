@@ -37,6 +37,7 @@ def safe_float(value, default=0.0):
         return float(value) if value and value != 'N/A' else default
     except: return default
 
+
 # ==========================================
 # 2. SYNC ENDPOINT (YOLOv10 + Logistic Regression)
 # ==========================================
@@ -45,7 +46,6 @@ def safe_float(value, default=0.0):
 def sync_to_cloud():
     try:
         data = request.json
-        user_id = data.get('user_id')
         user_name = data.get('user_name', 'App User')
         user_email = data.get('user_email', 'synced@user.local')
         profile = data.get('user_profile')
@@ -53,14 +53,25 @@ def sync_to_cloud():
         latest_risk = data.get('latest_risk_assessment')
 
         with db_pool.connect() as conn:
-            # Register/Update User
-            conn.execute(text("""
-                INSERT INTO users (id, name, email) VALUES (:uid, :name, :email)
-                ON DUPLICATE KEY UPDATE name=:name, email=:email
-            """), {"uid": user_id, "name": user_name, "email": user_email})
+            # --- THE IDENTITY FIX: Find user by email instead of Android ID ---
+            user_record = conn.execute(text("SELECT id FROM users WHERE email = :email"), {"email": user_email}).fetchone()
 
-            # Sync Health Profile
-            # Sync Health Profile (Updated with Blood Chem & Extra Risks)
+            if user_record:
+                cloud_uid = user_record[0]
+                # User exists, just update their name in case it changed
+                conn.execute(text("UPDATE users SET name = :name WHERE id = :uid"), {"name": user_name, "uid": cloud_uid})
+            else:
+                # Brand new user! Generate a new unique Cloud ID safely
+                max_id_record = conn.execute(text("SELECT MAX(id) FROM users")).fetchone()
+                next_id = (max_id_record[0] or 0) + 1 if max_id_record else 1
+
+                conn.execute(text("INSERT INTO users (id, name, email) VALUES (:uid, :name, :email)"),
+                             {"uid": next_id, "name": user_name, "email": user_email})
+                cloud_uid = next_id
+
+            # --- USE the safe `cloud_uid` for ALL subsequent tables ---
+
+            # 1. Sync Health Profile
             if profile:
                 conn.execute(text("""
                     INSERT INTO user_profiles (
@@ -78,7 +89,8 @@ def sync_to_cloud():
                     cholesterol=:chol, hdl=:hdl, ldl=:ldl, triglycerides=:tri, fbs=:fbs,
                     diabetes=:diab, stroke_history=:stroke, cardiac_disease=:cardiac
                 """), {
-                    "uid": user_id, "age": safe_int(profile.get("age")),
+                    "uid": cloud_uid, # <--- Uses the safe ID
+                    "age": safe_int(profile.get("age")),
                     "gen": profile.get("sex", "Unknown"),
                     "hyp": 1 if profile.get("hypertension") == "Yes" else 0,
                     "bmi": safe_float(profile.get("bmi")),
@@ -93,28 +105,33 @@ def sync_to_cloud():
                     "cardiac": 1 if profile.get("cardiac_disease") == "Yes" else 0
                 })
 
-            # Sync Results
+            # 2. Sync Risk Results (With Duplicate Blocker)
             if latest_risk:
-                conn.execute(text("INSERT INTO risk_assessments (user_id, lr_prediction, risk_level, timestamp) VALUES (:uid, :pred, :lvl, :t)"),
-                             {"uid": user_id, "pred": latest_risk.get("lr_prediction"), "lvl": latest_risk.get("risk_level"), "t": latest_risk.get("timestamp")})
+                risk_exists = conn.execute(text("SELECT 1 FROM risk_assessments WHERE user_id = :uid AND timestamp = :t"),
+                                           {"uid": cloud_uid, "t": latest_risk.get("timestamp")}).fetchone()
+                if not risk_exists:
+                    conn.execute(text("INSERT INTO risk_assessments (user_id, lr_prediction, risk_level, timestamp) VALUES (:uid, :pred, :lvl, :t)"),
+                                 {"uid": cloud_uid, "pred": latest_risk.get("lr_prediction"), "lvl": latest_risk.get("risk_level"), "t": latest_risk.get("timestamp")})
 
-            # Sync YOLOv10 Facial Scan results (Updated)
+            # 3. Sync YOLOv10 Facial Scan results (With Duplicate Blocker)
             if latest_scan:
-                conn.execute(text("""
-                    INSERT INTO facial_scans (user_id, asymmetric_detected, timestamp, scan_image)
-                    VALUES (:uid, :detected, :time, :img)
-                """), {
-                    "uid": user_id,
-                    "detected": 1 if latest_scan.get("detected") else 0,
-                    "time": latest_scan.get("timestamp"),
-                    "img": latest_scan.get("image_base64") # <--- Catches the Base64 string
-                })
+                scan_exists = conn.execute(text("SELECT 1 FROM facial_scans WHERE user_id = :uid AND timestamp = :t"),
+                                           {"uid": cloud_uid, "t": latest_scan.get("timestamp")}).fetchone()
+                if not scan_exists:
+                    conn.execute(text("""
+                        INSERT INTO facial_scans (user_id, asymmetric_detected, timestamp, scan_image)
+                        VALUES (:uid, :detected, :time, :img)
+                    """), {
+                        "uid": cloud_uid,
+                        "detected": 1 if latest_scan.get("detected") else 0,
+                        "time": latest_scan.get("timestamp"),
+                        "img": latest_scan.get("image_base64")
+                    })
 
             conn.commit()
         return jsonify({"success": True})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
-
 # ==========================================
 # 3. CLINICAL DASHBOARD & PDF REPORTING
 # ==========================================
@@ -247,77 +264,84 @@ def download_patient_report(user_id):
         pdf.set_text_color(100, 100, 100)
         pdf.cell(0, 10, f"Generated on: {datetime.now().strftime('%B %d, %Y - %I:%M %p')}", ln=True, align="C")
         pdf.set_text_color(0, 0, 0)
-        pdf.ln(10)
-
-        # Section 1: Demographics
-        pdf.set_font("helvetica", "B", 12)
-        pdf.cell(0, 10, "1. Patient Demographics & Profile", ln=True)
-        pdf.set_font("helvetica", "", 11)
-
-        # Left Column (Demographics)
-        pdf.cell(90, 6, f"Name: {profile[0] or 'Unknown'}", ln=0)
-        pdf.cell(90, 6, f"Hypertension: {'Yes' if profile[6] == 1 else 'No'}", ln=1)
-        pdf.cell(90, 6, f"Email: {profile[1] or 'N/A'}", ln=0)
-        pdf.cell(90, 6, f"Diabetes: {'Yes' if profile[7] == 1 else 'No'}", ln=1)
-        pdf.cell(90, 6, f"Age: {profile[2] or '-'} | Gender: {profile[3] or '-'}", ln=0)
-        pdf.cell(90, 6, f"Stroke History: {'Yes' if profile[8] == 1 else 'No'}", ln=1)
-        pdf.cell(90, 6, f"BMI: {profile[4] or '-'} | Smoker: {profile[5] or 'Unknown'}", ln=0)
-        pdf.cell(90, 6, f"Cardiac Disease: {'Yes' if profile[9] == 1 else 'No'}", ln=1)
         pdf.ln(5)
 
-        # Section 1.5: Blood Chemistry
+        # ---------------------------------------------------------
+        # Section 1: Demographics & Risk Factors (Fixed Layout)
+        # ---------------------------------------------------------
+        pdf.set_font("helvetica", "B", 12)
+        pdf.cell(0, 10, "1. Patient Demographics & Core Risk Factors", ln=True)
+        pdf.set_font("helvetica", "", 10)
+
+        # Left Column (Demographics) | Right Column (Risks)
+        pdf.cell(90, 6, f"Name: {profile[0] or 'Unknown'}", 0, 0)
+        pdf.cell(90, 6, f"Hypertension: {'Yes' if profile[6] == 1 else 'No'}", 0, 1)
+
+        pdf.cell(90, 6, f"Email: {profile[1] or 'N/A'}", 0, 0)
+        pdf.cell(90, 6, f"Diabetes: {'Yes' if profile[7] == 1 else 'No'}", 0, 1)
+
+        pdf.cell(90, 6, f"Age: {profile[2] or '-'} | Gender: {profile[3] or '-'}", 0, 0)
+        pdf.cell(90, 6, f"Stroke History: {'Yes' if profile[8] == 1 else 'No'}", 0, 1)
+
+        pdf.cell(90, 6, f"BMI: {profile[4] or '-'} | Smoker: {profile[5] or 'Unknown'}", 0, 0)
+        pdf.cell(90, 6, f"Cardiac Disease: {'Yes' if profile[9] == 1 else 'No'}", 0, 1)
+        pdf.ln(5)
+
+        # ---------------------------------------------------------
+        # Section 2: Blood Chemistry Panel
+        # ---------------------------------------------------------
         pdf.set_font("helvetica", "B", 12)
         pdf.cell(0, 10, "2. Blood Chemistry Panel", ln=True)
         pdf.set_font("helvetica", "", 10)
-        pdf.cell(60, 8, f"Total Cholesterol: {profile[10] or '-'} mg/dL", border=1)
-        pdf.cell(60, 8, f"HDL: {profile[11] or '-'} mg/dL", border=1)
-        pdf.cell(60, 8, f"LDL: {profile[12] or '-'} mg/dL", border=1)
-        pdf.ln()
-        pdf.cell(60, 8, f"Triglycerides: {profile[13] or '-'} mg/dL", border=1)
-        pdf.cell(60, 8, f"Fasting Blood Sugar: {profile[14] or '-'} mg/dL", border=1)
-        pdf.ln(10)
 
-        # Section 2: Logistic Regression Risk History (Fixed Percentage Bug)
+        pdf.cell(60, 8, f"Total Chol: {profile[10] or '-'} mg/dL", 1, 0)
+        pdf.cell(60, 8, f"HDL: {profile[11] or '-'} mg/dL", 1, 0)
+        pdf.cell(60, 8, f"LDL: {profile[12] or '-'} mg/dL", 1, 1)
+        pdf.cell(60, 8, f"Triglycerides: {profile[13] or '-'} mg/dL", 1, 0)
+        pdf.cell(60, 8, f"Fasting BS: {profile[14] or '-'} mg/dL", 1, 1)
+        pdf.ln(8)
+
+        # ---------------------------------------------------------
+        # Section 3: Logistic Regression Risk History
+        # ---------------------------------------------------------
         pdf.set_font("helvetica", "B", 12)
         pdf.cell(0, 10, "3. Clinical Risk Assessment History (Logistic Regression)", ln=True)
         pdf.set_font("helvetica", "B", 10)
-        pdf.cell(60, 8, "Timestamp", 1); pdf.cell(60, 8, "Risk Level", 1); pdf.cell(60, 8, "Probability Score", 1); pdf.ln()
+        pdf.cell(60, 8, "Timestamp", 1)
+        pdf.cell(60, 8, "Risk Level", 1)
+        pdf.cell(60, 8, "Probability Score", 1)
+        pdf.ln()
+
         pdf.set_font("helvetica", "", 10)
         for r in risks:
             pdf.cell(60, 8, str(r[2]), 1)
             pdf.cell(60, 8, str(r[1]), 1)
-            # FIX: Removed the * 100 so it formats correctly
             pdf.cell(60, 8, f"{float(r[0]):.2f}%" if r[0] else "N/A", 1)
             pdf.ln()
-        if not risks: pdf.cell(0, 8, "No risk assessments found.", ln=True)
-        pdf.ln(5)
+        if not risks:
+            pdf.cell(0, 8, "No risk assessments found.", ln=True)
+        pdf.ln(8)
 
-        # Section 3: YOLOv10 Facial Scan History
-        pdf.set_font("helvetica", "B", 12)
-        pdf.cell(0, 10, "3. Facial Droop Scan History (YOLOv10)", ln=True)
-        pdf.set_font("helvetica", "B", 10)
-        pdf.cell(90, 8, "Timestamp", 1); pdf.cell(90, 8, "Asymmetry Detected", 1); pdf.ln()
-        pdf.set_font("helvetica", "", 10)
-        for s in scans:
-            pdf.cell(90, 8, str(s[1]), 1)
-            pdf.cell(90, 8, "⚠️ Detected" if s[0] == 1 else "Normal", 1)
-            pdf.ln()
-        if not scans: pdf.cell(0, 8, "No facial scans found.", ln=True)
-
-        #Section 4: YOLOv10 Scans
+        # ---------------------------------------------------------
+        # Section 4: YOLOv10 Facial Scan History (Deleted the duplicate)
+        # ---------------------------------------------------------
         pdf.set_font("helvetica", "B", 12)
         pdf.cell(0, 10, "4. Facial Droop Scan History (YOLOv10)", ln=True)
         pdf.set_font("helvetica", "B", 10)
 
-        # Adjusted widths to make room for the picture
-        pdf.cell(50, 8, "Timestamp", 1); pdf.cell(50, 8, "Asymmetry Detected", 1); pdf.cell(80, 8, "Scan Evidence", 1); pdf.ln()
+        pdf.cell(50, 8, "Timestamp", 1)
+        pdf.cell(50, 8, "Asymmetry Detected", 1)
+        pdf.cell(80, 8, "Scan Evidence", 1)
+        pdf.ln()
 
         pdf.set_font("helvetica", "", 10)
         for s in scans:
-            # We need a taller row to fit the image
             row_height = 45
 
-            # Save current X and Y positions
+            # --- NEW FIX: Force a page break if the image will get cut off ---
+            if pdf.get_y() + row_height > 270:
+                pdf.add_page()
+
             x_start = pdf.get_x()
             y_start = pdf.get_y()
 
@@ -325,32 +349,34 @@ def download_patient_report(user_id):
             pdf.cell(50, row_height, "⚠️ Detected" if s[0] == 1 else "Normal", 1)
             pdf.cell(80, row_height, "", 1) # Empty cell for the image border
 
-            # Decode the image and place it inside the empty cell
             if s[2]: # If scan_image exists
                 try:
-                    # Create a temporary file to hold the decoded image
                     with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as temp_img:
                         temp_img.write(base64.b64decode(s[2]))
                         temp_img_path = temp_img.name
 
-                    # Place the image inside the 3rd cell (x_start + 100 is the start of the 3rd cell)
                     pdf.image(temp_img_path, x=x_start + 102, y=y_start + 2, w=40)
-
-                    # Clean up the temp file so your server doesn't run out of space
                     os.remove(temp_img_path)
                 except Exception as e:
-                    pdf.text(x_start + 105, y_start + 15, "Image Error")
+                    pdf.text(x_start + 105, y_start + 25, "Image Error")
             else:
-                pdf.text(x_start + 105, y_start + 15, "No Image Uploaded")
+                # NEW FIX: Adjusted the Y coordinate so the text sits perfectly in the middle of the box
+                pdf.text(x_start + 125, y_start + 25, "No Image")
 
             pdf.ln(row_height)
 
+        if not scans:
+            pdf.cell(0, 8, "No facial scans found.", ln=True)
+
+        # Return the final PDF
         response = make_response(bytes(pdf.output()))
         response.headers['Content-Type'] = 'application/pdf'
         formatted_name = str(profile[0]).replace(" ", "_") if profile[0] else "Patient"
         response.headers['Content-Disposition'] = f'attachment; filename=DeTechStroke_Record_{formatted_name}.pdf'
         return response
-    except Exception as e: return f"Patient PDF Error: {str(e)}"
+
+    except Exception as e:
+        return f"Patient PDF Error: {str(e)}"
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

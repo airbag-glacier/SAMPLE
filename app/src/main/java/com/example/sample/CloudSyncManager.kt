@@ -32,7 +32,6 @@ class CloudSyncManager(private val context: Context) {
         val latestRiskData = dbHelper.getLatestRiskAssessment(userId)
 
         val imagePath = latestScanData?.get("image_path") as? String ?: ""
-
         val base64Image = encodeImageToBase64(imagePath)
 
 

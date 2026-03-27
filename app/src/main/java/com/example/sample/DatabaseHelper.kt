@@ -17,7 +17,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         private const val COL_APT_TIME = "apt_time"
         private const val DATABASE_NAME = "DeTechStroke.db"
 
-        private const val DATABASE_VERSION = 4
+        private const val DATABASE_VERSION = 5
 
         // --- 1. USER TABLE (Hybrid: ERD + Auth) ---
         private const val TABLE_USER = "User"
@@ -64,6 +64,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         private const val COL_ASYMMETRIC_DETECTED = "asymmetric_detected"
         private const val COL_CONFIDENCE = "confidence"
         private const val COL_TIMESTAMP = "timestamp"
+        private const val COL_IMAGE_PATH = "image_path"
 
         // --- 6. RISK ASSESSMENT RESULT TABLE ---
         private const val TABLE_RISK_ASSESSMENT = "risk_assessments"
@@ -151,6 +152,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 + "$COL_ASYMMETRIC_DETECTED INTEGER,"
                 + "$COL_CONFIDENCE REAL,"
                 + "$COL_TIMESTAMP TEXT,"
+                + "$COL_IMAGE_PATH TEXT,"
                 + "FOREIGN KEY($COL_USER_ID) REFERENCES $TABLE_USER($COL_USER_ID) ON DELETE CASCADE)")
         db.execSQL(createScanResultTable)
 
@@ -358,7 +360,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         if (cursor.moveToFirst()) {
             scanData = mapOf(
                 "detected" to (cursor.getInt(0) == 1),
-                "timestamp" to (cursor.getString(1) ?: "Unknown Date")
+                "timestamp" to (cursor.getString(1) ?: "Unknown Date"),
+                "image_path" to (cursor.getString(2) ?: "")
             )
         }
         cursor.close()
