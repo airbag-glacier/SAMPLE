@@ -60,7 +60,7 @@ class ScanFragment : Fragment() {
 
         viewFinder = view.findViewById(R.id.viewFinder)
 
-        // Initialize the On-Device AI Model
+        // Initialize the On-Device Model
         strokeDetector = StrokeDetector(requireContext())
 
         view.findViewById<ImageButton>(R.id.btnBack).setOnClickListener { findNavController().popBackStack() }
@@ -95,7 +95,7 @@ class ScanFragment : Fragment() {
         val photoFile = File(requireContext().cacheDir, "face_scan_${System.currentTimeMillis()}.jpg")
         val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
 
-        Toast.makeText(requireContext(), "Running Offline AI Analysis...", Toast.LENGTH_SHORT).show()
+        Toast.makeText(requireContext(), "Running Offline Analysis...", Toast.LENGTH_SHORT).show()
 
         imageCapture.takePicture(
             outputOptions,
@@ -147,7 +147,7 @@ class ScanFragment : Fragment() {
                 withContext(Dispatchers.Main) {
                     // THIS WILL PRINT THE ENTIRE RED CRASH LOG:
                     Log.e("TFLite", "Inference Error", e)
-                    Toast.makeText(requireContext(), "AI Analysis failed.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Facial Analysis failed.", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -184,7 +184,7 @@ class ScanFragment : Fragment() {
         if (symptoms.isNotEmpty()) {
             val symptomsList = symptoms.joinToString(", ")
             MaterialAlertDialogBuilder(requireContext())
-                .setTitle("⚠️ CRITICAL: AI Assessment")
+                .setTitle("⚠️ CRITICAL: Facial Assessment")
                 .setMessage("Warning: Facial asymmetry detected ($symptomsList). This is a potential sign of a stroke. Please seek immediate medical attention.")
                 .setPositiveButton("Find Hospital") { _, _ ->
                     val mapIntent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("geo:0,0?q=hospitals"))
@@ -202,7 +202,7 @@ class ScanFragment : Fragment() {
                 .show()
         } else {
             MaterialAlertDialogBuilder(requireContext())
-                .setTitle("AI Assessment")
+                .setTitle("Facial Assessment")
                 .setMessage("No facial drooping features detected. Your face appears symmetrical.")
                 .setPositiveButton("Done") { _, _ -> findNavController().popBackStack() }
                 .setCancelable(false)

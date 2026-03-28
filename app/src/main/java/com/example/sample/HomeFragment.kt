@@ -70,6 +70,7 @@ class HomeFragment : Fragment() {
         view.findViewById<View>(R.id.cardBloodChem)?.setOnClickListener { findNavController().navigate(R.id.action_home_to_bloodChem) }
         view.findViewById<View>(R.id.cardRiskFactors)?.setOnClickListener { findNavController().navigate(R.id.action_home_to_riskFactors) }
         view.findViewById<TextView>(R.id.tvSeeDetails)?.setOnClickListener { findNavController().navigate(R.id.action_home_to_profileDetails) }
+        view.findViewById<ImageView>(R.id.hospitalMapFragment)?.setOnClickListener {findNavController().navigate(R.id.action_global_hospitalMap)}
 
         val dbHelper = DatabaseHelper(requireContext())
         val userId = requireActivity().intent?.getLongExtra("USER_ID", -1L) ?: -1L

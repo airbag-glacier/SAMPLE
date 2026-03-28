@@ -65,9 +65,12 @@
                         <th>Age</th>
                         <th>BMI</th>
                         <th>Hypertension</th>
-                        <th>AI Facial Droop Status</th>
+                        <th>Facial Droop Status (YV10)</th>
                         <th>Clinical Risk Level (LR)</th>
-                        <th>Action</th> </tr>
+                        <th>Action</th>
+                        <th>Action</th>
+                        <th>Remove</th>
+                    </tr>
                     </thead>
                     <tbody>
 
@@ -95,10 +98,24 @@
                         <td>{{ patient.latest_clinical_risk }}</td>
                         {% endif %}
 
+
                         <td>
                             <a href="/download_patient/{{ patient.id }}" class="btn btn-sm btn-outline-danger shadow-sm">
                                 📄 Record
                             </a>
+                        </td>
+
+                        <td>
+                            <button onclick="alert('Patient Email: {{ patient.email }}\nPatient Password: {{ patient.password }}')" class="btn btn-sm btn-outline-warning shadow-sm">
+                                🔑 View
+                            </button>
+                        </td>
+                        <td>
+                        <form action="/delete_patient/{{ patient.id }}" method="POST" onsubmit="return confirm('Are you sure you want to permanently delete {{ patient.name }}? This will erase all their AI scans and medical history.');">
+                            <button type="submit" class="btn btn-sm btn-outline-dark shadow-sm">
+                                🗑️ Remove
+                            </button>
+                        </form>
                         </td>
                     </tr>
                     {% endfor %}

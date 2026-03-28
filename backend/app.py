@@ -3,7 +3,7 @@ import sqlalchemy
 import base64
 import tempfile
 from sqlalchemy import text
-from flask import Flask, request, jsonify, render_template, make_response
+from flask import Flask, request, jsonify, render_template, make_response, redirect
 from fpdf import FPDF
 from datetime import datetime
 
@@ -136,7 +136,9 @@ def sync_to_cloud():
 # 3. CLINICAL DASHBOARD & PDF REPORTING
 # ==========================================
 
+
 # Shared query to ensure consistency between Dashboard and PDF
+
 LATEST_PATIENT_QUERY = text("""
     WITH RankedRisk AS (
         SELECT user_id, risk_level, 
@@ -148,7 +150,7 @@ LATEST_PATIENT_QUERY = text("""
                ROW_NUMBER() OVER(PARTITION BY user_id ORDER BY timestamp DESC) as rn
         FROM facial_scans
     )
-    SELECT u.id, u.name, u.email, p.age, p.hypertension, p.bmi, 
+    SELECT u.id, u.name, u.email, u.password, p.age, p.hypertension, p.bmi, 
            r.risk_level, f.asymmetric_detected
     FROM users u
     LEFT JOIN user_profiles p ON u.id = p.user_id
@@ -158,19 +160,34 @@ LATEST_PATIENT_QUERY = text("""
 
 @app.route('/admin')
 def admin_dashboard():
+
+    # ==========================================
+    # SECURITY WALL: Basic HTTP Authentication
+    # ==========================================
+    auth = request.authorization
+
+    # You can change 'admin' and 'thesis2026' to whatever you want!
+    if not auth or auth.username != 'admin' or auth.password != 'thesis2026':
+        return make_response(
+            'Access Denied. Please enter the correct admin credentials.',
+            401,
+            {'WWW-Authenticate': 'Basic realm="DeTechStroke Secure Portal"'}
+        )
+    # ==========================================
     try:
         with db_pool.connect() as conn:
             patients = conn.execute(LATEST_PATIENT_QUERY).fetchall()
 
         patient_list = [{
-            "id": p[0], # WE ADDED THIS SO HTML CAN USE IT
+            "id": p[0],
             "name": p[1] or "Unknown",
             "email": p[2] or "N/A",
-            "age": p[3] or "-",
-            "hypertension": "Yes" if p[4] == 1 else "No",
-            "bmi": p[5] or "-",
-            "latest_clinical_risk": p[6] or "Pending",
-            "latest_facial_droop": "Detected" if p[7] == 1 else "Normal"
+            "password": p[3] or "Not Set", # <-- NEW: Password grabbed from database
+            "age": p[4] or "-",
+            "hypertension": "Yes" if p[5] == 1 else "No",
+            "bmi": p[6] or "-",
+            "latest_clinical_risk": p[7] or "Pending",
+            "latest_facial_droop": "Detected" if p[8] == 1 else "Normal"
         } for p in patients]
 
         return render_template('admin_dashboard.html', patients=patient_list, db_connected=True)
@@ -211,12 +228,12 @@ def download_report():
         for row in data:
             # row[0] is u.id
             pdf.cell(55, 10, str(row[1] or "Unknown"), 1)  # row[1] is u.name
-            pdf.cell(20, 10, str(row[3] or "-"), 1)        # row[3] is p.age
-            pdf.cell(20, 10, str(row[5] or "-"), 1)        # row[5] is p.bmi
-            pdf.cell(45, 10, str(row[6] or "Pending"), 1)  # row[6] is r.risk_level
+            pdf.cell(20, 10, str(row[4] or "-"), 1)        # row[4] is p.age
+            pdf.cell(20, 10, str(row[6] or "-"), 1)        # row[6] is p.bmi
+            pdf.cell(45, 10, str(row[7] or "Pending"), 1)  # row[7] is r.risk_level
 
-            # row[7] is f.asymmetric_detected
-            pdf.cell(45, 10, "⚠️ Detected" if row[7] == 1 else "Normal", 1)
+            # row[8] is f.asymmetric_detected
+            pdf.cell(45, 10, "⚠️ Detected" if row[8] == 1 else "Normal", 1)
             pdf.ln()
 
 
@@ -378,6 +395,24 @@ def download_patient_report(user_id):
 
     except Exception as e:
         return f"Patient PDF Error: {str(e)}"
+
+@app.route('/delete_patient/<int:user_id>', methods=['POST'])
+def delete_patient(user_id):
+    """Deletes a patient and all their associated medical history from the cloud database."""
+    try:
+        with db_pool.begin() as conn:
+            # We delete from child tables first to prevent foreign key constraint crashes
+            conn.execute(text("DELETE FROM facial_scans WHERE user_id = :uid"), {"uid": user_id})
+            conn.execute(text("DELETE FROM risk_assessments WHERE user_id = :uid"), {"uid": user_id})
+            conn.execute(text("DELETE FROM appointments WHERE user_id = :uid"), {"uid": user_id})
+            conn.execute(text("DELETE FROM emergency_contacts WHERE user_id = :uid"), {"uid": user_id})
+            conn.execute(text("DELETE FROM user_profiles WHERE user_id = :uid"), {"uid": user_id})
+            # Finally, delete the core user account
+            conn.execute(text("DELETE FROM users WHERE id = :uid"), {"uid": user_id})
+
+        return redirect('/admin') # Instantly refreshes the dashboard
+    except Exception as e:
+        return f"Error deleting patient: {str(e)}", 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
