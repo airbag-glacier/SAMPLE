@@ -128,6 +128,32 @@ def sync_to_cloud():
                         "img": latest_scan.get("image_base64")
                     })
 
+            # 4. Sync Appointments to Doctor's Database
+            appointments = data.get('appointments', [])
+            for apt in appointments:
+                # Check if this exact appointment already exists so we don't duplicate it
+                apt_exists = conn.execute(text("""
+                    SELECT 1 FROM appointments 
+                    WHERE user_id = :uid AND apt_date = :d AND apt_time = :t
+                """), {
+                    "uid": cloud_uid,
+                    "d": apt.get("apt_date"),
+                    "t": apt.get("apt_time")
+                }).fetchone()
+
+                if not apt_exists:
+                    conn.execute(text("""
+                        INSERT INTO appointments (user_id, doctor_name, apt_date, apt_time) 
+                        VALUES (:uid, :doc, :d, :t)
+                    """), {
+                        "uid": cloud_uid,
+                        "doc": apt.get("doctor_name"),
+                        "d": apt.get("apt_date"),
+                        "t": apt.get("apt_time")
+                    })
+
+            conn.commit() # <--- Make sure it is placed right before this line!
+
             conn.commit()
         return jsonify({"success": True})
     except Exception as e:
@@ -139,6 +165,7 @@ def sync_to_cloud():
 
 # Shared query to ensure consistency between Dashboard and PDF
 
+# Shared query to ensure consistency between Dashboard and PDF
 LATEST_PATIENT_QUERY = text("""
     WITH RankedRisk AS (
         SELECT user_id, risk_level, 
@@ -149,24 +176,28 @@ LATEST_PATIENT_QUERY = text("""
         SELECT user_id, asymmetric_detected, 
                ROW_NUMBER() OVER(PARTITION BY user_id ORDER BY timestamp DESC) as rn
         FROM facial_scans
+    ),
+    RankedAppointments AS (
+        SELECT user_id, doctor_name, apt_date, apt_time,
+               ROW_NUMBER() OVER(PARTITION BY user_id ORDER BY id DESC) as rn
+        FROM appointments
     )
     SELECT u.id, u.name, u.email, u.password, p.age, p.hypertension, p.bmi, 
-           r.risk_level, f.asymmetric_detected
+           r.risk_level, f.asymmetric_detected,
+           a.apt_date, a.apt_time, a.doctor_name
     FROM users u
     LEFT JOIN user_profiles p ON u.id = p.user_id
     LEFT JOIN RankedRisk r ON u.id = r.user_id AND r.rn = 1
     LEFT JOIN RankedScans f ON u.id = f.user_id AND f.rn = 1
+    LEFT JOIN RankedAppointments a ON u.id = a.user_id AND a.rn = 1
 """)
 
 @app.route('/admin')
 def admin_dashboard():
-
     # ==========================================
     # SECURITY WALL: Basic HTTP Authentication
     # ==========================================
     auth = request.authorization
-
-    # You can change 'admin' and 'thesis2026' to whatever you want!
     if not auth or auth.username != 'admin' or auth.password != 'thesis2026':
         return make_response(
             'Access Denied. Please enter the correct admin credentials.',
@@ -174,25 +205,27 @@ def admin_dashboard():
             {'WWW-Authenticate': 'Basic realm="DeTechStroke Secure Portal"'}
         )
     # ==========================================
+
     try:
-        with db_pool.connect() as conn:
+        with db_pool.begin() as conn:
             patients = conn.execute(LATEST_PATIENT_QUERY).fetchall()
 
         patient_list = [{
             "id": p[0],
             "name": p[1] or "Unknown",
             "email": p[2] or "N/A",
-            "password": p[3] or "Not Set", # <-- NEW: Password grabbed from database
+            "password": p[3] or "Not Set",
             "age": p[4] or "-",
             "hypertension": "Yes" if p[5] == 1 else "No",
             "bmi": p[6] or "-",
             "latest_clinical_risk": p[7] or "Pending",
-            "latest_facial_droop": "Detected" if p[8] == 1 else "Normal"
+            "latest_facial_droop": "Detected" if p[8] == 1 else "Normal",
+            "next_appointment": f"{p[9]} at {p[10]}" if p[9] else "None",
+            "doctor": p[11] or ""
         } for p in patients]
 
         return render_template('admin_dashboard.html', patients=patient_list, db_connected=True)
     except Exception as e: return f"Database Error: {str(e)}"
-
 @app.route('/download_report')
 def download_report():
     try:
@@ -216,24 +249,26 @@ def download_report():
 
         # Table Header
         pdf.set_font("helvetica", "B", 10)
-        pdf.cell(55, 10, "Patient Name", 1)
-        pdf.cell(20, 10, "Age", 1)
-        pdf.cell(20, 10, "BMI", 1)
-        pdf.cell(45, 10, "Stroke Risk (LR)", 1)
-        pdf.cell(45, 10, "Facial Droop (YOLO)", 1)
+        pdf.cell(40, 10, "Patient Name", 1)
+        pdf.cell(15, 10, "Age", 1)
+        pdf.cell(15, 10, "BMI", 1)
+        pdf.cell(30, 10, "Risk (LR)", 1)
+        pdf.cell(30, 10, "YOLOv10", 1)
+        pdf.cell(60, 10, "Next Appointment", 1) # Added Appointment Column
         pdf.ln()
 
         # Table Content
         pdf.set_font("helvetica", "", 10)
         for row in data:
-            # row[0] is u.id
-            pdf.cell(55, 10, str(row[1] or "Unknown"), 1)  # row[1] is u.name
-            pdf.cell(20, 10, str(row[4] or "-"), 1)        # row[4] is p.age
-            pdf.cell(20, 10, str(row[6] or "-"), 1)        # row[6] is p.bmi
-            pdf.cell(45, 10, str(row[7] or "Pending"), 1)  # row[7] is r.risk_level
+            pdf.cell(40, 10, str(row[1] or "Unknown"), 1)  # u.name
+            pdf.cell(15, 10, str(row[4] or "-"), 1)        # p.age
+            pdf.cell(15, 10, str(row[6] or "-"), 1)        # p.bmi
+            pdf.cell(30, 10, str(row[7] or "Pending"), 1)  # r.risk_level
+            pdf.cell(30, 10, "⚠️ Detected" if row[8] == 1 else "Normal", 1)
 
-            # row[8] is f.asymmetric_detected
-            pdf.cell(45, 10, "⚠️ Detected" if row[8] == 1 else "Normal", 1)
+            # Format the new appointment string
+            apt_text = f"{row[9]} {row[10]}" if row[9] else "None"
+            pdf.cell(60, 10, apt_text, 1)
             pdf.ln()
 
 
@@ -263,12 +298,14 @@ def download_patient_report(user_id):
             if not profile:
                 return "Patient not found", 404
 
-            # Fetch AI Scan History (Up to 5 latest)
+            # Fetch Scan History (Up to 5 latest)
             risks = conn.execute(text("SELECT lr_prediction, risk_level, timestamp FROM risk_assessments WHERE user_id = :uid ORDER BY timestamp DESC LIMIT 5"), {"uid": user_id}).fetchall()
             scans = conn.execute(text("""
                 SELECT asymmetric_detected, timestamp, scan_image 
                 FROM facial_scans WHERE user_id = :uid ORDER BY timestamp DESC LIMIT 5
             """), {"uid": user_id}).fetchall()
+            appointments = conn.execute(text("SELECT doctor_name, apt_date, apt_time FROM appointments WHERE user_id = :uid ORDER BY id DESC"),
+            {"uid": user_id}).fetchall()
 
         # Build the PDF
         pdf = FPDF()
@@ -385,6 +422,33 @@ def download_patient_report(user_id):
 
         if not scans:
             pdf.cell(0, 8, "No facial scans found.", ln=True)
+
+        # ---------------------------------------------------------
+        # Section 5: Scheduled Appointments
+        # ---------------------------------------------------------
+        if pdf.get_y() > 240: # Force page break if too close to the bottom
+            pdf.add_page()
+
+        pdf.set_font("helvetica", "B", 12)
+        pdf.cell(0, 10, "5. Scheduled Checkups & Appointments", ln=True)
+        pdf.set_font("helvetica", "B", 10)
+
+        pdf.cell(80, 8, "Doctor / Department", 1)
+        pdf.cell(50, 8, "Date", 1)
+        pdf.cell(60, 8, "Time", 1)
+        pdf.ln()
+
+        pdf.set_font("helvetica", "", 10)
+        for apt in appointments:
+            pdf.cell(80, 8, str(apt[0]), 1)
+            pdf.cell(50, 8, str(apt[1]), 1)
+            pdf.cell(60, 8, str(apt[2]), 1)
+            pdf.ln()
+
+        if not appointments:
+            pdf.cell(0, 8, "No upcoming appointments scheduled.", ln=True)
+
+        pdf.ln(8)
 
         # Return the final PDF
         response = make_response(bytes(pdf.output()))

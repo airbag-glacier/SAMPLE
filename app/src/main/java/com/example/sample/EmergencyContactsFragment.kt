@@ -88,7 +88,7 @@ class EmergencyContactsFragment : Fragment() {
                     etPhone.text?.clear()
                     switchPrimary.isChecked = false
 
-                    loadContacts() // Refresh UI
+                    loadContacts()
                 } else {
                     Toast.makeText(requireContext(), "Database Error.", Toast.LENGTH_SHORT).show()
                 }
@@ -111,7 +111,7 @@ class EmergencyContactsFragment : Fragment() {
             findNavController().popBackStack()
         }
 
-// Bottom Navigation: Upgraded List Menu Dialog
+        // Bottom Navigation: Upgraded List Menu Dialog
         view.findViewById<ImageView>(R.id.btnMenu)?.setOnClickListener {
             val menuOptions = arrayOf("Assessment Result", "Emergency Contacts", "About / Credits", "Restart App")
 
@@ -201,6 +201,17 @@ class EmergencyContactsFragment : Fragment() {
                 holder.tvPrimary.visibility = View.VISIBLE
             } else {
                 holder.tvPrimary.visibility = View.GONE
+            }
+
+            holder.tvPhone.setOnClickListener {
+                val phoneNumber = contact["phone_number"]
+                if (!phoneNumber.isNullOrEmpty()) {
+                    // ACTION_DIAL opens the dialer and pastes the number safely
+                    val intent = Intent(Intent.ACTION_DIAL).apply {
+                        data = android.net.Uri.parse("tel:$phoneNumber")
+                    }
+                    holder.itemView.context.startActivity(intent)
+                }
             }
 
             holder.btnDelete.setOnClickListener {

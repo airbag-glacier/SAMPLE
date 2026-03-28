@@ -70,20 +70,24 @@ class HospitalMapFragment : Fragment(), OnMapReadyCallback {
         tvNearestHospital = view.findViewById(R.id.tvNearestHospital)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
-        // Initialize Google Places API
-        val appInfo = requireContext().packageManager.getApplicationInfo(requireContext().packageName, PackageManager.GET_META_DATA)
-        val apiKey = appInfo.metaData.getString("com.google.android.geo.API_KEY")
+        // STABLE PLACES INITIALIZATION
+        try {
+            val appInfo = requireContext().packageManager.getApplicationInfo(requireContext().packageName, PackageManager.GET_META_DATA)
+            val apiKey = appInfo.metaData.getString("com.google.android.geo.API_KEY")
 
-        if (apiKey != null && !Places.isInitialized()) {
-            Places.initialize(requireContext(), apiKey)
+            if (apiKey != null) {
+                if (!Places.isInitialized()) {
+                    Places.initialize(requireContext().applicationContext, apiKey) // Use applicationContext to prevent memory leaks
+                }
+                placesClient = Places.createClient(requireContext())
+            }
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "Places API Error: ${e.message}", Toast.LENGTH_SHORT).show()
         }
-        placesClient = Places.createClient(requireContext())
 
-        // Initialize
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        // Setup Dialer
         btnCallEmergency.setOnClickListener {
             emergencyPhoneNumber?.let { number ->
                 val dialIntent = Intent(Intent.ACTION_DIAL)

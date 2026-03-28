@@ -298,13 +298,12 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val db = this.readableDatabase
         val map = mutableMapOf<String, String>()
 
-        // Added diabetes, stroke_history, and cardiac_disease
-        val keys = listOf("name", "email", "age", "sex", "bmi", "cholesterol", "hdl", "ldl", "tri", "fbs", "hypertension", "smoker", "diabetes", "stroke_history", "cardiac_disease", "image_uri")
+        val keys = listOf("name", "email", "password", "age", "sex", "bmi", "cholesterol", "hdl", "ldl", "tri", "fbs", "hypertension", "smoker", "diabetes", "stroke_history", "cardiac_disease", "image_uri")
         keys.forEach { map[it] = "N/A" }
         map["image_uri"] = ""
 
         val query = """
-        SELECT u.$COL_USER_NAME, u.$COL_EMAIL, u.$COL_AGE, u.$COL_SEX, u.$COL_IMAGE_URI,
+        SELECT u.$COL_USER_NAME, u.$COL_EMAIL, u.$COL_PASSWORD, u.$COL_AGE, u.$COL_SEX, u.$COL_IMAGE_URI,
                h.$COL_BMI, h.$COL_CHOLESTEROL, h.$COL_HYPERTENSION, h.$COL_SMOKER,
                h.$COL_HDL, h.$COL_LDL, h.$COL_TRIGLYCERIDES, h.$COL_FBS,
                h.$COL_DIABETES, h.$COL_STROKE_HISTORY, h.$COL_CARDIAC_DISEASE
@@ -317,20 +316,21 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         if (cursor.moveToFirst()) {
             map["name"] = cursor.getString(0) ?: "User"
             map["email"] = cursor.getString(1) ?: "No Email"
-            map["age"] = cursor.getString(2) ?: "N/A"
-            map["sex"] = cursor.getString(3) ?: "N/A"
-            map["image_uri"] = cursor.getString(4) ?: ""
-            map["bmi"] = cursor.getString(5) ?: "N/A"
-            map["cholesterol"] = cursor.getString(6) ?: "N/A"
-            map["hypertension"] = if (cursor.getInt(7) == 1) "Yes" else "No"
-            map["smoker"] = if (cursor.getInt(8) == 1) "Yes" else "No"
-            map["hdl"] = cursor.getString(9) ?: "N/A"
-            map["ldl"] = cursor.getString(10) ?: "N/A"
-            map["tri"] = cursor.getString(11) ?: "N/A"
-            map["fbs"] = cursor.getString(12) ?: "N/A"
-            map["diabetes"] = if (cursor.getInt(13) == 1) "Yes" else "No"
-            map["stroke_history"] = if (cursor.getInt(14) == 1) "Yes" else "No"
-            map["cardiac_disease"] = if (cursor.getInt(15) == 1) "Yes" else "No"
+            map["password"] = cursor.getString(2) ?: "No Password"
+            map["age"] = cursor.getString(3) ?: "N/A"
+            map["sex"] = cursor.getString(4) ?: "N/A"
+            map["image_uri"] = cursor.getString(5) ?: ""
+            map["bmi"] = cursor.getString(6) ?: "N/A"
+            map["cholesterol"] = cursor.getString(7) ?: "N/A"
+            map["hypertension"] = if (cursor.getInt(8) == 1) "Yes" else "No"
+            map["smoker"] = if (cursor.getInt(9) == 1) "Yes" else "No"
+            map["hdl"] = cursor.getString(10) ?: "N/A"
+            map["ldl"] = cursor.getString(11) ?: "N/A"
+            map["tri"] = cursor.getString(12) ?: "N/A"
+            map["fbs"] = cursor.getString(13) ?: "N/A"
+            map["diabetes"] = if (cursor.getInt(14) == 1) "Yes" else "No"
+            map["stroke_history"] = if (cursor.getInt(15) == 1) "Yes" else "No"
+            map["cardiac_disease"] = if (cursor.getInt(16) == 1) "Yes" else "No"
         }
         cursor.close()
         return map
@@ -377,7 +377,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     // EMERGENCY CONTACTS FUNCTIONS
     // ==========================================
 
-    // UPDATED: Now accepts name, relationship, and isPrimary
+
     fun insertEmergencyContact(userId: Long, name: String, relationship: String, isPrimary: Int, phoneNumber: String): Boolean {
         val db = this.writableDatabase
         val values = ContentValues().apply {
@@ -471,5 +471,42 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
         cursor.close()
         return result
+    }
+
+    fun getAllRiskAssessments(userId: Long): List<Map<String, Any>> {
+        val list = mutableListOf<Map<String, Any>>()
+        val db = this.readableDatabase
+        // Grabs all risk assessments, ordered by newest first
+        val cursor = db.rawQuery("SELECT lr_prediction, risk_level, timestamp FROM risk_assessments WHERE user_id = ? ORDER BY timestamp DESC", arrayOf(userId.toString()))
+
+        if (cursor.moveToFirst()) {
+            do {
+                list.add(mapOf(
+                    "lr_prediction" to cursor.getDouble(0),
+                    "risk_level" to (cursor.getString(1) ?: "Unknown"),
+                    "timestamp" to (cursor.getString(2) ?: "Unknown Date")
+                ))
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        return list
+    }
+
+    fun getAllFacialScans(userId: Long): List<Map<String, Any>> {
+        val list = mutableListOf<Map<String, Any>>()
+        val db = this.readableDatabase
+
+        val cursor = db.rawQuery("SELECT $COL_ASYMMETRIC_DETECTED, $COL_TIMESTAMP FROM $TABLE_SCAN_RESULT WHERE $COL_USER_ID = ? ORDER BY $COL_TIMESTAMP DESC", arrayOf(userId.toString()))
+
+        if (cursor.moveToFirst()) {
+            do {
+                list.add(mapOf(
+                    "detected" to (cursor.getInt(0) == 1),
+                    "timestamp" to (cursor.getString(1) ?: "Unknown Date")
+                ))
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        return list
     }
 }

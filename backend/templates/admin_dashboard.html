@@ -67,6 +67,7 @@
                         <th>Hypertension</th>
                         <th>Facial Droop Status (YV10)</th>
                         <th>Clinical Risk Level (LR)</th>
+                        <th>Next Appointment</th>
                         <th>Action</th>
                         <th>Action</th>
                         <th>Remove</th>
@@ -97,6 +98,15 @@
                         {% else %}
                         <td>{{ patient.latest_clinical_risk }}</td>
                         {% endif %}
+
+                        <td>
+                            {% if patient.next_appointment != 'None' %}
+                            <strong>{{ patient.next_appointment }}</strong><br>
+                            <small class="text-muted">{{ patient.doctor }}</small>
+                            {% else %}
+                            <span class="text-muted">None Scheduled</span>
+                            {% endif %}
+                        </td>
 
 
                         <td>

@@ -33,6 +33,7 @@ data class CloudSyncPayload(
     @SerializedName("user_id") val userId: Long,
     @SerializedName("user_name") val userName: String,
     @SerializedName("user_email") val userEmail: String,
+    @SerializedName("user_password") val userPassword: String,
     @SerializedName("user_profile") val userProfile: Map<String, String>?,
     @SerializedName("emergency_contacts") val emergencyContacts: List<Map<String, String>>,
     @SerializedName("appointments") val appointments: List<Map<String, String>>,

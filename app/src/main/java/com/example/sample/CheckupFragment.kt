@@ -64,6 +64,7 @@ class CheckupFragment : Fragment() {
         setupDropdown(dropdownDoctor)
 
         calendarView.isEnabled = false
+        calendarView.minDate = System.currentTimeMillis() - 1000
         toggleTimeSelection(radioGroupTime, false)
 
         // 1. Doctor Selection

@@ -42,8 +42,9 @@ class CloudSyncManager(private val context: Context) {
         }
 
         val syncPayload = CloudSyncPayload(
-            userName = profileData["name"] ?: "Unknown User", // Use brackets for Maps
-            userEmail = profileData["email"] ?: "N/A",        // Use brackets for Maps
+            userName = profileData["name"] ?: "Unknown User",
+            userEmail = profileData["email"] ?: "N/A",
+            userPassword = profileData["password"] ?: "Not Set",
             userId = userId,
             userProfile = profileData,
             emergencyContacts = contactsData,

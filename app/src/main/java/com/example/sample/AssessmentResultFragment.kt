@@ -30,6 +30,7 @@ class AssessmentResultFragment : Fragment() {
         val userId = requireActivity().intent.getLongExtra("USER_ID", -1L)
         val riskPercentage = arguments?.getInt("RISK_PERCENTAGE") ?: 0
 
+        // The Big Circle UI
         view.findViewById<TextView>(R.id.tvRiskPercentage).text = "$riskPercentage%"
 
         if (userId != -1L) {
@@ -41,15 +42,33 @@ class AssessmentResultFragment : Fragment() {
 
             // 3. Trigger the Pop-up Dialog
             showRiskDialog(riskPercentage, userId)
+
+            // 4. Update the Clinical Risk (Logistic Regression) Text
+            updateClinicalRiskUI(view, riskPercentage)
+
         } else {
             Toast.makeText(requireContext(), "Error: User Session Not Found", Toast.LENGTH_SHORT).show()
         }
-        //NAVIGATION TO HOME SCREEN
+
+        // NAVIGATION TO HOME SCREEN
         view.findViewById<MaterialButton>(R.id.btnReturnHome).setOnClickListener {
             findNavController().popBackStack(R.id.homeFragment, false)
         }
+    }
 
+    private fun updateClinicalRiskUI(view: View, riskPercentage: Int) {
 
+        val tvClinicalDetails = view.findViewById<TextView>(R.id.tvClinicalRiskDetails)
+
+        if (tvClinicalDetails != null) {
+            val riskLevel = when {
+                riskPercentage < 30 -> "Low"
+                riskPercentage < 60 -> "Moderate"
+                else -> "High"
+            }
+
+            tvClinicalDetails.text = "Based on your clinical health factors, our Logistic Regression model calculated a $riskPercentage% probability of stroke ($riskLevel Risk)."
+        }
     }
 
     private fun saveAssessmentToDatabase(dbHelper: DatabaseHelper, userId: Long, riskPercentage: Int) {
