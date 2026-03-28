@@ -76,6 +76,12 @@
             app:destination="@id/profileDetailsFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim" />
+
+        <action
+            android:id="@+id/action_home_to_hospitalMapFragment"
+            app:destination="@id/hospitalMapFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim" />
     </fragment>
 
     <fragment
@@ -151,6 +157,8 @@
         android:id="@+id/hospitalMapFragment"
         android:name="com.example.sample.HospitalMapFragment"
         android:label="Nearest Hospital"
-        tools:layout="@layout/fragment_hospital_map" />
+        tools:layout="@layout/fragment_hospital_map" >
+    </fragment>
+
 
 </navigation>

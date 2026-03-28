@@ -222,7 +222,7 @@
                     </com.google.android.material.card.MaterialCardView>
 
                     <com.google.android.material.card.MaterialCardView
-                        android:layout_width="@dimen/card_width_medium"
+                        android:id="@+id/card_go_to_map"  android:layout_width="@dimen/card_width_medium"
                         android:layout_height="match_parent"
                         android:layout_marginStart="@dimen/spacing_small"
                         android:layout_marginEnd="@dimen/spacing_small"
@@ -230,14 +230,19 @@
                         app:cardCornerRadius="@dimen/card_corner_radius"
                         android:clipToOutline="true"
                         android:clickable="true"
-                        android:focusable="true">
+                        android:focusable="true"
+                        android:foreground="?android:attr/selectableItemBackground">
 
                         <ImageView
+                            android:id="@+id/imgMapClicker"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:layout_gravity="center_horizontal"
                             android:scaleType="centerCrop"
                             android:src="@drawable/map_image"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:foreground="?android:attr/selectableItemBackground"
                             tools:ignore="ContentDescription" />
 
                         <TextView
@@ -248,7 +253,8 @@
                             android:padding="@dimen/spacing_12"
                             android:text=" Hospitals\n near you"
                             android:textColor="#D81B60"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"
+                            android:elevation="2dp" />
 
                     </com.google.android.material.card.MaterialCardView>
 
