@@ -267,7 +267,7 @@ def download_patient_report(user_id):
         pdf.ln(5)
 
         # ---------------------------------------------------------
-        # Section 1: Demographics & Risk Factors (Fixed Layout)
+        # Section 1: Demographics & Core Risk Factors (Fixed Layout)
         # ---------------------------------------------------------
         pdf.set_font("helvetica", "B", 12)
         pdf.cell(0, 10, "1. Patient Demographics & Core Risk Factors", ln=True)
@@ -281,10 +281,11 @@ def download_patient_report(user_id):
         pdf.cell(90, 6, f"Diabetes: {'Yes' if profile[7] == 1 else 'No'}", 0, 1)
 
         pdf.cell(90, 6, f"Age: {profile[2] or '-'} | Gender: {profile[3] or '-'}", 0, 0)
-        pdf.cell(90, 6, f"Stroke History: {'Yes' if profile[8] == 1 else 'No'}", 0, 1)
+        # Renamed to Heart Disease to perfectly match the Android app!
+        pdf.cell(90, 6, f"Heart Disease: {'Yes' if profile[9] == 1 else 'No'}", 0, 1)
 
-        pdf.cell(90, 6, f"BMI: {profile[4] or '-'} | Smoker: {profile[5] or 'Unknown'}", 0, 0)
-        pdf.cell(90, 6, f"Cardiac Disease: {'Yes' if profile[9] == 1 else 'No'}", 0, 1)
+        # We removed Stroke History. The '0, 1' at the end of this line drops us to the next row cleanly.
+        pdf.cell(90, 6, f"BMI: {profile[4] or '-'} | Smoker: {profile[5] or 'Unknown'}", 0, 1)
         pdf.ln(5)
 
         # ---------------------------------------------------------
