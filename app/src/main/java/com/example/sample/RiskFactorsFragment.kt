@@ -72,9 +72,8 @@ class RiskFactorsFragment : Fragment() {
             findNavController().popBackStack(R.id.homeFragment, false)
         }
 
-// Bottom Navigation: Upgraded List Menu Dialog
         view.findViewById<ImageView>(R.id.btnMenu)?.setOnClickListener {
-            val menuOptions = arrayOf("Assessment Result", "Emergency Contacts", "About / Credits", "Restart App")
+            val menuOptions = arrayOf("Assessment Result", "Emergency Contacts", "About / Credits", "Log out")
 
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle("DeTechStroke Menu")

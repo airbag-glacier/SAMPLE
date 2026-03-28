@@ -355,13 +355,18 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
     fun getLatestFacialScan(userId: Long): Map<String, Any>? {
         val db = this.readableDatabase
-        val cursor = db.rawQuery("SELECT $COL_ASYMMETRIC_DETECTED, $COL_TIMESTAMP FROM $TABLE_SCAN_RESULT WHERE $COL_USER_ID = ? ORDER BY $COL_SCAN_ID DESC LIMIT 1", arrayOf(userId.toString()))
+
+
+        val query = "SELECT $COL_ASYMMETRIC_DETECTED, $COL_TIMESTAMP, $COL_IMAGE_PATH FROM $TABLE_SCAN_RESULT WHERE $COL_USER_ID = ? ORDER BY $COL_SCAN_ID DESC LIMIT 1"
+
+        val cursor = db.rawQuery(query, arrayOf(userId.toString()))
         var scanData: Map<String, Any>? = null
+
         if (cursor.moveToFirst()) {
             scanData = mapOf(
                 "detected" to (cursor.getInt(0) == 1),
                 "timestamp" to (cursor.getString(1) ?: "Unknown Date"),
-                "image_path" to (cursor.getString(2) ?: "")
+                "image_path" to (cursor.getString(2) ?: "") // This will now work perfectly!
             )
         }
         cursor.close()

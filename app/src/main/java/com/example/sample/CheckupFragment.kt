@@ -25,9 +25,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 class CheckupFragment : Fragment() {
 
     private val doctorsList = mutableListOf(
-        "Dr. Jose Rizal (Ophthalmology)",
-        "Dr. Fe Del Mundo (Pediatrics)",
-        "Dr. Vicki Belo (Dermatology)",
         "Dr. Willie Ong (Cardiology)",
         "Dr. Juan Dela Cruz (General Practice)"
     )
@@ -152,9 +149,9 @@ class CheckupFragment : Fragment() {
             findNavController().navigate(R.id.action_global_scan)
         }
         view.findViewById<ImageView>(R.id.btnHome)?.setOnClickListener { findNavController().popBackStack(R.id.homeFragment, false) }
-// Bottom Navigation: Upgraded List Menu Dialog
+
         view.findViewById<ImageView>(R.id.btnMenu)?.setOnClickListener {
-            val menuOptions = arrayOf("Assessment Result", "Emergency Contacts", "About / Credits", "Restart App")
+            val menuOptions = arrayOf("Assessment Result", "Emergency Contacts", "About / Credits", "Log out")
 
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle("DeTechStroke Menu")

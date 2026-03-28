@@ -107,6 +107,10 @@ class EmergencyContactsFragment : Fragment() {
             findNavController().popBackStack(R.id.homeFragment, false)
         }
 
+        view.findViewById<ImageButton>(R.id.btnBack).setOnClickListener {
+            findNavController().popBackStack()
+        }
+
 // Bottom Navigation: Upgraded List Menu Dialog
         view.findViewById<ImageView>(R.id.btnMenu)?.setOnClickListener {
             val menuOptions = arrayOf("Assessment Result", "Emergency Contacts", "About / Credits", "Restart App")
