@@ -59,7 +59,6 @@ class HomeFragment : Fragment() {
                 .show()
         }
 
-        // 2. STANDARD NAVIGATION CARDS
         view.findViewById<View>(R.id.cardCheckup)?.setOnClickListener { findNavController().navigate(R.id.action_homeFragment_to_checkupFragment) }
         view.findViewById<View>(R.id.cardVitals)?.setOnClickListener { findNavController().navigate(R.id.action_home_to_vitals) }
         view.findViewById<View>(R.id.cardBefast)?.setOnClickListener { findNavController().navigate(R.id.action_home_to_befast) }
@@ -68,11 +67,19 @@ class HomeFragment : Fragment() {
         view.findViewById<View>(R.id.tvSeeDetails)?.setOnClickListener { findNavController().navigate(R.id.action_home_to_profileDetails) }
 
 
-        view.findViewById<View>(R.id.clickTargetHospital)?.setOnClickListener {
-            Toast.makeText(requireContext(), "Loading Map...", Toast.LENGTH_SHORT).show()
-            findNavController().navigate(R.id.action_global_hospitalMap)
+
+        val mapClickListener = View.OnClickListener {
+            try {
+
+                findNavController().navigate(R.id.hospitalMapFragment)
+            } catch (e: Exception) {
+
+                Toast.makeText(requireContext(), "CRASH PREVENTED: ${e.message}", Toast.LENGTH_LONG).show()
+            }
         }
 
+        view.findViewById<View>(R.id.clickTargetHospital)?.setOnClickListener(mapClickListener)
+        
         // 3. DATABASE & USER PROFILE INJECTION
         val dbHelper = DatabaseHelper(requireContext())
         val userId = requireActivity().intent?.getLongExtra("USER_ID", -1L) ?: -1L
