@@ -156,9 +156,8 @@
     <fragment
         android:id="@+id/hospitalMapFragment"
         android:name="com.example.sample.HospitalMapFragment"
-        android:label="Nearest Hospital"
-        tools:layout="@layout/fragment_hospital_map" >
-    </fragment>
+        android:label="Hospital Map"
+        tools:layout="@layout/fragment_hospital_map" />
 
 
 </navigation>

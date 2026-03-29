@@ -66,7 +66,7 @@ class EmergencyContactsFragment : Fragment() {
 
 
         btnOpenMap.setOnClickListener {
-            // Assumes you have an action defined in your nav_graph.xml
+
             findNavController().navigate(R.id.action_emergencyContacts_to_hospitalMap)
         }
 

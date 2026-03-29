@@ -137,7 +137,6 @@ class HospitalMapFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-    @SuppressLint("MissingPermission")
     private fun fetchNearestHospitalFromPlacesAPI(userLocation: LatLng) {
 
         val placeFields = listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.PHONE_NUMBER, Place.Field.TYPES)
@@ -146,8 +145,8 @@ class HospitalMapFragment : Fragment(), OnMapReadyCallback {
         placesClient.findCurrentPlace(request)
             .addOnSuccessListener { response ->
                 val hospitals = response.placeLikelihoods
-                    .filter { it.place.types?.contains(Place.Type.HOSPITAL) == true }
-                    .sortedBy { it.likelihood } // Likelihood often correlates with proximity here
+                    .filter { it.place.placeTypes?.contains(com.google.android.libraries.places.api.model.PlaceTypes.HOSPITAL) == true }
+                    .sortedBy { it.likelihood }
                     .reversed()
 
                 if (hospitals.isNotEmpty()) {

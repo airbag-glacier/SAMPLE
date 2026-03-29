@@ -107,7 +107,6 @@
                         app:cardElevation="@dimen/card_elevation"
                         app:cardCornerRadius="@dimen/card_corner_radius"
                         android:clipToOutline="true"
-
                         android:clickable="true"
                         android:focusable="true"
                         android:foreground="?android:attr/selectableItemBackground">
@@ -167,14 +166,13 @@
                             android:textColor="@color/primaryPink"
                             android:textStyle="bold" />
                     </com.google.android.material.card.MaterialCardView>
-
                 </LinearLayout>
             </HorizontalScrollView>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Education"
+                android:text="Education &amp; Emergency"
                 android:textColor="#D81B60"
                 android:textSize="@dimen/text_subheader"
                 android:textStyle="bold"
@@ -199,6 +197,7 @@
                         app:cardElevation="@dimen/card_elevation"
                         app:cardBackgroundColor="#FFCDD2"
                         app:cardCornerRadius="@dimen/card_corner_radius"
+                        android:clipToOutline="true"
                         android:clickable="true"
                         android:focusable="true"
                         android:foreground="?android:attr/selectableItemBackground">
@@ -222,49 +221,52 @@
                     </com.google.android.material.card.MaterialCardView>
 
                     <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/card_go_to_map"  android:layout_width="@dimen/card_width_medium"
+                        android:layout_width="@dimen/card_width_xlarge"
                         android:layout_height="match_parent"
                         android:layout_marginStart="@dimen/spacing_small"
-                        android:layout_marginEnd="@dimen/spacing_small"
-                        app:cardElevation="@dimen/card_elevation"
                         app:cardCornerRadius="@dimen/card_corner_radius"
-                        android:clipToOutline="true"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:foreground="?android:attr/selectableItemBackground">
+                        app:cardElevation="@dimen/card_elevation"
+                        android:clipToOutline="true">
 
-                        <ImageView
-                            android:id="@+id/imgMapClicker"
+                        <FrameLayout
+                            android:id="@+id/clickTargetHospital"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:layout_gravity="center_horizontal"
                             android:clickable="true"
                             android:focusable="true"
-                            android:foreground="?android:attr/selectableItemBackground"
-                            android:scaleType="centerCrop"
-                            android:src="@drawable/map_image"
-                            tools:ignore="ContentDescription" />
+                            android:background="?attr/selectableItemBackground">
 
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="bottom"
-                            android:gravity="left"
-                            android:padding="@dimen/spacing_12"
-                            android:text=" Hospitals\n near you"
-                            android:textColor="#D81B60"
-                            android:textStyle="bold"
-                            android:elevation="2dp" />
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:scaleType="centerCrop"
+                                android:src="@drawable/map_image"
+                                android:clickable="false"
+                                tools:ignore="ContentDescription" />
 
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:background="#30000000" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="bottom"
+                                android:text="Hospitals\nnear you"
+                                android:textColor="@color/primaryPink"
+                                android:textStyle="bold"
+                                android:padding="@dimen/spacing_12"
+                                android:clickable="false" />
+                        </FrameLayout>
                     </com.google.android.material.card.MaterialCardView>
-
                 </LinearLayout>
             </HorizontalScrollView>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Health"
+                android:text="Health Data"
                 android:textColor="#D81B60"
                 android:textSize="@dimen/text_subheader"
                 android:textStyle="bold"
@@ -274,7 +276,8 @@
             <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/card_scroll_height_small"
-                android:scrollbars="none">
+                android:scrollbars="none"
+                android:layout_marginBottom="24dp">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -289,7 +292,6 @@
                         app:cardElevation="@dimen/card_elevation"
                         app:cardCornerRadius="@dimen/card_corner_radius"
                         android:clipToOutline="true"
-
                         android:clickable="true"
                         android:focusable="true"
                         android:foreground="?android:attr/selectableItemBackground">
@@ -308,7 +310,7 @@
                             android:layout_gravity="bottom"
                             android:textColor="@color/primaryPink"
                             android:padding="@dimen/spacing_12"
-                            android:text="Check Blood Chem\nChemistry"
+                            android:text="Check Blood\nChemistry"
                             android:textStyle="bold" />
                     </com.google.android.material.card.MaterialCardView>
 
@@ -321,7 +323,6 @@
                         app:cardElevation="@dimen/card_elevation"
                         app:cardCornerRadius="@dimen/card_corner_radius"
                         android:clipToOutline="true"
-
                         android:clickable="true"
                         android:focusable="true"
                         android:foreground="?android:attr/selectableItemBackground">
