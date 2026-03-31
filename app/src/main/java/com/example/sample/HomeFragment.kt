@@ -79,7 +79,7 @@ class HomeFragment : Fragment() {
         }
 
         view.findViewById<View>(R.id.clickTargetHospital)?.setOnClickListener(mapClickListener)
-        
+
         // 3. DATABASE & USER PROFILE INJECTION
         val dbHelper = DatabaseHelper(requireContext())
         val userId = requireActivity().intent?.getLongExtra("USER_ID", -1L) ?: -1L
