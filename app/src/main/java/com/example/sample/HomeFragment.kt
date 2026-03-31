@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -26,22 +25,24 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Bottom Navigation
         view.findViewById<FloatingActionButton>(R.id.btnCamera)?.setOnClickListener {
             findNavController().navigate(R.id.action_global_scan)
         }
 
         view.findViewById<ImageView>(R.id.btnMenu)?.setOnClickListener {
             val menuOptions = arrayOf("Assessment Result", "Emergency Contacts", "About / Credits", "Log out")
+
             MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Menu")
+                .setTitle("DeTechStroke Menu")
                 .setItems(menuOptions) { _, which ->
                     when (which) {
                         0 -> findNavController().navigate(R.id.action_global_assessmentResult)
                         1 -> findNavController().navigate(R.id.action_global_emergencyContacts)
                         2 -> {
                             MaterialAlertDialogBuilder(requireContext())
-                                .setTitle("About DeTechStroke")
-                                .setMessage("Developed by:\nGabriel Garcia\nPhoebe Andrei Quan\nNatsuki Ushijima\n\n© 2026 All Rights Reserved.")
+                                .setTitle("DeTechStroke")
+                                .setMessage("Developers:\nGabriel Garcia\nPhoebe Andrei Quan\nNatsuki Ushijima\n\n© 2026 All Rights Reserved.")
                                 .setPositiveButton("Close", null)
                                 .show()
                         }
@@ -59,6 +60,7 @@ class HomeFragment : Fragment() {
                 .show()
         }
 
+        // Standard Card Click Listeners
         view.findViewById<View>(R.id.cardCheckup)?.setOnClickListener { findNavController().navigate(R.id.action_homeFragment_to_checkupFragment) }
         view.findViewById<View>(R.id.cardVitals)?.setOnClickListener { findNavController().navigate(R.id.action_home_to_vitals) }
         view.findViewById<View>(R.id.cardBefast)?.setOnClickListener { findNavController().navigate(R.id.action_home_to_befast) }
@@ -66,33 +68,24 @@ class HomeFragment : Fragment() {
         view.findViewById<View>(R.id.cardRiskFactors)?.setOnClickListener { findNavController().navigate(R.id.action_home_to_riskFactors) }
         view.findViewById<View>(R.id.tvSeeDetails)?.setOnClickListener { findNavController().navigate(R.id.action_home_to_profileDetails) }
 
-
-
-        val mapClickListener = View.OnClickListener {
-            try {
-
-                findNavController().navigate(R.id.hospitalMapFragment)
-            } catch (e: Exception) {
-
-                Toast.makeText(requireContext(), "CRASH PREVENTED: ${e.message}", Toast.LENGTH_LONG).show()
-            }
+        // The Hospital Map Click Listener!
+        view.findViewById<View>(R.id.cardHospitalMap)?.setOnClickListener {
+            findNavController().navigate(R.id.action_global_hospitalMap)
         }
 
-        view.findViewById<View>(R.id.clickTargetHospital)?.setOnClickListener(mapClickListener)
-
-        // 3. DATABASE & USER PROFILE INJECTION
+        // User Data Logic
         val dbHelper = DatabaseHelper(requireContext())
         val userId = requireActivity().intent?.getLongExtra("USER_ID", -1L) ?: -1L
 
         if (userId != -1L) {
             val userData = dbHelper.getUserData(userId)
             if (userData != null) {
-                view.findViewById<TextView>(R.id.tvName)?.text = userData["name"]
+                view.findViewById<TextView>(R.id.tvName).text = userData["name"]
 
                 val imageUriString = userData["image_uri"]
                 val profileImageView = view.findViewById<ImageView>(R.id.imgProfile)
 
-                if (!imageUriString.isNullOrEmpty() && profileImageView != null) {
+                if (!imageUriString.isNullOrEmpty()) {
                     try {
                         profileImageView.setImageURI(imageUriString.toUri())
                     } catch (e: SecurityException) {
@@ -100,7 +93,7 @@ class HomeFragment : Fragment() {
                     }
                 }
             }
-            view.findViewById<TextView>(R.id.tvDetails)?.text = dbHelper.getUserHealthSummary(userId)
+            view.findViewById<TextView>(R.id.tvDetails).text = dbHelper.getUserHealthSummary(userId)
         }
     }
 }
