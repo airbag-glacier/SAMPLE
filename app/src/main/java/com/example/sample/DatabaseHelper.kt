@@ -52,11 +52,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         private const val COL_IS_PRIMARY = "is_primary"
         private const val COL_PHONE_NUMBER = "phone_number"
 
-        // --- 4. FACIAL SCAN SCHEDULE TABLE ---
-        private const val TABLE_SCAN_SCHEDULE = "FacialScanSchedule"
-        private const val COL_SCHED_ID = "sched_id"
-        private const val COL_SCHEDULE = "schedule"
-        private const val COL_COMPLETED = "completed"
+
 
         // --- 5. FACIAL SCAN RESULT TABLE ---
         private const val TABLE_SCAN_RESULT = "FacialScanResult"
@@ -138,13 +134,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 + "FOREIGN KEY($COL_USER_ID) REFERENCES $TABLE_USER($COL_USER_ID) ON DELETE CASCADE)")
         db.execSQL(createEmergencyContactsTable)
 
-        val createScanScheduleTable = ("CREATE TABLE $TABLE_SCAN_SCHEDULE ("
-                + "$COL_SCHED_ID INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + "$COL_USER_ID INTEGER,"
-                + "$COL_SCHEDULE TEXT,"
-                + "$COL_COMPLETED INTEGER DEFAULT 0,"
-                + "FOREIGN KEY($COL_USER_ID) REFERENCES $TABLE_USER($COL_USER_ID) ON DELETE CASCADE)")
-        db.execSQL(createScanScheduleTable)
 
         val createScanResultTable = ("CREATE TABLE $TABLE_SCAN_RESULT ("
                 + "$COL_SCAN_ID INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -169,7 +158,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         db.execSQL("DROP TABLE IF EXISTS $TABLE_RISK_ASSESSMENT")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_SCAN_RESULT")
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_SCAN_SCHEDULE")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_EMERGENCY_CONTACTS")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_HEALTH_PROFILE")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_USER")
