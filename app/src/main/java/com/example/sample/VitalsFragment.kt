@@ -33,7 +33,8 @@ class VitalsFragment : Fragment() {
         btnBackVitals?.setOnClickListener {
             findNavController().popBackStack()
         }
-        //  Find all the Dropdown UI Elements
+
+        // Find all the Dropdown UI Elements
         val dropdownSystolic = view.findViewById<AutoCompleteTextView>(R.id.dropdownSystolic)
         val dropdownDiastolic = view.findViewById<AutoCompleteTextView>(R.id.dropdownDiastolic)
         val dropdownHeartRate = view.findViewById<AutoCompleteTextView>(R.id.dropdownHeartRate)
@@ -41,7 +42,7 @@ class VitalsFragment : Fragment() {
         val dropdownHeight = view.findViewById<AutoCompleteTextView>(R.id.dropdownHeight)
         val dropdownWeight = view.findViewById<AutoCompleteTextView>(R.id.dropdownWeight)
 
-        // 2. Generate the Number Ranges for the Dropdowns
+        // Generate the Number Ranges for the Dropdowns
         val systolicRange = (70..250 step 1).map { it.toString() }
         val diastolicRange = (40..150 step 1).map { it.toString() }
         val hrRange = (40..200 step 1).map { it.toString() }
@@ -49,7 +50,7 @@ class VitalsFragment : Fragment() {
         val heightRange = (100..250 step 1).map { it.toString() }
         val weightRange = (30..200 step 1).map { it.toString() }
 
-        // 3. Attach the Data to the Dropdowns using ArrayAdapters
+        // Attach the Data to the Dropdowns
         dropdownSystolic.setAdapter(ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, systolicRange))
         dropdownDiastolic.setAdapter(ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, diastolicRange))
         dropdownHeartRate.setAdapter(ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, hrRange))
@@ -64,7 +65,6 @@ class VitalsFragment : Fragment() {
             val heightCm = dropdownHeight.text.toString().toDoubleOrNull() ?: 0.0
             val weightKg = dropdownWeight.text.toString().toDoubleOrNull() ?: 0.0
 
-            // ERD Mapping: The ERD only has BMI. So we calculate it here.
             var bmi = 0.0
             if (heightCm > 0) {
                 val heightMeters = heightCm / 100
@@ -75,8 +75,8 @@ class VitalsFragment : Fragment() {
             val dbHelper = DatabaseHelper(requireContext())
 
             if (userId != -1L) {
-                // Save ONLY the BMI to the ERD's Health Profile
-                val isSaved = dbHelper.updateVitalsToERD(userId, bmi)
+
+                val isSaved = dbHelper.updateVitalsToERD(userId, heightCm, weightKg, bmi)
 
                 if (isSaved) {
                     Toast.makeText(requireContext(), "Vitals Saved to Profile!", Toast.LENGTH_SHORT).show()
@@ -106,20 +106,15 @@ class VitalsFragment : Fragment() {
                 .setItems(menuOptions) { _, which ->
                     when (which) {
                         0 -> findNavController().navigate(R.id.action_global_assessmentResult)
-
                         1 -> findNavController().navigate(R.id.action_global_emergencyContacts)
-
                         2 -> {
-                            // Show the developer credits in a secondary pop-up
                             MaterialAlertDialogBuilder(requireContext())
                                 .setTitle("DeTechStroke")
                                 .setMessage("Developers:\nGabriel Garcia\nPhoebe Andrei Quan\nNatsuki Ushijima\n\n© 2026 All Rights Reserved.")
                                 .setPositiveButton("Close", null)
                                 .show()
                         }
-
                         3 -> {
-                            // Restart App Logic
                             val intent = requireContext().packageManager.getLaunchIntentForPackage(requireContext().packageName)
                             if (intent != null) {
                                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)

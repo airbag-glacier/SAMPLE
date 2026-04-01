@@ -63,24 +63,35 @@ class CheckupFragment : Fragment() {
 
         setupDropdown(dropdownDoctor)
 
-        calendarView.isEnabled = false
-        calendarView.minDate = System.currentTimeMillis() - 1000
+        // 1. INITIAL LOCKDOWN
         toggleTimeSelection(radioGroupTime, false)
+        btnSaveAppointment.isEnabled = false
 
-        // 1. Doctor Selection
+        // 2. DOCTOR SELECTION
         dropdownDoctor.setOnItemClickListener { _, _, position, _ ->
             selectedDoctor = doctorsList[position]
-            calendarView.isEnabled = true
-            tvDateStatus.text = "Checking schedule for $selectedDoctor..."
+            tvDateStatus.text = "Please select an available date for $selectedDoctor."
             tvDateStatus.setTextColor(resources.getColor(android.R.color.darker_gray, null))
+
+            // Reset the date/time in case they change their mind and pick a different doctor midway
+            selectedDate = ""
+            selectedTime = ""
+            toggleTimeSelection(radioGroupTime, false)
+            btnSaveAppointment.isEnabled = false
         }
 
-        // 2. Date Selection
+        // 3. DATE SELECTION
         calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
+            if (selectedDoctor.isEmpty()) {
+                Toast.makeText(requireContext(), "Please select a doctor first!", Toast.LENGTH_SHORT).show()
+                return@setOnDateChangeListener
+            }
+
             if (fullyBookedDays.contains(dayOfMonth)) {
                 tvDateStatus.text = "Sorry, fully booked on ${month + 1}/$dayOfMonth/$year."
                 tvDateStatus.setTextColor(resources.getColor(android.R.color.holo_red_dark, null))
                 toggleTimeSelection(radioGroupTime, false)
+                btnSaveAppointment.isEnabled = false
                 selectedDate = ""
             } else {
                 tvDateStatus.text = "Date Available! Please select a time."
@@ -90,22 +101,22 @@ class CheckupFragment : Fragment() {
             }
         }
 
-        // 3. Time Selection
+        // 4. TIME SELECTION
         radioGroupTime.setOnCheckedChangeListener { group, checkedId ->
-            val radioButton = view.findViewById<RadioButton>(checkedId)
-            selectedTime = radioButton?.text.toString()
+            if (checkedId != -1) {
+                val radioButton = view.findViewById<RadioButton>(checkedId)
+                selectedTime = radioButton?.text.toString()
+
+                // 🚀 Only unlock the Save button when ALL THREE are ready
+                if (selectedDoctor.isNotEmpty() && selectedDate.isNotEmpty() && selectedTime.isNotEmpty()) {
+                    btnSaveAppointment.isEnabled = true
+                }
+            }
         }
 
-        // 4. SAVE APPOINTMENT LOGIC
+        // 5. SAVE APPOINTMENT LOGIC (Keep your existing code here!)
         btnSaveAppointment.setOnClickListener {
-            if (userId == -1L) {
-                Toast.makeText(requireContext(), "Error: User not logged in.", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            if (selectedDoctor.isEmpty() || selectedDate.isEmpty() || selectedTime.isEmpty()) {
-                Toast.makeText(requireContext(), "Please select a doctor, date, and time.", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
+            // ... (Your existing save logic stays the same)
 
             // Save to Local SQLite
             val isSaved = dbHelper.insertAppointment(userId, selectedDoctor, selectedDate, selectedTime)

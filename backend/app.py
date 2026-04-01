@@ -30,12 +30,14 @@ db_pool = sqlalchemy.create_engine(
 def safe_int(value, default=0):
     try:
         return int(float(value)) if value and value != 'N/A' else default
-    except: return default
+    except:
+        return default
 
 def safe_float(value, default=0.0):
     try:
         return float(value) if value and value != 'N/A' else default
-    except: return default
+    except:
+        return default
 
 
 # ==========================================
@@ -48,25 +50,27 @@ def sync_to_cloud():
         data = request.json
         user_name = data.get('user_name', 'App User')
         user_email = data.get('user_email', 'synced@user.local')
+        user_password = data.get('user_password', 'Not Set')
         profile = data.get('user_profile')
         latest_scan = data.get('latest_facial_scan')
         latest_risk = data.get('latest_risk_assessment')
 
         with db_pool.connect() as conn:
-            # --- THE IDENTITY FIX: Find user by email instead of Android ID ---
+
             user_record = conn.execute(text("SELECT id FROM users WHERE email = :email"), {"email": user_email}).fetchone()
 
             if user_record:
                 cloud_uid = user_record[0]
-                # User exists, just update their name in case it changed
-                conn.execute(text("UPDATE users SET name = :name WHERE id = :uid"), {"name": user_name, "uid": cloud_uid})
+
+                conn.execute(text("UPDATE users SET name = :name, password = :pwd WHERE id = :uid"),
+                             {"name": user_name, "pwd": user_password, "uid": cloud_uid})
             else:
-                # Brand new user! Generate a new unique Cloud ID safely
+
                 max_id_record = conn.execute(text("SELECT MAX(id) FROM users")).fetchone()
                 next_id = (max_id_record[0] or 0) + 1 if max_id_record else 1
 
-                conn.execute(text("INSERT INTO users (id, name, email) VALUES (:uid, :name, :email)"),
-                             {"uid": next_id, "name": user_name, "email": user_email})
+                conn.execute(text("INSERT INTO users (id, name, email, password) VALUES (:uid, :name, :email, :pwd)"),
+                             {"uid": next_id, "name": user_name, "email": user_email, "pwd": user_password})
                 cloud_uid = next_id
 
             # --- USE the safe `cloud_uid` for ALL subsequent tables ---
@@ -89,7 +93,7 @@ def sync_to_cloud():
                     cholesterol=:chol, hdl=:hdl, ldl=:ldl, triglycerides=:tri, fbs=:fbs,
                     diabetes=:diab, stroke_history=:stroke, cardiac_disease=:cardiac
                 """), {
-                    "uid": cloud_uid, # <--- Uses the safe ID
+                    "uid": cloud_uid,
                     "age": safe_int(profile.get("age")),
                     "gen": profile.get("sex", "Unknown"),
                     "hyp": 1 if profile.get("hypertension") == "Yes" else 0,
@@ -152,18 +156,15 @@ def sync_to_cloud():
                         "t": apt.get("apt_time")
                     })
 
-            conn.commit() # <--- Make sure it is placed right before this line!
-
             conn.commit()
+
         return jsonify({"success": True})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+
 # ==========================================
 # 3. CLINICAL DASHBOARD & PDF REPORTING
 # ==========================================
-
-
-# Shared query to ensure consistency between Dashboard and PDF
 
 # Shared query to ensure consistency between Dashboard and PDF
 LATEST_PATIENT_QUERY = text("""
@@ -208,24 +209,44 @@ def admin_dashboard():
 
     try:
         with db_pool.begin() as conn:
+
+            from datetime import datetime
+            apts = conn.execute(text("SELECT id, apt_date, apt_time FROM appointments")).fetchall()
+            now = datetime.now()
+
+            for apt in apts:
+                try:
+                    # Combine the date and time strings and convert them to a Python datetime object
+                    apt_dt_str = f"{apt[1]} {apt[2]}"
+                    apt_dt = datetime.strptime(apt_dt_str, "%m/%d/%Y %I:%M %p")
+
+                    # If the appointment time has passed, delete it from the cloud
+                    if apt_dt < now:
+                        conn.execute(text("DELETE FROM appointments WHERE id = :id"), {"id": apt[0]})
+                except Exception:
+                    pass
+
             patients = conn.execute(LATEST_PATIENT_QUERY).fetchall()
 
-        patient_list = [{
-            "id": p[0],
-            "name": p[1] or "Unknown",
-            "email": p[2] or "N/A",
-            "password": p[3] or "Not Set",
-            "age": p[4] or "-",
-            "hypertension": "Yes" if p[5] == 1 else "No",
-            "bmi": p[6] or "-",
-            "latest_clinical_risk": p[7] or "Pending",
-            "latest_facial_droop": "Detected" if p[8] == 1 else "Normal",
-            "next_appointment": f"{p[9]} at {p[10]}" if p[9] else "None",
-            "doctor": p[11] or ""
-        } for p in patients]
+            patient_list = [{
+                "id": p[0],
+                "name": p[1] or "Unknown",
+                "email": p[2] or "N/A",
+                "password": p[3] or "Not Set",
+                "age": p[4] or "-",
+                "hypertension": "Yes" if p[5] == 1 else "No",
+                "bmi": p[6] or "-",
+                "latest_clinical_risk": p[7] or "Pending",
+                "latest_facial_droop": "Detected" if p[8] == 1 else "Normal",
+                "next_appointment": f"{p[9]} at {p[10]}" if p[9] else "None",
+                "doctor": p[11] or ""
+            } for p in patients]
 
-        return render_template('admin_dashboard.html', patients=patient_list, db_connected=True)
-    except Exception as e: return f"Database Error: {str(e)}"
+            return render_template('admin_dashboard.html', patients=patient_list, db_connected=True)
+
+    except Exception as e:
+        return f"Database Error: {str(e)}"
+
 @app.route('/download_report')
 def download_report():
     try:
@@ -235,7 +256,7 @@ def download_report():
         pdf = FPDF()
         pdf.add_page()
 
-        # --- NEW: Added Timestamp Footer ---
+
         current_time = datetime.now().strftime("%B %d, %Y - %I:%M %p")
         pdf.set_font("helvetica", "I", 10)
         pdf.set_text_color(100, 100, 100) # Gray color
@@ -254,16 +275,16 @@ def download_report():
         pdf.cell(15, 10, "BMI", 1)
         pdf.cell(30, 10, "Risk (LR)", 1)
         pdf.cell(30, 10, "YOLOv10", 1)
-        pdf.cell(60, 10, "Next Appointment", 1) # Added Appointment Column
+        pdf.cell(60, 10, "Next Appointment", 1)
         pdf.ln()
 
         # Table Content
         pdf.set_font("helvetica", "", 10)
         for row in data:
-            pdf.cell(40, 10, str(row[1] or "Unknown"), 1)  # u.name
-            pdf.cell(15, 10, str(row[4] or "-"), 1)        # p.age
-            pdf.cell(15, 10, str(row[6] or "-"), 1)        # p.bmi
-            pdf.cell(30, 10, str(row[7] or "Pending"), 1)  # r.risk_level
+            pdf.cell(40, 10, str(row[1] or "Unknown"), 1)
+            pdf.cell(15, 10, str(row[4] or "-"), 1)
+            pdf.cell(15, 10, str(row[6] or "-"), 1)
+            pdf.cell(30, 10, str(row[7] or "Pending"), 1)
             pdf.cell(30, 10, "⚠️ Detected" if row[8] == 1 else "Normal", 1)
 
             # Format the new appointment string
@@ -272,7 +293,7 @@ def download_report():
             pdf.ln()
 
 
-        pdf_bytes = bytes(pdf.output())
+        pdf_bytes = pdf.output(dest='S').encode('latin-1')
 
         response = make_response(pdf_bytes)
         response.headers['Content-Type'] = 'application/pdf'
@@ -305,7 +326,7 @@ def download_patient_report(user_id):
                 FROM facial_scans WHERE user_id = :uid ORDER BY timestamp DESC LIMIT 5
             """), {"uid": user_id}).fetchall()
             appointments = conn.execute(text("SELECT doctor_name, apt_date, apt_time FROM appointments WHERE user_id = :uid ORDER BY id DESC"),
-            {"uid": user_id}).fetchall()
+                                        {"uid": user_id}).fetchall()
 
         # Build the PDF
         pdf = FPDF()
@@ -335,10 +356,10 @@ def download_patient_report(user_id):
         pdf.cell(90, 6, f"Diabetes: {'Yes' if profile[7] == 1 else 'No'}", 0, 1)
 
         pdf.cell(90, 6, f"Age: {profile[2] or '-'} | Gender: {profile[3] or '-'}", 0, 0)
-        # Renamed to Heart Disease to perfectly match the Android app!
+
         pdf.cell(90, 6, f"Heart Disease: {'Yes' if profile[9] == 1 else 'No'}", 0, 1)
 
-        # We removed Stroke History. The '0, 1' at the end of this line drops us to the next row cleanly.
+
         pdf.cell(90, 6, f"BMI: {profile[4] or '-'} | Smoker: {profile[5] or 'Unknown'}", 0, 1)
         pdf.ln(5)
 
@@ -393,7 +414,7 @@ def download_patient_report(user_id):
         for s in scans:
             row_height = 45
 
-            # --- NEW FIX: Force a page break if the image will get cut off ---
+
             if pdf.get_y() + row_height > 270:
                 pdf.add_page()
 
@@ -402,7 +423,7 @@ def download_patient_report(user_id):
 
             pdf.cell(50, row_height, str(s[1]), 1)
             pdf.cell(50, row_height, "⚠️ Detected" if s[0] == 1 else "Normal", 1)
-            pdf.cell(80, row_height, "", 1) # Empty cell for the image border
+            pdf.cell(80, row_height, "", 1)
 
             if s[2]: # If scan_image exists
                 try:
@@ -415,7 +436,7 @@ def download_patient_report(user_id):
                 except Exception as e:
                     pdf.text(x_start + 105, y_start + 25, "Image Error")
             else:
-                # NEW FIX: Adjusted the Y coordinate so the text sits perfectly in the middle of the box
+
                 pdf.text(x_start + 125, y_start + 25, "No Image")
 
             pdf.ln(row_height)
@@ -451,7 +472,7 @@ def download_patient_report(user_id):
         pdf.ln(8)
 
         # Return the final PDF
-        response = make_response(bytes(pdf.output()))
+        response = make_response(pdf.output(dest='S').encode('latin-1'))
         response.headers['Content-Type'] = 'application/pdf'
         formatted_name = str(profile[0]).replace(" ", "_") if profile[0] else "Patient"
         response.headers['Content-Disposition'] = f'attachment; filename=DeTechStroke_Record_{formatted_name}.pdf'
@@ -465,16 +486,16 @@ def delete_patient(user_id):
     """Deletes a patient and all their associated medical history from the cloud database."""
     try:
         with db_pool.begin() as conn:
-            # We delete from child tables first to prevent foreign key constraint crashes
+
             conn.execute(text("DELETE FROM facial_scans WHERE user_id = :uid"), {"uid": user_id})
             conn.execute(text("DELETE FROM risk_assessments WHERE user_id = :uid"), {"uid": user_id})
             conn.execute(text("DELETE FROM appointments WHERE user_id = :uid"), {"uid": user_id})
             conn.execute(text("DELETE FROM emergency_contacts WHERE user_id = :uid"), {"uid": user_id})
             conn.execute(text("DELETE FROM user_profiles WHERE user_id = :uid"), {"uid": user_id})
-            # Finally, delete the core user account
+
             conn.execute(text("DELETE FROM users WHERE id = :uid"), {"uid": user_id})
 
-        return redirect('/admin') # Instantly refreshes the dashboard
+        return redirect('/admin')
     except Exception as e:
         return f"Error deleting patient: {str(e)}", 500
 

@@ -39,7 +39,7 @@ class HospitalMapFragment : Fragment(), OnMapReadyCallback {
     private lateinit var tvNearestHospital: TextView
 
     private var emergencyPhoneNumber: String? = null
-    private val defaultLocation = LatLng(15.4828, 120.5943) // Tarlac City Default
+    private val defaultLocation = LatLng(15.4828, 120.5943)
 
     private val requestLocationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -77,7 +77,7 @@ class HospitalMapFragment : Fragment(), OnMapReadyCallback {
 
             if (apiKey != null) {
                 if (!Places.isInitialized()) {
-                    Places.initialize(requireContext().applicationContext, apiKey) // Use applicationContext to prevent memory leaks
+                    Places.initialize(requireContext().applicationContext, apiKey)
                 }
                 placesClient = Places.createClient(requireContext())
             }

@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -61,7 +62,26 @@ class HomeFragment : Fragment() {
         }
 
         // Standard Card Click Listeners
-        view.findViewById<View>(R.id.cardCheckup)?.setOnClickListener { findNavController().navigate(R.id.action_homeFragment_to_checkupFragment) }
+        view.findViewById<View>(R.id.cardCheckup)?.setOnClickListener {
+            val db = DatabaseHelper(requireContext())
+            val currentUserId = requireActivity().intent?.getLongExtra("USER_ID", -1L) ?: -1L
+
+            // If the user is logged in, check their appointment history
+            if (currentUserId != -1L) {
+                val pendingAppointments = db.getAppointments(currentUserId)
+
+                if (pendingAppointments.isNotEmpty()) {
+
+                    Toast.makeText(
+                        requireContext(),
+                        "You have a pending appointment. Please complete your existing checkup before scheduling a new one.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                } else {
+                    findNavController().navigate(R.id.action_homeFragment_to_checkupFragment)
+                }
+            }
+        }
         view.findViewById<View>(R.id.cardVitals)?.setOnClickListener { findNavController().navigate(R.id.action_home_to_vitals) }
         view.findViewById<View>(R.id.cardBefast)?.setOnClickListener { findNavController().navigate(R.id.action_home_to_befast) }
         view.findViewById<View>(R.id.cardBloodChem)?.setOnClickListener { findNavController().navigate(R.id.action_home_to_bloodChem) }

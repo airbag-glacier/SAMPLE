@@ -14,7 +14,6 @@ import androidx.navigation.fragment.findNavController
 
 class ProfileDetailsFragment : Fragment() {
 
-    // Declare dbHelper at the class level so all functions can use it
     private lateinit var dbHelper: DatabaseHelper
 
     override fun onCreateView(
@@ -26,7 +25,6 @@ class ProfileDetailsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
 
         view.findViewById<ImageButton>(R.id.btnBack).setOnClickListener {
             findNavController().popBackStack()
@@ -41,21 +39,32 @@ class ProfileDetailsFragment : Fragment() {
             // Basic Info
             view.findViewById<TextView>(R.id.tvFullName).text = profile["name"]
             view.findViewById<TextView>(R.id.tvEmail).text = profile["email"]
-            view.findViewById<TextView>(R.id.tvAgeGender).text = "Age / Gender: ${profile["age"]} / ${profile["sex"]}"
+
+
+            val ageStr = if (profile["age"] == "0" || profile["age"] == "N/A" || profile["age"] == "null") "N/A" else profile["age"]
+            val genderStr = if (profile["sex"] == "null" || profile["sex"] == "N/A" || profile["sex"].isNullOrEmpty()) "N/A" else profile["sex"]
+            view.findViewById<TextView>(R.id.tvAgeGender).text = "Age / Gender: $ageStr / $genderStr"
+
+
+            val hStr = if (profile["height"] == "0.0" || profile["height"] == "N/A" || profile["height"] == "null") "-" else profile["height"]
+            val wStr = if (profile["weight"] == "0.0" || profile["weight"] == "N/A" || profile["weight"] == "null") "-" else profile["weight"]
+
+            // Check your XML file to make sure this ID matches your Height/Weight textview!
+            view.findViewById<TextView>(R.id.tvHeightWeight)?.text = "Height / Weight: $hStr cm / $wStr kg"
 
             // Vitals & History
             view.findViewById<TextView>(R.id.tvFullBmi).text = "BMI: ${profile["bmi"]}"
             view.findViewById<TextView>(R.id.tvFullBp).text = "Hypertension: ${profile["hypertension"]}"
             view.findViewById<TextView>(R.id.tvSmoking).text = "Smoker: ${profile["smoker"]}"
 
-            // MAPPING DATA FOR BLOOD CHEM TABLE
+            // Blood Chemistry
             view.findViewById<TextView>(R.id.tvTotalChol).text = "Total Cholesterol: ${profile["cholesterol"]} mg/dL"
             view.findViewById<TextView>(R.id.tvHDL).text = "HDL: ${profile["hdl"]} mg/dL"
             view.findViewById<TextView>(R.id.tvLDL).text = "LDL: ${profile["ldl"]} mg/dL"
             view.findViewById<TextView>(R.id.tvTriglycerides).text = "Triglycerides: ${profile["tri"]} mg/dL"
             view.findViewById<TextView>(R.id.tvFbs).text = "Fasting Blood Sugar: ${profile["fbs"]} mg/dL"
 
-            // Image handling
+            // Profile Picture
             val imageUriString = profile["image_uri"]
             val profileImageView = view.findViewById<ImageView>(R.id.imgFullProfile)
             if (!imageUriString.isNullOrEmpty()) {
@@ -66,27 +75,21 @@ class ProfileDetailsFragment : Fragment() {
                 }
             }
 
-
             loadRiskHistory(userId)
             loadScanHistory(userId)
             loadAppointments(userId)
         }
     }
 
-    // --- MOVED FUNCTIONS OUTSIDE OF onViewCreated ---
-
     private fun loadRiskHistory(userId: Long) {
         val historyLayout = view?.findViewById<LinearLayout>(R.id.llRiskHistoryList)
         val emptyText = view?.findViewById<TextView>(R.id.tvEmptyRiskHistory)
-
         val pastRisks = dbHelper.getAllRiskAssessments(userId)
 
         if (pastRisks.isNotEmpty()) {
             emptyText?.visibility = View.GONE
-
             for (risk in pastRisks) {
                 val resultView = TextView(requireContext()).apply {
-                    // Format: "• YYYY-MM-DD: High Risk (85.2%)"
                     text = "• ${risk["timestamp"]}: ${risk["risk_level"]} (${risk["lr_prediction"]}%)"
                     textSize = 14f
                     setPadding(0, 8, 0, 8)
@@ -99,12 +102,10 @@ class ProfileDetailsFragment : Fragment() {
     private fun loadScanHistory(userId: Long) {
         val historyLayout = view?.findViewById<LinearLayout>(R.id.llScanHistoryList)
         val emptyText = view?.findViewById<TextView>(R.id.tvEmptyScanHistory)
-
         val pastScans = dbHelper.getAllFacialScans(userId)
 
         if (pastScans.isNotEmpty()) {
             emptyText?.visibility = View.GONE
-
             for (scan in pastScans) {
                 val resultView = TextView(requireContext()).apply {
                     val statusText = if (scan["detected"] == true) "⚠️ Droop Detected" else "✅ Normal"
@@ -120,20 +121,15 @@ class ProfileDetailsFragment : Fragment() {
     private fun loadAppointments(userId: Long) {
         val appointmentsLayout = view?.findViewById<LinearLayout>(R.id.llAppointmentsList)
         val emptyText = view?.findViewById<TextView>(R.id.tvEmptyAppointments)
-
-        // Fetch from the DatabaseHelper
         val pastAppointments = dbHelper.getAppointments(userId)
 
         if (pastAppointments.isNotEmpty()) {
             emptyText?.visibility = View.GONE
-
             for (apt in pastAppointments) {
                 val resultView = TextView(requireContext()).apply {
                     val date = apt["apt_date"]
                     val time = apt["apt_time"]
                     val doctor = apt["doctor_name"]
-
-                    // Format: "• MM/DD/YYYY at 09:00 AM (Dr. Name)"
                     text = "• $date at $time\n   $doctor"
                     textSize = 14f
                     setPadding(0, 8, 0, 8)
