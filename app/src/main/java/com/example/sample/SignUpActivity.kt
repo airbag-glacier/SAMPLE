@@ -17,10 +17,10 @@ class SignUpActivity : AppCompatActivity() {
     private var selectedImageUri: Uri? = null
     private lateinit var imgProfileUpload: ShapeableImageView
 
-    // 1. Upgraded to OpenDocument to allow permanent URI access
+
     private val pickImage = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
         uri?.let {
-            // 2. Tell Android to lock this permission so the Home Screen can read it forever!
+
             contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
 
             selectedImageUri = it
@@ -51,20 +51,20 @@ class SignUpActivity : AppCompatActivity() {
             val password = etPassword.text.toString().trim()
             val imageUriString = selectedImageUri?.toString() ?: ""
 
-            // --- 1. VALIDATION RULES ---
+            // 1. VALIDATION RULES
 
-            // Check if email ends with an allowed domain
+            // Check email domain
             val isValidEmail = email.endsWith("@gmail.com") ||
                     email.endsWith("@student.tsu.edu.ph") ||
                     email.endsWith("@yahoo.com")
 
-            // Check password strength criteria
+            // Check password strength
             val hasMinLength = password.length >= 12
             val hasNumber = password.any { it.isDigit() }
             val hasSpecialChar = password.any { !it.isLetterOrDigit() }
             val isValidPassword = hasMinLength && hasNumber && hasSpecialChar
 
-            // --- 2. ENFORCE RULES ---
+            //2. ENFORCE RULES
 
             if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
@@ -81,16 +81,18 @@ class SignUpActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // --- 3. PROCEED TO DATABASE ---
+            //3. PROCEED TO DATABASE
 
             val isInserted = dbHelper.registerUser(email, password, name, imageUriString)
 
             if (isInserted) {
                 Toast.makeText(this, "Sign Up Successful!", Toast.LENGTH_SHORT).show()
-                finish() // Closes the sign-up screen and returns to Log in
+                finish()
             } else {
                 Toast.makeText(this, "Email already exists!", Toast.LENGTH_SHORT).show()
             }
         }
     }
+
+
 }
