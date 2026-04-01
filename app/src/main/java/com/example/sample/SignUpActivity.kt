@@ -39,10 +39,19 @@ class SignUpActivity : AppCompatActivity() {
         val etPassword = findViewById<TextInputEditText>(R.id.etPassword)
         val btnSignUp = findViewById<MaterialButton>(R.id.btnSignUp)
         imgProfileUpload = findViewById(R.id.imgProfileUpload)
+        val tvLogin = findViewById<android.widget.TextView>(R.id.tvLogin)
 
         imgProfileUpload.setOnClickListener {
-            // 3. OpenDocument requires an Array of file types instead of a basic string
+            // requires an Array of file types instead of a basic string
             pickImage.launch(arrayOf("image/*"))
+        }
+
+        tvLogin.setOnClickListener {
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+
+            // Close the current activity to prevent going back to it
+            finish()
         }
 
         btnSignUp.setOnClickListener {
