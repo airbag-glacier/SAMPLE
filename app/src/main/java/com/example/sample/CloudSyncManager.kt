@@ -17,7 +17,7 @@ import java.io.File
 
 class CloudSyncManager(private val context: Context) {
 
-    // Ensure this matches your Python Flask server's Wi-Fi IP address
+
     private val BASE_URL = "http://192.168.254.121:5000/"
 
     fun syncLocalDatabaseToCloud(userId: Long) {
