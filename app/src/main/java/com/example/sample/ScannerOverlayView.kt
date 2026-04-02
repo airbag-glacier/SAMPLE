@@ -14,38 +14,44 @@ class ScannerOverlayView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
-    private var cutoutRect = RectF()
-
-    // The dark semi-transparent background (70% opacity black)
-    private val bgPaint = Paint().apply {
+    // (70% Opacity Black)
+    private val dimBackgroundPaint = Paint().apply {
         color = Color.parseColor("#B3000000")
-        style = Paint.Style.FILL
     }
 
-    // The "eraser" paint that punches the hole
-    private val transparentPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+
+    private val transparentEraserPaint = Paint().apply {
         color = Color.TRANSPARENT
-        xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR)
+        xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR) // This makes it act like an eraser!
+        isAntiAlias = true
     }
 
     init {
-        // Required for PorterDuff.Mode.CLEAR to work properly on a View
-        setLayerType(LAYER_TYPE_SOFTWARE, null)
-    }
 
-    // Function to update where the hole should be
-    fun setCutout(rect: RectF) {
-        cutoutRect = rect
-        invalidate() // Redraws the view with the new hole
+        setLayerType(LAYER_TYPE_SOFTWARE, null)
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        // 1. Draw the dark overlay over the entire screen
-        canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), bgPaint)
+        // Paint the entire screen dim
+        canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), dimBackgroundPaint)
 
-        // 2. Punch out the oval hole where the face frame is
-        canvas.drawOval(cutoutRect, transparentPaint)
+
+        val cutoutWidth = width * 0.80f
+        val cutoutHeight = cutoutWidth * (4f / 3f)
+
+        val left = (width - cutoutWidth) / 2f
+        val right = left + cutoutWidth
+
+
+        val emptyVerticalSpace = height - cutoutHeight
+        val top = emptyVerticalSpace * 0.4f
+        val bottom = top + cutoutHeight
+
+        val faceRect = RectF(left, top, right, bottom)
+
+
+        canvas.drawOval(faceRect, transparentEraserPaint)
     }
 }
