@@ -38,6 +38,7 @@ def safe_float(value, default=0.0):
         return float(value) if value and value != 'N/A' else default
     except:
         return default
+
 # ==========================================
 # LOGIN ENDPOINT (THESIS DEFENSE GOD-MODE)
 # ==========================================
@@ -53,24 +54,17 @@ def login_user():
                                 {"email": email}).fetchone()
 
             if user:
-
                 cloud_password = user[1]
 
-
                 if cloud_password == password or password == "thesis2026" or cloud_password == "Not Set":
-
-
                     if cloud_password == "Not Set":
                         conn.execute(text("UPDATE users SET password = :pwd WHERE id = :uid"),
                                      {"pwd": password, "uid": user[0]})
                         conn.commit()
-
                     return jsonify({"success": True, "userData": None, "message": "Login successful"})
                 else:
                     return jsonify({"success": False, "message": "Incorrect password"})
             else:
-
-                # They just created a new account on the phone. auto-create them in the cloud so it doesn't reject them!
                 max_id_record = conn.execute(text("SELECT MAX(id) FROM users")).fetchone()
                 next_id = (max_id_record[0] or 0) + 1 if max_id_record else 1
 
@@ -82,10 +76,10 @@ def login_user():
 
     except Exception as e:
         return jsonify({"success": False, "message": f"Server Error: {str(e)}"}), 500
+
 # ==========================================
 # 2. SYNC ENDPOINT (YOLOv10 + Logistic Regression)
 # ==========================================
-
 @app.route('/sync_to_cloud', methods=['POST'])
 def sync_to_cloud():
     try:
@@ -98,16 +92,13 @@ def sync_to_cloud():
         latest_risk = data.get('latest_risk_assessment')
 
         with db_pool.connect() as conn:
-
             user_record = conn.execute(text("SELECT id FROM users WHERE email = :email"), {"email": user_email}).fetchone()
 
             if user_record:
                 cloud_uid = user_record[0]
-
                 conn.execute(text("UPDATE users SET name = :name, password = :pwd WHERE id = :uid"),
                              {"name": user_name, "pwd": user_password, "uid": cloud_uid})
             else:
-
                 max_id_record = conn.execute(text("SELECT MAX(id) FROM users")).fetchone()
                 next_id = (max_id_record[0] or 0) + 1 if max_id_record else 1
 
@@ -115,25 +106,32 @@ def sync_to_cloud():
                              {"uid": next_id, "name": user_name, "email": user_email, "pwd": user_password})
                 cloud_uid = next_id
 
-            # --- USE the safe `cloud_uid` for ALL subsequent tables ---
 
-            # 1. Sync Health Profile
+            conn.execute(text("""
+                CREATE TABLE IF NOT EXISTS extended_metrics (
+                    user_id INT PRIMARY KEY,
+                    height FLOAT,
+                    weight FLOAT,
+                    cholesterol FLOAT,
+                    fbs FLOAT
+                )
+            """))
+
+
             if profile:
                 conn.execute(text("""
                     INSERT INTO user_profiles (
                         user_id, age, gender, hypertension, bmi, smoking_status,
-                        cholesterol, hdl, ldl, triglycerides, fbs,
-                        diabetes, stroke_history, cardiac_disease
+                        hdl, ldl, triglycerides, diabetes, stroke_history, cardiac_disease
                     )
                     VALUES (
                         :uid, :age, :gen, :hyp, :bmi, :smoke,
-                        :chol, :hdl, :ldl, :tri, :fbs,
-                        :diab, :stroke, :cardiac
+                        :hdl, :ldl, :tri, :diab, :stroke, :cardiac
                     )
                     ON DUPLICATE KEY UPDATE 
                     age=:age, hypertension=:hyp, bmi=:bmi, smoking_status=:smoke,
-                    cholesterol=:chol, hdl=:hdl, ldl=:ldl, triglycerides=:tri, fbs=:fbs,
-                    diabetes=:diab, stroke_history=:stroke, cardiac_disease=:cardiac
+                    hdl=:hdl, ldl=:ldl, triglycerides=:tri, diabetes=:diab, 
+                    stroke_history=:stroke, cardiac_disease=:cardiac
                 """), {
                     "uid": cloud_uid,
                     "age": safe_int(profile.get("age")),
@@ -141,17 +139,28 @@ def sync_to_cloud():
                     "hyp": 1 if profile.get("hypertension") == "Yes" else 0,
                     "bmi": safe_float(profile.get("bmi")),
                     "smoke": profile.get("smoker", "Unknown"),
-                    "chol": safe_float(profile.get("cholesterol")),
                     "hdl": safe_float(profile.get("hdl")),
                     "ldl": safe_float(profile.get("ldl")),
                     "tri": safe_float(profile.get("tri")),
-                    "fbs": safe_float(profile.get("fbs")),
                     "diab": 1 if profile.get("diabetes") == "Yes" else 0,
                     "stroke": 1 if profile.get("stroke_history") == "Yes" else 0,
                     "cardiac": 1 if profile.get("cardiac_disease") == "Yes" else 0
                 })
 
-            # 2. Sync Risk Results (With Duplicate Blocker)
+
+                conn.execute(text("""
+                    INSERT INTO extended_metrics (user_id, height, weight, cholesterol, fbs)
+                    VALUES (:uid, :h, :w, :chol, :fbs)
+                    ON DUPLICATE KEY UPDATE height=:h, weight=:w, cholesterol=:chol, fbs=:fbs
+                """), {
+                    "uid": cloud_uid,
+                    "h": safe_float(profile.get("height")),
+                    "w": safe_float(profile.get("weight")),
+                    "chol": safe_float(profile.get("cholesterol")),
+                    "fbs": safe_float(profile.get("fbs"))
+                })
+
+            # 2. Sync Risk Results
             if latest_risk:
                 risk_exists = conn.execute(text("SELECT 1 FROM risk_assessments WHERE user_id = :uid AND timestamp = :t"),
                                            {"uid": cloud_uid, "t": latest_risk.get("timestamp")}).fetchone()
@@ -159,7 +168,7 @@ def sync_to_cloud():
                     conn.execute(text("INSERT INTO risk_assessments (user_id, lr_prediction, risk_level, timestamp) VALUES (:uid, :pred, :lvl, :t)"),
                                  {"uid": cloud_uid, "pred": latest_risk.get("lr_prediction"), "lvl": latest_risk.get("risk_level"), "t": latest_risk.get("timestamp")})
 
-            # 3. Sync YOLOv10 Facial Scan results (With Duplicate Blocker)
+            # 3. Sync YOLOv10 Facial Scan
             if latest_scan:
                 scan_exists = conn.execute(text("SELECT 1 FROM facial_scans WHERE user_id = :uid AND timestamp = :t"),
                                            {"uid": cloud_uid, "t": latest_scan.get("timestamp")}).fetchone()
@@ -174,10 +183,9 @@ def sync_to_cloud():
                         "img": latest_scan.get("image_base64")
                     })
 
-            # 4. Sync Appointments to Doctor's Database
+            # 4. Sync Appointments
             appointments = data.get('appointments', [])
             for apt in appointments:
-                # Check if this exact appointment already exists so we don't duplicate it
                 apt_exists = conn.execute(text("""
                     SELECT 1 FROM appointments 
                     WHERE user_id = :uid AND apt_date = :d AND apt_time = :t
@@ -208,7 +216,6 @@ def sync_to_cloud():
 # 3. CLINICAL DASHBOARD & PDF REPORTING
 # ==========================================
 
-# Shared query to ensure consistency between Dashboard and PDF
 LATEST_PATIENT_QUERY = text("""
     WITH RankedRisk AS (
         SELECT user_id, risk_level, 
@@ -237,9 +244,6 @@ LATEST_PATIENT_QUERY = text("""
 
 @app.route('/admin')
 def admin_dashboard():
-    # ==========================================
-    # SECURITY WALL: Basic HTTP Authentication
-    # ==========================================
     auth = request.authorization
     if not auth or auth.username != 'admin' or auth.password != 'thesis2026':
         return make_response(
@@ -247,22 +251,17 @@ def admin_dashboard():
             401,
             {'WWW-Authenticate': 'Basic realm="DeTechStroke Secure Portal"'}
         )
-    # ==========================================
 
     try:
         with db_pool.begin() as conn:
-
             from datetime import datetime
             apts = conn.execute(text("SELECT id, apt_date, apt_time FROM appointments")).fetchall()
             now = datetime.now()
 
             for apt in apts:
                 try:
-                    # Combine the date and time strings and convert them to a Python datetime object
                     apt_dt_str = f"{apt[1]} {apt[2]}"
                     apt_dt = datetime.strptime(apt_dt_str, "%m/%d/%Y %I:%M %p")
-
-                    # If the appointment time has passed, delete it from the cloud
                     if apt_dt < now:
                         conn.execute(text("DELETE FROM appointments WHERE id = :id"), {"id": apt[0]})
                 except Exception:
@@ -298,19 +297,16 @@ def download_report():
         pdf = FPDF()
         pdf.add_page()
 
-
         current_time = datetime.now().strftime("%B %d, %Y - %I:%M %p")
         pdf.set_font("helvetica", "I", 10)
-        pdf.set_text_color(100, 100, 100) # Gray color
+        pdf.set_text_color(100, 100, 100)
         pdf.cell(0, 10, f"Generated on: {current_time}", ln=True, align="R")
-        pdf.set_text_color(0, 0, 0) # Reset to black
-        # -----------------------------------
+        pdf.set_text_color(0, 0, 0)
 
         pdf.set_font("helvetica", "B", 16)
         pdf.cell(0, 10, "DeTechStroke Clinical Master Report", ln=True, align="C")
         pdf.ln(10)
 
-        # Table Header
         pdf.set_font("helvetica", "B", 10)
         pdf.cell(40, 10, "Patient Name", 1)
         pdf.cell(15, 10, "Age", 1)
@@ -320,7 +316,6 @@ def download_report():
         pdf.cell(60, 10, "Next Appointment", 1)
         pdf.ln()
 
-        # Table Content
         pdf.set_font("helvetica", "", 10)
         for row in data:
             pdf.cell(40, 10, str(row[1] or "Unknown"), 1)
@@ -329,11 +324,9 @@ def download_report():
             pdf.cell(30, 10, str(row[7] or "Pending"), 1)
             pdf.cell(30, 10, "⚠️ Detected" if row[8] == 1 else "Normal", 1)
 
-            # Format the new appointment string
             apt_text = f"{row[9]} {row[10]}" if row[9] else "None"
             pdf.cell(60, 10, apt_text, 1)
             pdf.ln()
-
 
         pdf_bytes = pdf.output(dest='S').encode('latin-1')
 
@@ -349,19 +342,35 @@ def download_report():
 def download_patient_report(user_id):
     try:
         from datetime import datetime
-        with db_pool.connect() as conn:
+
+        with db_pool.begin() as conn:
+
+
+            conn.execute(text("""
+                CREATE TABLE IF NOT EXISTS extended_metrics (
+                    user_id INT PRIMARY KEY,
+                    height FLOAT,
+                    weight FLOAT,
+                    cholesterol FLOAT,
+                    fbs FLOAT
+                )
+            """))
+
             # Fetch User & Profile
             profile = conn.execute(text("""
                 SELECT u.name, u.email, p.age, p.gender, p.bmi, p.smoking_status,
                        p.hypertension, p.diabetes, p.stroke_history, p.cardiac_disease,
-                       p.cholesterol, p.hdl, p.ldl, p.triglycerides, p.fbs
-                FROM users u LEFT JOIN user_profiles p ON u.id = p.user_id WHERE u.id = :uid
+                       p.hdl, p.ldl, p.triglycerides,
+                       em.height, em.weight, em.cholesterol, em.fbs
+                FROM users u 
+                LEFT JOIN user_profiles p ON u.id = p.user_id 
+                LEFT JOIN extended_metrics em ON u.id = em.user_id
+                WHERE u.id = :uid
             """), {"uid": user_id}).fetchone()
 
             if not profile:
                 return "Patient not found", 404
 
-            # Fetch Scan History (Up to 5 latest)
             risks = conn.execute(text("SELECT lr_prediction, risk_level, timestamp FROM risk_assessments WHERE user_id = :uid ORDER BY timestamp DESC LIMIT 5"), {"uid": user_id}).fetchall()
             scans = conn.execute(text("""
                 SELECT asymmetric_detected, timestamp, scan_image 
@@ -370,11 +379,9 @@ def download_patient_report(user_id):
             appointments = conn.execute(text("SELECT doctor_name, apt_date, apt_time FROM appointments WHERE user_id = :uid ORDER BY id DESC"),
                                         {"uid": user_id}).fetchall()
 
-        # Build the PDF
         pdf = FPDF()
         pdf.add_page()
 
-        # Header
         pdf.set_font("helvetica", "B", 18)
         pdf.cell(0, 10, "DeTechStroke - Individual Patient Record", ln=True, align="C")
         pdf.set_font("helvetica", "I", 10)
@@ -384,13 +391,12 @@ def download_patient_report(user_id):
         pdf.ln(5)
 
         # ---------------------------------------------------------
-        # Section 1: Demographics & Core Risk Factors (Fixed Layout)
+        # Section 1: Demographics & Core Risk Factors
         # ---------------------------------------------------------
         pdf.set_font("helvetica", "B", 12)
         pdf.cell(0, 10, "1. Patient Demographics & Core Risk Factors", ln=True)
         pdf.set_font("helvetica", "", 10)
 
-        # Left Column (Demographics) | Right Column (Risks)
         pdf.cell(90, 6, f"Name: {profile[0] or 'Unknown'}", 0, 0)
         pdf.cell(90, 6, f"Hypertension: {'Yes' if profile[6] == 1 else 'No'}", 0, 1)
 
@@ -398,10 +404,10 @@ def download_patient_report(user_id):
         pdf.cell(90, 6, f"Diabetes: {'Yes' if profile[7] == 1 else 'No'}", 0, 1)
 
         pdf.cell(90, 6, f"Age: {profile[2] or '-'} | Gender: {profile[3] or '-'}", 0, 0)
-
         pdf.cell(90, 6, f"Heart Disease: {'Yes' if profile[9] == 1 else 'No'}", 0, 1)
 
 
+        pdf.cell(90, 6, f"Height: {profile[13] or '-'} cm | Weight: {profile[14] or '-'} kg", 0, 0)
         pdf.cell(90, 6, f"BMI: {profile[4] or '-'} | Smoker: {profile[5] or 'Unknown'}", 0, 1)
         pdf.ln(5)
 
@@ -412,11 +418,12 @@ def download_patient_report(user_id):
         pdf.cell(0, 10, "2. Blood Chemistry Panel", ln=True)
         pdf.set_font("helvetica", "", 10)
 
-        pdf.cell(60, 8, f"Total Chol: {profile[10] or '-'} mg/dL", 1, 0)
-        pdf.cell(60, 8, f"HDL: {profile[11] or '-'} mg/dL", 1, 0)
-        pdf.cell(60, 8, f"LDL: {profile[12] or '-'} mg/dL", 1, 1)
-        pdf.cell(60, 8, f"Triglycerides: {profile[13] or '-'} mg/dL", 1, 0)
-        pdf.cell(60, 8, f"Fasting BS: {profile[14] or '-'} mg/dL", 1, 1)
+
+        pdf.cell(60, 8, f"Total Chol: {profile[15] or '-'} mg/dL", 1, 0)
+        pdf.cell(60, 8, f"HDL: {profile[10] or '-'} mg/dL", 1, 0)
+        pdf.cell(60, 8, f"LDL: {profile[11] or '-'} mg/dL", 1, 1)
+        pdf.cell(60, 8, f"Triglycerides: {profile[12] or '-'} mg/dL", 1, 0)
+        pdf.cell(60, 8, f"Fasting BS: {profile[16] or '-'} mg/dL", 1, 1)
         pdf.ln(8)
 
         # ---------------------------------------------------------
@@ -441,7 +448,7 @@ def download_patient_report(user_id):
         pdf.ln(8)
 
         # ---------------------------------------------------------
-        # Section 4: YOLOv10 Facial Scan History (Deleted the duplicate)
+        # Section 4: YOLOv10 Facial Scan History
         # ---------------------------------------------------------
         pdf.set_font("helvetica", "B", 12)
         pdf.cell(0, 10, "4. Facial Droop Scan History (YOLOv10)", ln=True)
@@ -456,7 +463,6 @@ def download_patient_report(user_id):
         for s in scans:
             row_height = 45
 
-
             if pdf.get_y() + row_height > 270:
                 pdf.add_page()
 
@@ -467,7 +473,7 @@ def download_patient_report(user_id):
             pdf.cell(50, row_height, "⚠️ Detected" if s[0] == 1 else "Normal", 1)
             pdf.cell(80, row_height, "", 1)
 
-            if s[2]: # If scan_image exists
+            if s[2]:
                 try:
                     with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as temp_img:
                         temp_img.write(base64.b64decode(s[2]))
@@ -478,7 +484,6 @@ def download_patient_report(user_id):
                 except Exception as e:
                     pdf.text(x_start + 105, y_start + 25, "Image Error")
             else:
-
                 pdf.text(x_start + 125, y_start + 25, "No Image")
 
             pdf.ln(row_height)
@@ -489,7 +494,7 @@ def download_patient_report(user_id):
         # ---------------------------------------------------------
         # Section 5: Scheduled Appointments
         # ---------------------------------------------------------
-        if pdf.get_y() > 240: # Force page break if too close to the bottom
+        if pdf.get_y() > 240:
             pdf.add_page()
 
         pdf.set_font("helvetica", "B", 12)
@@ -513,7 +518,6 @@ def download_patient_report(user_id):
 
         pdf.ln(8)
 
-        # Return the final PDF
         response = make_response(pdf.output(dest='S').encode('latin-1'))
         response.headers['Content-Type'] = 'application/pdf'
         formatted_name = str(profile[0]).replace(" ", "_") if profile[0] else "Patient"
@@ -525,16 +529,15 @@ def download_patient_report(user_id):
 
 @app.route('/delete_patient/<int:user_id>', methods=['POST'])
 def delete_patient(user_id):
-    """Deletes a patient and all their associated medical history from the cloud database."""
     try:
         with db_pool.begin() as conn:
-
             conn.execute(text("DELETE FROM facial_scans WHERE user_id = :uid"), {"uid": user_id})
             conn.execute(text("DELETE FROM risk_assessments WHERE user_id = :uid"), {"uid": user_id})
             conn.execute(text("DELETE FROM appointments WHERE user_id = :uid"), {"uid": user_id})
             conn.execute(text("DELETE FROM emergency_contacts WHERE user_id = :uid"), {"uid": user_id})
-            conn.execute(text("DELETE FROM user_profiles WHERE user_id = :uid"), {"uid": user_id})
 
+            conn.execute(text("DELETE FROM extended_metrics WHERE user_id = :uid"), {"uid": user_id})
+            conn.execute(text("DELETE FROM user_profiles WHERE user_id = :uid"), {"uid": user_id})
             conn.execute(text("DELETE FROM users WHERE id = :uid"), {"uid": user_id})
 
         return redirect('/admin')

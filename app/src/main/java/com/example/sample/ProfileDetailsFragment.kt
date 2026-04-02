@@ -40,16 +40,12 @@ class ProfileDetailsFragment : Fragment() {
             view.findViewById<TextView>(R.id.tvFullName).text = profile["name"]
             view.findViewById<TextView>(R.id.tvEmail).text = profile["email"]
 
-
             val ageStr = if (profile["age"] == "0" || profile["age"] == "N/A" || profile["age"] == "null") "N/A" else profile["age"]
             val genderStr = if (profile["sex"] == "null" || profile["sex"] == "N/A" || profile["sex"].isNullOrEmpty()) "N/A" else profile["sex"]
             view.findViewById<TextView>(R.id.tvAgeGender).text = "Age / Gender: $ageStr / $genderStr"
 
-
             val hStr = if (profile["height"] == "0.0" || profile["height"] == "N/A" || profile["height"] == "null") "-" else profile["height"]
             val wStr = if (profile["weight"] == "0.0" || profile["weight"] == "N/A" || profile["weight"] == "null") "-" else profile["weight"]
-
-            // Check your XML file to make sure this ID matches your Height/Weight textview!
             view.findViewById<TextView>(R.id.tvHeightWeight)?.text = "Height / Weight: $hStr cm / $wStr kg"
 
             // Vitals & History
