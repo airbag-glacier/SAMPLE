@@ -1,8 +1,10 @@
 package com.example.sample
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -19,10 +21,13 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class LoginActivity : AppCompatActivity() {
 
-    private val baseUrl = "http://192.168.1.15:5000/"
-
-
     private var loadingDialog: AlertDialog? = null
+
+
+    private fun getBaseUrl(): String {
+        val prefs = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+        return prefs.getString("SERVER_IP", "http://192.168.1.15:5000/")!!
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,9 +47,7 @@ class LoginActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-
             showLoadingScreen()
-
             performLoginAndSync(email, password)
         }
 
@@ -52,36 +55,70 @@ class LoginActivity : AppCompatActivity() {
             val intent = Intent(this, SignUpActivity::class.java)
             startActivity(intent)
         }
+
+        // Long-pressing the "Sign Up" text opens the IP Configuration
+        tvSignUp.setOnLongClickListener {
+            showIpConfigDialog()
+            true
+        }
+    }
+
+    // ==========================================
+    // DEVELOPER CONFIGURATION
+    // ==========================================
+    private fun showIpConfigDialog() {
+
+        val currentIp = getBaseUrl().replace("http://", "").replace(":5000/", "")
+
+        val input = EditText(this).apply {
+            setText(currentIp)
+            setPadding(50, 40, 50, 40)
+            hint = "e.g., 192.168.1.15"
+        }
+
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Developer: Set Server IP")
+            .setMessage("Enter the laptop's current IPv4 address.")
+            .setView(input)
+            .setPositiveButton("Save") { _, _ ->
+                val newIp = input.text.toString().trim()
+                if (newIp.isNotEmpty()) {
+                    val prefs = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+                    prefs.edit().putString("SERVER_IP", "http://$newIp:5000/").apply()
+                    Toast.makeText(this, "Server IP updated to: $newIp", Toast.LENGTH_LONG).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     // ==========================================
     // LOADING SCREEN LOGIC
     // ==========================================
     private fun showLoadingScreen() {
-        val progressBar = ProgressBar(this).apply {
-            setPadding(0, 50, 0, 50)
-        }
-
+        val progressBar = ProgressBar(this).apply { setPadding(0, 50, 0, 50) }
         loadingDialog = MaterialAlertDialogBuilder(this)
             .setTitle("Authenticating")
-            .setMessage("Please wait while we sync your data...")
+            .setMessage("Connecting to ${getBaseUrl()}...") // Shows the active IP!
             .setView(progressBar)
             .setCancelable(false)
             .create()
-
         loadingDialog?.show()
     }
 
     private fun hideLoadingScreen() {
         loadingDialog?.dismiss()
     }
-    // ==========================================
 
+    // ==========================================
+    // AUTHENTICATION
+    // ==========================================
     private fun performLoginAndSync(emailInput: String, passwordInput: String) {
         val credentials = LoginCredentials(email = emailInput, passwordHash = passwordInput)
 
+
         val retrofit = Retrofit.Builder()
-            .baseUrl(baseUrl)
+            .baseUrl(getBaseUrl())
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
@@ -95,10 +132,8 @@ class LoginActivity : AppCompatActivity() {
                     if (payload != null) {
                         rebuildLocalDatabase(payload)
                     } else {
-
                         val dbHelper = DatabaseHelper(this@LoginActivity)
                         val localUserId = dbHelper.authenticateUser(emailInput, passwordInput)
-
                         hideLoadingScreen()
                         navigateToHome(if (localUserId != -1L) localUserId else -1L)
                     }
@@ -109,17 +144,15 @@ class LoginActivity : AppCompatActivity() {
             }
 
             override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
-
                 val dbHelper = DatabaseHelper(this@LoginActivity)
                 val localUserId = dbHelper.authenticateUser(emailInput, passwordInput)
-
                 hideLoadingScreen()
 
                 if (localUserId != -1L) {
-                    Toast.makeText(this@LoginActivity, "No internet. Logged in offline.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@LoginActivity, "Server unreachable. Logged in offline.", Toast.LENGTH_LONG).show()
                     navigateToHome(localUserId)
                 } else {
-                    Toast.makeText(this@LoginActivity, "Offline Login Failed. Check connection or credentials.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@LoginActivity, "Offline Login Failed. Check connection.", Toast.LENGTH_LONG).show()
                 }
             }
         })
@@ -159,7 +192,6 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun navigateToHome(userId: Long) {
-
         val intent = Intent(this, MainActivity::class.java)
         intent.putExtra("USER_ID", userId)
         startActivity(intent)

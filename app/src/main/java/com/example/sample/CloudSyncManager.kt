@@ -18,13 +18,12 @@ import java.io.File
 class CloudSyncManager(private val context: Context) {
 
 
-    private val BASE_URL = "http://192.168.254.121:5000/"
 
     fun syncLocalDatabaseToCloud(userId: Long) {
         val dbHelper = DatabaseHelper(context)
         Log.d("CloudSync", "Initiating background sync for User ID: $userId")
 
-        // Extract records from local SQLite
+
         val profileData = dbHelper.getFullUserProfile(userId)
         val contactsData = dbHelper.getEmergencyContacts(userId)
         var latestScanData = dbHelper.getLatestFacialScan(userId)
@@ -58,9 +57,12 @@ class CloudSyncManager(private val context: Context) {
         val jsonPayload = gson.toJson(syncPayload)
         Log.d("CloudSync", "DATA BEING SENT TO CLOUD: $jsonPayload")
 
-        // Retrofit Client
+        val prefs = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+        val dynamicBaseUrl = prefs.getString("SERVER_IP", "http://192.168.1.15:5000/")!!
+
+
         val retrofit = Retrofit.Builder()
-            .baseUrl(BASE_URL) // Use the variable that ends in a slash
+            .baseUrl(dynamicBaseUrl)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
