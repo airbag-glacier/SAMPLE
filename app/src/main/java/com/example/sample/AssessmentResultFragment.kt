@@ -28,23 +28,48 @@ class AssessmentResultFragment : Fragment() {
 
         val dbHelper = DatabaseHelper(requireContext())
         val userId = requireActivity().intent.getLongExtra("USER_ID", -1L)
-        val riskPercentage = arguments?.getInt("RISK_PERCENTAGE") ?: 0
-
-        // The Big Circle UI
-        view.findViewById<TextView>(R.id.tvRiskPercentage).text = "$riskPercentage%"
 
         if (userId != -1L) {
-            // 1. Save the Logistic Regression Result to the Database
-            saveAssessmentToDatabase(dbHelper, userId, riskPercentage)
 
-            // 2. Fetch and Display the latest YOLOv10 Facial Scan
+            // CHECK PATH: Did we just finish an assessment, or did we open from the menu?
+            if (arguments != null && requireArguments().containsKey("RISK_PERCENTAGE")) {
+
+                // PATH 1: NEW ASSESSMENT (Arguments exist)
+                val newRiskPercentage = requireArguments().getInt("RISK_PERCENTAGE")
+
+                view.findViewById<TextView>(R.id.tvRiskPercentage).text = "$newRiskPercentage%"
+                updateClinicalRiskUI(view, newRiskPercentage)
+
+                // Save to DB and show the alert
+                saveAssessmentToDatabase(dbHelper, userId, newRiskPercentage)
+                showRiskDialog(newRiskPercentage, userId)
+
+                // Clear the argument so if they rotate their phone, it doesn't save a duplicate!
+                requireArguments().remove("RISK_PERCENTAGE")
+
+            } else {
+
+                // PATH 2: HISTORY MODE
+                val latestAssessment = dbHelper.getLatestRiskAssessment(userId)
+
+                if (latestAssessment != null) {
+                    // Pull the last saved score from the database
+                    val savedRisk = latestAssessment["lr_prediction"] as? Double ?: 0.0
+                    val riskInt = savedRisk.toInt()
+
+                    view.findViewById<TextView>(R.id.tvRiskPercentage).text = "$riskInt%"
+                    updateClinicalRiskUI(view, riskInt)
+                } else {
+                    // They have never taken an assessment
+                    view.findViewById<TextView>(R.id.tvRiskPercentage).text = "0%"
+                    view.findViewById<TextView>(R.id.tvClinicalRiskDetails).text = "No assessment history found. Please update your risk factors."
+                }
+
+                showIncompleteDataWarning(dbHelper, userId)
+            }
+
+            // Always fetch and display the YOLOv10 Facial Scan regardless of the path
             updateYoloStatusUI(view, dbHelper, userId)
-
-            // 3. Trigger the Pop-up Dialog
-            showRiskDialog(riskPercentage, userId)
-
-            // 4. Update the Clinical Risk (Logistic Regression) Text
-            updateClinicalRiskUI(view, riskPercentage)
 
         } else {
             Toast.makeText(requireContext(), "Error: User Session Not Found", Toast.LENGTH_SHORT).show()
@@ -141,6 +166,30 @@ class AssessmentResultFragment : Fragment() {
                 dialog.dismiss()
             }
             .setCancelable(false) // Prevents them from clicking outside to close it
+            .show()
+    }
+
+    private fun showIncompleteDataWarning(dbHelper: DatabaseHelper, userId: Long) {
+        val latestAssessment = dbHelper.getLatestRiskAssessment(userId)
+        val latestScan = dbHelper.getLatestFacialScan(userId)
+
+        val missingRisk = latestAssessment == null
+        val missingScan = latestScan == null
+
+        // If neither is missing, we just do nothing and let them see their results!
+        if (!missingRisk && !missingScan) return
+
+        val title = "Incomplete Assessment"
+        val message = when {
+            missingRisk && missingScan -> "You haven't completed your Risk Factor Questionnaire or Facial Scan yet.\n\nPlease complete both to get your comprehensive stroke risk assessment."
+            missingRisk -> "You haven't completed your Risk Factor Questionnaire.\n\nPlease complete it to calculate your clinical risk score."
+            else -> "You haven't completed your Facial Scan.\n\nPlease use the camera tab to check for facial asymmetry and finalize your assessment."
+        }
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton("Got it", null)
             .show()
     }
 }

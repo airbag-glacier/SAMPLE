@@ -484,6 +484,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 "timestamp" to cursor.getString(cursor.getColumnIndexOrThrow("timestamp"))
             )
         }
+
+
         cursor.close()
         return result
     }
@@ -522,4 +524,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         cursor.close()
         return list
     }
+
+
 }

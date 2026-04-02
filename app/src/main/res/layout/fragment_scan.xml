@@ -38,16 +38,16 @@
 
     <ImageView
         android:id="@+id/faceFrame"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="411dp"
+        android:layout_height="509dp"
         android:src="@drawable/face_guide_overlay"
-        app:layout_constraintWidth_percent="0.80"
-        app:layout_constraintDimensionRatio="3:4"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="3:4"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.4"
+        app:layout_constraintWidth_percent="0.80"
         tools:ignore="ContentDescription" />
 
     <TextView

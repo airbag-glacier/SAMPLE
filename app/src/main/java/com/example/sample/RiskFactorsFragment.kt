@@ -35,10 +35,9 @@ class RiskFactorsFragment : Fragment() {
     private lateinit var dbHelper: DatabaseHelper
     private val appThemeColor = "#D81B60".toColorInt()
 
-    // Specific text options expected by the Kaggle model
     private val genderOptions = arrayOf("Male", "Female", "Other")
     private val workOptions = arrayOf("Private", "Self-employed", "Government", "Student", "Never worked")
-    private val smokingOptions = arrayOf("Formerly smoked", "Never smoked", "Smokes", "Unknown") // Added Unknown to match Kaggle
+    private val smokingOptions = arrayOf("Formerly smoked", "Never smoked", "Smokes", "Unknown")
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -60,40 +59,52 @@ class RiskFactorsFragment : Fragment() {
         view.findViewById<MaterialButton>(R.id.btnSubmit).setOnClickListener { submitForm(view) }
 
         // ==========================================
-        // Bottom Navigation Setup
+        // 🚀 NEW: DIALOG LOCK & AUTO-POPULATE
         // ==========================================
-        val btnCamera = view.findViewById<FloatingActionButton>(R.id.btnCamera)
-        btnCamera?.setOnClickListener {
-            findNavController().navigate(R.id.action_global_scan)
+        val userId = requireActivity().intent.getLongExtra("USER_ID", -1L)
+        if (userId != -1L) {
+            val pastRisks = dbHelper.getAllRiskAssessments(userId)
+
+            if (pastRisks.isNotEmpty()) {
+                // Lock the screen , ask for confirmation
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("Update Risk Profile?")
+                    .setMessage("You already have a medical risk assessment on file. Do you want to update your information and take a new test?")
+                    .setCancelable(false) // Forces them to pick an option
+                    .setPositiveButton("Update") { dialog, _ ->
+                        dialog.dismiss()
+                        prefillUserData(view, userId) // get BMI
+                    }
+                    .setNegativeButton("Cancel") { _, _ ->
+                        findNavController().popBackStack() //cancel
+                    }
+                    .show()
+            } else {
+                // First time taking the test, just auto-fill what we know
+                prefillUserData(view, userId)
+            }
         }
 
-        val btnHome = view.findViewById<ImageView>(R.id.btnHome)
-        btnHome?.setOnClickListener {
-            findNavController().popBackStack(R.id.homeFragment, false)
-        }
+        // Bottom Navigation Setup
+        val btnCamera = view.findViewById<FloatingActionButton>(R.id.btnCamera)
+        btnCamera?.setOnClickListener { findNavController().navigate(R.id.action_global_scan) }
+        view.findViewById<ImageView>(R.id.btnHome)?.setOnClickListener { findNavController().popBackStack(R.id.homeFragment, false) }
 
         view.findViewById<ImageView>(R.id.btnMenu)?.setOnClickListener {
             val menuOptions = arrayOf("Assessment Result", "Emergency Contacts", "About / Credits", "Log out")
-
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle("DeTechStroke Menu")
                 .setItems(menuOptions) { _, which ->
                     when (which) {
                         0 -> findNavController().navigate(R.id.action_global_assessmentResult)
-
                         1 -> findNavController().navigate(R.id.action_global_emergencyContacts)
-
                         2 -> {
-                            // Show the developer credits in a secondary pop-up
                             MaterialAlertDialogBuilder(requireContext())
                                 .setTitle("DeTechStroke")
                                 .setMessage("Developers:\nGabriel Garcia\nPhoebe Andrei Quan\nNatsuki Ushijima\n\n© 2026 All Rights Reserved.")
-                                .setPositiveButton("Close", null)
-                                .show()
+                                .setPositiveButton("Close", null).show()
                         }
-
                         3 -> {
-                            // Restart App Logic
                             val intent = requireContext().packageManager.getLaunchIntentForPackage(requireContext().packageName)
                             if (intent != null) {
                                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -102,13 +113,29 @@ class RiskFactorsFragment : Fragment() {
                             }
                         }
                     }
-                }
-                .setNegativeButton("Close Menu", null)
-                .show()
+                }.setNegativeButton("Close Menu", null).show()
         }
     }
 
+    // ==========================================
     // HELPER FUNCTIONS
+    // ==========================================
+
+
+    private fun prefillUserData(view: View, userId: Long) {
+        val profile = dbHelper.getFullUserProfile(userId)
+
+        val bmi = profile["bmi"]
+        if (bmi != null && bmi != "N/A" && bmi != "0.0") {
+            view.findViewById<EditText>(R.id.etBmi).setText(bmi)
+        }
+
+        val age = profile["age"]
+        if (age != null && age != "N/A" && age != "0") {
+            view.findViewById<EditText>(R.id.etAge).setText(age)
+        }
+    }
+
     private fun getRadioString(view: View, groupId: Int): String? {
         val radioGroup = view.findViewById<RadioGroup>(groupId)
         val selectedId = radioGroup.checkedRadioButtonId
@@ -120,7 +147,7 @@ class RiskFactorsFragment : Fragment() {
         return if (getRadioString(view, groupId) == "Yes") 1 else 0
     }
 
-    // --- MAIN SUBMISSION LOGIC ---
+    // MAIN SUBMISSION LOGIC
     private fun submitForm(view: View) {
         val ageText = view.findViewById<EditText>(R.id.etAge).text.toString()
         val glucoseText = view.findViewById<EditText>(R.id.etGlucose).text.toString()
@@ -132,13 +159,16 @@ class RiskFactorsFragment : Fragment() {
         val residence = getRadioString(view, R.id.rgResidence)
         val smokingStatus = view.findViewById<Spinner>(R.id.spinSmoking).selectedItem.toString()
 
-        if (ageText.isEmpty() || glucoseText.isEmpty() || bmiText.isEmpty() ||
+
+        if (ageText.isEmpty() || bmiText.isEmpty() ||
             hypertensionStr == null || heartDiseaseStr == null || everMarried == null || residence == null) {
-            Toast.makeText(requireContext(), "Please answer all questions before submitting.", Toast.LENGTH_LONG).show()
+            Toast.makeText(requireContext(), "Please answer all required questions before submitting.", Toast.LENGTH_LONG).show()
             return
         }
 
-        // 1. Pack data exactly as Kaggle/Python expects
+        // missing glucose. If empty, default to 99.0 mg/dL (Normal healthy baseline)
+        val finalGlucose = glucoseText.toDoubleOrNull() ?: 99.0
+
         val answers = mapOf<String, Any>(
             "gender" to view.findViewById<Spinner>(R.id.spinGender).selectedItem.toString(),
             "age" to ageText.toDouble(),
@@ -147,7 +177,7 @@ class RiskFactorsFragment : Fragment() {
             "ever_married" to everMarried,
             "work_type" to view.findViewById<Spinner>(R.id.spinWork).selectedItem.toString(),
             "Residence_type" to residence,
-            "avg_glucose_level" to glucoseText.toDouble(),
+            "avg_glucose_level" to finalGlucose,
             "bmi" to bmiText.toDouble(),
             "smoking_status" to smokingStatus
         )
@@ -155,13 +185,12 @@ class RiskFactorsFragment : Fragment() {
         val userId = requireActivity().intent.getLongExtra("USER_ID", -1L)
 
         if (userId != -1L) {
-            // 2. Map data to the ERD HealthRiskFactorProfile table constraints
             val isSmoker = if (smokingStatus.contains("smokes", ignoreCase = true)) 1 else 0
-            val isDiabetic = if (glucoseText.toDouble() >= 126.0) 1 else 0 // Basic medical mapping
+            val isDiabetic = if (finalGlucose >= 126.0) 1 else 0
 
             val isSaved = dbHelper.updateRiskFactorsToERD(
                 userId = userId,
-                age = ageText.toInt(), // ERD stores age in User table
+                age = ageText.toInt(),
                 hypertension = getRadioInt(view, R.id.rgHypertension),
                 cardiacDisease = getRadioInt(view, R.id.rgHeart),
                 bmi = bmiText.toDouble(),
@@ -169,9 +198,8 @@ class RiskFactorsFragment : Fragment() {
                 diabetes = isDiabetic
             )
 
-            // THE CRITICAL FIX IS HERE
             if (isSaved) {
-                runOfflineRiskAssessment(answers) // Run local TFLite model and background sync
+                runOfflineRiskAssessment(answers)
             } else {
                 Toast.makeText(requireContext(), "Database Error.", Toast.LENGTH_SHORT).show()
             }
@@ -180,33 +208,29 @@ class RiskFactorsFragment : Fragment() {
         }
     }
 
-    // --- OFFLINE AI INFERENCE & CLOUD SYNC ---
+    //  OFFLINE AI INFERENCE & CLOUD SYNC
     private fun runOfflineRiskAssessment(answers: Map<String, Any>) {
         val loadingDialog = showThemedLoadingDialog()
         val userId = requireActivity().intent.getLongExtra("USER_ID", -1L)
 
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                // 1. KOTLIN DUMMY ENCODING
-                // 🛑 CHANGED SIZE FROM 21 TO 23 to fit the new facial data!
                 val encodedFeatures = FloatArray(23)
 
-                // Base Numerical Features
                 encodedFeatures[0] = (answers["age"] as Double).toFloat()
                 encodedFeatures[1] = (answers["hypertension"] as Int).toFloat()
                 encodedFeatures[2] = (answers["heart_disease"] as Int).toFloat()
                 encodedFeatures[3] = (answers["avg_glucose_level"] as Double).toFloat()
                 encodedFeatures[4] = (answers["bmi"] as Double).toFloat()
 
-                // Categorical Features (One-Hot Encoding)
                 val gender = answers["gender"] as String
                 if (gender == "Female") encodedFeatures[5] = 1f
                 else if (gender == "Male") encodedFeatures[6] = 1f
-                else encodedFeatures[7] = 1f // Other
+                else encodedFeatures[7] = 1f
 
                 val everMarried = answers["ever_married"] as String
                 if (everMarried == "No") encodedFeatures[8] = 1f
-                else encodedFeatures[9] = 1f // Yes
+                else encodedFeatures[9] = 1f
 
                 val workType = answers["work_type"] as String
                 when (workType) {
@@ -219,7 +243,7 @@ class RiskFactorsFragment : Fragment() {
 
                 val residence = answers["Residence_type"] as String
                 if (residence == "Rural") encodedFeatures[15] = 1f
-                else encodedFeatures[16] = 1f // Urban
+                else encodedFeatures[16] = 1f
 
                 val smoke = answers["smoking_status"] as String
                 when (smoke) {
@@ -229,33 +253,23 @@ class RiskFactorsFragment : Fragment() {
                     "Smokes" -> encodedFeatures[20] = 1f
                 }
 
-                // ==========================================
-                // 🚀 NEW STEP: INJECT YOLOv10 FACIAL DATA
-                // ==========================================
-                // Fetch the latest scan result from SQLite
                 val latestScan = dbHelper.getLatestFacialScan(userId)
-
                 if (latestScan != null && latestScan["detected"] as Boolean) {
-                    // Stroke symptoms detected in the face
-                    encodedFeatures[21] = 1f // eye_asymmetry
-                    encodedFeatures[22] = 1f // mouth_asymmetry
+                    encodedFeatures[21] = 1f
+                    encodedFeatures[22] = 1f
                 } else {
-                    // Normal face or no scan taken yet
                     encodedFeatures[21] = 0f
                     encodedFeatures[22] = 0f
                 }
-                // ==========================================
 
-                // 2. RUN TENSORFLOW LITE INFERENCE
                 val riskDetector = ClinicalRiskDetector(requireContext())
                 val riskProbability = riskDetector.predictRisk(encodedFeatures)
-                riskDetector.close() // Prevent memory leaks
+                riskDetector.close()
 
                 val percentage = (riskProbability * 100).toInt()
 
                 withContext(Dispatchers.Main) {
                     loadingDialog.dismiss()
-                    // Navigate to Results Screen
                     val bundle = Bundle().apply {
                         putInt("RISK_PERCENTAGE", percentage)
                     }
