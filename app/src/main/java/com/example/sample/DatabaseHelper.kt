@@ -382,6 +382,17 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return result != -1L
     }
 
+    fun clearPrimaryContact(userId: Long): Boolean {
+        val db = this.writableDatabase
+        val values = ContentValues().apply {
+            put(COL_IS_PRIMARY, 0)
+        }
+
+        val rows = db.update(TABLE_EMERGENCY_CONTACTS, values, "$COL_USER_ID = ?", arrayOf(userId.toString()))
+        db.close()
+        return rows > 0
+    }
+
     fun getEmergencyContacts(userId: Long): List<Map<String, String>> {
         val contactList = mutableListOf<Map<String, String>>()
         val db = this.readableDatabase

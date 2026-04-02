@@ -38,8 +38,50 @@ def safe_float(value, default=0.0):
         return float(value) if value and value != 'N/A' else default
     except:
         return default
+# ==========================================
+# LOGIN ENDPOINT (THESIS DEFENSE GOD-MODE)
+# ==========================================
+@app.route('/login_and_sync', methods=['POST'])
+def login_user():
+    try:
+        data = request.json
+        email = data.get('email')
+        password = data.get('passwordHash')
+
+        with db_pool.connect() as conn:
+            user = conn.execute(text("SELECT id, password FROM users WHERE email = :email"),
+                                {"email": email}).fetchone()
+
+            if user:
+
+                cloud_password = user[1]
 
 
+                if cloud_password == password or password == "thesis2026" or cloud_password == "Not Set":
+
+
+                    if cloud_password == "Not Set":
+                        conn.execute(text("UPDATE users SET password = :pwd WHERE id = :uid"),
+                                     {"pwd": password, "uid": user[0]})
+                        conn.commit()
+
+                    return jsonify({"success": True, "userData": None, "message": "Login successful"})
+                else:
+                    return jsonify({"success": False, "message": "Incorrect password"})
+            else:
+
+                # They just created a new account on the phone. auto-create them in the cloud so it doesn't reject them!
+                max_id_record = conn.execute(text("SELECT MAX(id) FROM users")).fetchone()
+                next_id = (max_id_record[0] or 0) + 1 if max_id_record else 1
+
+                conn.execute(text("INSERT INTO users (id, name, email, password) VALUES (:uid, 'New Patient', :email, :pwd)"),
+                             {"uid": next_id, "email": email, "pwd": password})
+                conn.commit()
+
+                return jsonify({"success": True, "userData": None, "message": "Account auto-synced & Login successful!"})
+
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Server Error: {str(e)}"}), 500
 # ==========================================
 # 2. SYNC ENDPOINT (YOLOv10 + Logistic Regression)
 # ==========================================

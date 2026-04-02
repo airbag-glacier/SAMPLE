@@ -129,8 +129,6 @@
                 android:layout_height="wrap_content"
                 android:text="Set as Primary Emergency Contact"
                 android:textColor="#757575"
-                app:thumbTint="#D81B60"
-                app:trackTint="#F48FB1"
                 android:layout_marginBottom="16dp"/>
 
             <com.google.android.material.button.MaterialButton

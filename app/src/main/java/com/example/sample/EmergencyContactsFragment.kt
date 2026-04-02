@@ -48,6 +48,30 @@ class EmergencyContactsFragment : Fragment() {
         val etRelation = view.findViewById<TextInputEditText>(R.id.etRelationship)
         val etPhone = view.findViewById<TextInputEditText>(R.id.etPhone)
         val switchPrimary = view.findViewById<SwitchMaterial>(R.id.switchPrimary)
+
+        val thumbColors = android.content.res.ColorStateList(
+            arrayOf(
+                intArrayOf(android.R.attr.state_checked),
+                intArrayOf(-android.R.attr.state_checked)
+            ),
+            intArrayOf(
+                android.graphics.Color.parseColor("#4CAF50"),
+                android.graphics.Color.parseColor("#9E9E9E")
+            )
+        )
+        val trackColors = android.content.res.ColorStateList(
+            arrayOf(
+                intArrayOf(android.R.attr.state_checked),
+                intArrayOf(-android.R.attr.state_checked)
+            ),
+            intArrayOf(
+                android.graphics.Color.parseColor("#A5D6A7"),
+                android.graphics.Color.parseColor("#E0E0E0")
+            )
+        )
+
+        switchPrimary.thumbTintList = thumbColors
+        switchPrimary.trackTintList = trackColors
         val btnAddContact = view.findViewById<MaterialButton>(R.id.btnAddContact)
 
         // Setup RecyclerView
@@ -64,13 +88,13 @@ class EmergencyContactsFragment : Fragment() {
             Toast.makeText(requireContext(), "Error: User session not found.", Toast.LENGTH_SHORT).show()
         }
 
-
         btnOpenMap.setOnClickListener {
-
             findNavController().navigate(R.id.action_emergencyContacts_to_hospitalMap)
         }
 
-        //
+        // ==========================================
+        // Save Contact Logic
+        // ==========================================
         btnAddContact.setOnClickListener {
             val name = etName.text.toString().trim()
             val relation = etRelation.text.toString().trim()
@@ -78,62 +102,56 @@ class EmergencyContactsFragment : Fragment() {
             val isPrimary = if (switchPrimary.isChecked) 1 else 0
 
             if (name.isNotEmpty() && phone.isNotEmpty() && userId != -1L) {
-                val isSaved = dbHelper.insertEmergencyContact(userId, name, relation, isPrimary, phone)
 
-                if (isSaved) {
-                    Toast.makeText(requireContext(), "Contact Saved!", Toast.LENGTH_SHORT).show()
-                    // Clear inputs
-                    etName.text?.clear()
-                    etRelation.text?.clear()
-                    etPhone.text?.clear()
-                    switchPrimary.isChecked = false
 
-                    loadContacts()
+                val existingPrimary = contactsList.find { it["is_primary"] == "1" }
+
+                if (isPrimary == 1 && existingPrimary != null) {
+                    val oldName = existingPrimary["name"] ?: "the existing primary contact"
+
+
+                    AlertDialog.Builder(requireContext())
+                        .setTitle("Replace Primary Contact?")
+                        .setMessage("Are you sure you want to replace $oldName as your primary emergency contact? They will be moved down to a standard contact.")
+                        .setPositiveButton("Replace") { _, _ ->
+                            // Demote the old primary contact in the database
+                            dbHelper.clearPrimaryContact(userId)
+                            // Save the new one
+                            saveNewContact(name, relation, isPrimary, phone, etName, etRelation, etPhone, switchPrimary)
+                        }
+                        .setNegativeButton("Cancel", null)
+                        .show()
                 } else {
-                    Toast.makeText(requireContext(), "Database Error.", Toast.LENGTH_SHORT).show()
+                    // Normal save (No conflict)
+                    saveNewContact(name, relation, isPrimary, phone, etName, etRelation, etPhone, switchPrimary)
                 }
             } else {
                 Toast.makeText(requireContext(), "Name and Phone are required.", Toast.LENGTH_SHORT).show()
             }
         }
 
+        // Bottom Navigation Logic
         val btnCamera = view.findViewById<FloatingActionButton>(R.id.btnCamera)
-        btnCamera?.setOnClickListener {
-            findNavController().navigate(R.id.action_home_to_scan)
-        }
-
+        btnCamera?.setOnClickListener { findNavController().navigate(R.id.action_home_to_scan) }
         val btnHome = view.findViewById<ImageView>(R.id.btnHome)
-        btnHome?.setOnClickListener {
-            findNavController().popBackStack(R.id.homeFragment, false)
-        }
+        btnHome?.setOnClickListener { findNavController().popBackStack(R.id.homeFragment, false) }
+        view.findViewById<ImageButton>(R.id.btnBack).setOnClickListener { findNavController().popBackStack() }
 
-        view.findViewById<ImageButton>(R.id.btnBack).setOnClickListener {
-            findNavController().popBackStack()
-        }
-
-        // Bottom Navigation: Upgraded List Menu Dialog
         view.findViewById<ImageView>(R.id.btnMenu)?.setOnClickListener {
             val menuOptions = arrayOf("Assessment Result", "Emergency Contacts", "About / Credits", "Restart App")
-
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle("DeTechStroke Menu")
                 .setItems(menuOptions) { _, which ->
                     when (which) {
                         0 -> findNavController().navigate(R.id.action_global_assessmentResult)
-
                         1 -> findNavController().navigate(R.id.action_global_emergencyContacts)
-
                         2 -> {
-                            // Show the developer credits in a secondary pop-up
                             MaterialAlertDialogBuilder(requireContext())
                                 .setTitle("DeTechStroke")
                                 .setMessage("Developers:\nGabriel Garcia\nPhoebe Andrei Quan\nNatsuki Ushijima\n\n© 2026 All Rights Reserved.")
-                                .setPositiveButton("Close", null)
-                                .show()
+                                .setPositiveButton("Close", null).show()
                         }
-
                         3 -> {
-                            // Restart App Logic
                             val intent = requireContext().packageManager.getLaunchIntentForPackage(requireContext().packageName)
                             if (intent != null) {
                                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -142,15 +160,37 @@ class EmergencyContactsFragment : Fragment() {
                             }
                         }
                     }
-                }
-                .setNegativeButton("Close Menu", null)
-                .show()
+                }.setNegativeButton("Close Menu", null).show()
         }
     }
 
+
+    private fun saveNewContact(name: String, relation: String, isPrimary: Int, phone: String,
+                               etName: TextInputEditText, etRelation: TextInputEditText,
+                               etPhone: TextInputEditText, switchPrimary: SwitchMaterial) {
+        val isSaved = dbHelper.insertEmergencyContact(userId, name, relation, isPrimary, phone)
+        if (isSaved) {
+            Toast.makeText(requireContext(), "Contact Saved!", Toast.LENGTH_SHORT).show()
+            etName.text?.clear()
+            etRelation.text?.clear()
+            etPhone.text?.clear()
+            switchPrimary.isChecked = false
+            loadContacts()
+        } else {
+            Toast.makeText(requireContext(), "Database Error.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // ==========================================
+    // Sorting Load Logic
+    // ==========================================
     private fun loadContacts() {
         contactsList.clear()
-        contactsList.addAll(dbHelper.getEmergencyContacts(userId))
+
+        // Fetch contacts and immediately sort them so "1" (Primary) floats to the top, and "0" falls to the bottom
+        val sortedList = dbHelper.getEmergencyContacts(userId).sortedByDescending { it["is_primary"]?.toIntOrNull() ?: 0 }
+
+        contactsList.addAll(sortedList)
         contactsAdapter.notifyDataSetChanged()
     }
 
@@ -196,7 +236,6 @@ class EmergencyContactsFragment : Fragment() {
             holder.tvRelation.text = contact["relationship"]
             holder.tvPhone.text = contact["phone_number"]
 
-            // Show or hide the (Primary) badge
             if (contact["is_primary"] == "1") {
                 holder.tvPrimary.visibility = View.VISIBLE
             } else {
@@ -206,7 +245,6 @@ class EmergencyContactsFragment : Fragment() {
             holder.tvPhone.setOnClickListener {
                 val phoneNumber = contact["phone_number"]
                 if (!phoneNumber.isNullOrEmpty()) {
-                    // ACTION_DIAL opens the dialer and pastes the number safely
                     val intent = Intent(Intent.ACTION_DIAL).apply {
                         data = android.net.Uri.parse("tel:$phoneNumber")
                     }

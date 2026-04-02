@@ -52,7 +52,7 @@ class CloudSyncManager(private val context: Context) {
             latestRiskAssessment = latestRiskData
         )
 
-        //LOGGING OF PAYLOAD: Verifying if the data is being sent
+
         val gson = Gson()
         val jsonPayload = gson.toJson(syncPayload)
         Log.d("CloudSync", "DATA BEING SENT TO CLOUD: $jsonPayload")
