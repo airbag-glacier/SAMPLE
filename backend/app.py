@@ -398,87 +398,6 @@ def download_patient_report(user_id):
         pdf.set_font("helvetica", "", 10)
 
         # Left Column (Demographics) | Right Column (Risks)
-        # Moved Heart Disease and Smoker up to fill the gap left by removing Diabetes!
-        pdf.cell(90, 6, f"Name: {profile[0] or 'Unknown'}", 0, 0)
-        pdf.cell(90, 6, f"Hypertension: {'Yes' if profile[6] == 1 else 'No'}", 0, 1)
-
-        pdf.cell(90, 6, f"Email: {profile[1] or 'N/A'}", 0, 0)
-        pdf.cell(90, 6, f"Heart Disease: {'Yes' if profile[9] == 1 else 'No'}", 0, 1)
-
-        pdf.cell(90, 6, f"Age: {profile[2] or '-'} | Gender: {profile[3] or '-'}", 0, 0)
-        pdf.cell(90, 6, f"Smoker: {profile[5] or 'Unknown'}", 0, 1)
-
-        pdf.cell(90, 6, f"Height: {profile[13] or '-'} cm | Weight: {profile[14] or '-'} kg", 0, 0)
-        pdf.cell(90, 6, f"BMI: {profile[4] or '-'}", 0, 1)
-        pdf.ln(5)# ---------------------------------------------------------
-        # Section 1: Demographics & Core Risk Factors
-        # ---------------------------------------------------------
-        pdf.set_font("helvetica", "B", 12)
-        pdf.cell(0, 10, "1. Patient Demographics & Core Risk Factors", ln=True)
-        pdf.set_font("helvetica", "", 10)
-
-        # Left Column (Demographics) | Right Column (Risks)
-        # Moved Heart Disease and Smoker up to fill the gap left by removing Diabetes!
-        pdf.cell(90, 6, f"Name: {profile[0] or 'Unknown'}", 0, 0)
-        pdf.cell(90, 6, f"Hypertension: {'Yes' if profile[6] == 1 else 'No'}", 0, 1)
-
-        pdf.cell(90, 6, f"Email: {profile[1] or 'N/A'}", 0, 0)
-        pdf.cell(90, 6, f"Heart Disease: {'Yes' if profile[9] == 1 else 'No'}", 0, 1)
-
-        pdf.cell(90, 6, f"Age: {profile[2] or '-'} | Gender: {profile[3] or '-'}", 0, 0)
-        pdf.cell(90, 6, f"Smoker: {profile[5] or 'Unknown'}", 0, 1)
-
-        pdf.cell(90, 6, f"Height: {profile[13] or '-'} cm | Weight: {profile[14] or '-'} kg", 0, 0)
-        pdf.cell(90, 6, f"BMI: {profile[4] or '-'}", 0, 1)
-        pdf.ln(5)# ---------------------------------------------------------
-        # Section 1: Demographics & Core Risk Factors
-        # ---------------------------------------------------------
-        pdf.set_font("helvetica", "B", 12)
-        pdf.cell(0, 10, "1. Patient Demographics & Core Risk Factors", ln=True)
-        pdf.set_font("helvetica", "", 10)
-
-        # Left Column (Demographics) | Right Column (Risks)
-        # Moved Heart Disease and Smoker up to fill the gap left by removing Diabetes!
-        pdf.cell(90, 6, f"Name: {profile[0] or 'Unknown'}", 0, 0)
-        pdf.cell(90, 6, f"Hypertension: {'Yes' if profile[6] == 1 else 'No'}", 0, 1)
-
-        pdf.cell(90, 6, f"Email: {profile[1] or 'N/A'}", 0, 0)
-        pdf.cell(90, 6, f"Heart Disease: {'Yes' if profile[9] == 1 else 'No'}", 0, 1)
-
-        pdf.cell(90, 6, f"Age: {profile[2] or '-'} | Gender: {profile[3] or '-'}", 0, 0)
-        pdf.cell(90, 6, f"Smoker: {profile[5] or 'Unknown'}", 0, 1)
-
-        pdf.cell(90, 6, f"Height: {profile[13] or '-'} cm | Weight: {profile[14] or '-'} kg", 0, 0)
-        pdf.cell(90, 6, f"BMI: {profile[4] or '-'}", 0, 1)
-        pdf.ln(5)# ---------------------------------------------------------
-        # Section 1: Demographics & Core Risk Factors
-        # ---------------------------------------------------------
-        pdf.set_font("helvetica", "B", 12)
-        pdf.cell(0, 10, "1. Patient Demographics & Core Risk Factors", ln=True)
-        pdf.set_font("helvetica", "", 10)
-
-        # Left Column (Demographics) | Right Column (Risks)
-        # Moved Heart Disease and Smoker up to fill the gap left by removing Diabetes!
-        pdf.cell(90, 6, f"Name: {profile[0] or 'Unknown'}", 0, 0)
-        pdf.cell(90, 6, f"Hypertension: {'Yes' if profile[6] == 1 else 'No'}", 0, 1)
-
-        pdf.cell(90, 6, f"Email: {profile[1] or 'N/A'}", 0, 0)
-        pdf.cell(90, 6, f"Heart Disease: {'Yes' if profile[9] == 1 else 'No'}", 0, 1)
-
-        pdf.cell(90, 6, f"Age: {profile[2] or '-'} | Gender: {profile[3] or '-'}", 0, 0)
-        pdf.cell(90, 6, f"Smoker: {profile[5] or 'Unknown'}", 0, 1)
-
-        pdf.cell(90, 6, f"Height: {profile[13] or '-'} cm | Weight: {profile[14] or '-'} kg", 0, 0)
-        pdf.cell(90, 6, f"BMI: {profile[4] or '-'}", 0, 1)
-        pdf.ln(5)# ---------------------------------------------------------
-        # Section 1: Demographics & Core Risk Factors
-        # ---------------------------------------------------------
-        pdf.set_font("helvetica", "B", 12)
-        pdf.cell(0, 10, "1. Patient Demographics & Core Risk Factors", ln=True)
-        pdf.set_font("helvetica", "", 10)
-
-        # Left Column (Demographics) | Right Column (Risks)
-        # Moved Heart Disease and Smoker up to fill the gap left by removing Diabetes!
         pdf.cell(90, 6, f"Name: {profile[0] or 'Unknown'}", 0, 0)
         pdf.cell(90, 6, f"Hypertension: {'Yes' if profile[6] == 1 else 'No'}", 0, 1)
 
@@ -491,6 +410,7 @@ def download_patient_report(user_id):
         pdf.cell(90, 6, f"Height: {profile[13] or '-'} cm | Weight: {profile[14] or '-'} kg", 0, 0)
         pdf.cell(90, 6, f"BMI: {profile[4] or '-'}", 0, 1)
         pdf.ln(5)
+
 
         # ---------------------------------------------------------
         # Section 2: Blood Chemistry Panel
