@@ -20,7 +20,7 @@ class BefastFragment : Fragment() {
     ): View? {
         return inflater.inflate(R.layout.fragment_befast, container, false)
     }
-
+    @android.annotation.SuppressLint("SetJavaScriptEnabled", "ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -40,6 +40,28 @@ class BefastFragment : Fragment() {
         btnHome?.setOnClickListener {
             findNavController().popBackStack(R.id.homeFragment, false)
         }
+
+        val webView = view.findViewById<android.webkit.WebView>(R.id.webViewWho)
+
+        if (webView != null) {
+
+            webView.settings.javaScriptEnabled = true
+
+
+            webView.settings.domStorageEnabled = true
+
+
+            webView.webViewClient = android.webkit.WebViewClient()
+
+
+            webView.loadUrl("https://www.who.int/news-room/fact-sheets/detail/stroke")
+
+            webView.setOnTouchListener { v, _ ->
+                v.parent.requestDisallowInterceptTouchEvent(true)
+                false
+            }
+        }
+
 
 // Bottom Navigation: Upgraded List Menu Dialog
         view.findViewById<ImageView>(R.id.btnMenu)?.setOnClickListener {
