@@ -50,7 +50,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
-                android:text="Please enter your exact medical metrics for the AI stroke prediction model."
+                android:text="Please enter your exact medical metrics for the Risk Percentage Scoring."
                 android:textColor="#757575"
                 android:textSize="14sp" />
 
