@@ -96,12 +96,22 @@ class SignUpActivity : AppCompatActivity() {
 
             if (isInserted) {
                 Toast.makeText(this, "Sign Up Successful!", Toast.LENGTH_SHORT).show()
+
+                // ==========================================
+                // INSTANT CLOUD SYNC FOR NEW ACCOUNTS
+                // ==========================================
+                val newUserId = dbHelper.authenticateUser(email, password)
+                if (newUserId != -1L) {
+
+                    CloudSyncManager(this).syncLocalDatabaseToCloud(newUserId)
+                }
+                // ==========================================
+
+                // Return to the Login Screen
                 finish()
             } else {
                 Toast.makeText(this, "Email already exists!", Toast.LENGTH_SHORT).show()
             }
         }
     }
-
-
 }

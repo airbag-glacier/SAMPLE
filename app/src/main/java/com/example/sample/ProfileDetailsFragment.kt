@@ -36,7 +36,9 @@ class ProfileDetailsFragment : Fragment() {
         if (userId != -1L) {
             val profile = dbHelper.getFullUserProfile(userId)
 
-            // Basic Info
+            // ==========================================
+            // 1. Basic Info Section
+            // ==========================================
             view.findViewById<TextView>(R.id.tvFullName).text = profile["name"]
             view.findViewById<TextView>(R.id.tvEmail).text = profile["email"]
 
@@ -48,19 +50,44 @@ class ProfileDetailsFragment : Fragment() {
             val wStr = if (profile["weight"] == "0.0" || profile["weight"] == "N/A" || profile["weight"] == "null") "-" else profile["weight"]
             view.findViewById<TextView>(R.id.tvHeightWeight)?.text = "Height / Weight: $hStr cm / $wStr kg"
 
-            // Vitals & History
+            // Target the Original Basic Info ID
+            val tvLastUpdated = view.findViewById<TextView>(R.id.tvLastUpdated)
+            if (tvLastUpdated != null) {
+                val updatedAt = profile["updated_at"] ?: "Not Recorded"
+                tvLastUpdated.text = "Data recorded as of: $updatedAt"
+            }
+
+            // ==========================================
+            // 2. Health Metrics (Vitals) Section
+            // ==========================================
             view.findViewById<TextView>(R.id.tvFullBmi).text = "BMI: ${profile["bmi"]}"
             view.findViewById<TextView>(R.id.tvFullBp).text = "Hypertension: ${profile["hypertension"]}"
             view.findViewById<TextView>(R.id.tvSmoking).text = "Smoker: ${profile["smoker"]}"
 
-            // Blood Chemistry
+            // Target the NEW Vitals Timestamp ID
+            val tvVitalsUpdated = view.findViewById<TextView>(R.id.tvVitalsUpdated)
+            if (tvVitalsUpdated != null) {
+                tvVitalsUpdated.text = "Data recorded as of: ${profile["updated_at"] ?: "Not Recorded"}"
+            }
+
+            // ==========================================
+            // 3. Blood Chemistry Section
+            // ==========================================
             view.findViewById<TextView>(R.id.tvTotalChol).text = "Total Cholesterol: ${profile["cholesterol"]} mg/dL"
             view.findViewById<TextView>(R.id.tvHDL).text = "HDL: ${profile["hdl"]} mg/dL"
             view.findViewById<TextView>(R.id.tvLDL).text = "LDL: ${profile["ldl"]} mg/dL"
             view.findViewById<TextView>(R.id.tvTriglycerides).text = "Triglycerides: ${profile["tri"]} mg/dL"
             view.findViewById<TextView>(R.id.tvFbs).text = "Fasting Blood Sugar: ${profile["fbs"]} mg/dL"
 
+            // Target the NEW Blood Chem Timestamp ID
+            val tvBloodChemUpdated = view.findViewById<TextView>(R.id.tvBloodChemUpdated)
+            if (tvBloodChemUpdated != null) {
+                tvBloodChemUpdated.text = "Data recorded as of: ${profile["updated_at"] ?: "Not Recorded"}"
+            }
+
+            // ==========================================
             // Profile Picture
+            // ==========================================
             val imageUriString = profile["image_uri"]
             val profileImageView = view.findViewById<ImageView>(R.id.imgFullProfile)
             if (!imageUriString.isNullOrEmpty()) {

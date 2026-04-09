@@ -64,10 +64,17 @@ class BloodChemFragment : Fragment() {
             val tri = etTriglycerides.text.toString().trim()
             val fbs = etFbs.text.toString().trim()
 
-            // Basic validation
-            if (totalChol.isEmpty() && hdl.isEmpty() && ldl.isEmpty() && tri.isEmpty() && fbs.isEmpty()) {
-                Toast.makeText(requireContext(), "Please select at least one value to save.", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
+// Strict Validation: Ensure NO fields are left blank
+            if (totalChol.isEmpty() || hdl.isEmpty() || ldl.isEmpty() || tri.isEmpty() || fbs.isEmpty()) {
+
+
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("⚠️ Incomplete Information")
+                    .setMessage("Please complete the entire form. Health records cannot be saved properly if any values are missing.")
+                    .setPositiveButton("Okay", null)
+                    .show()
+
+                return@setOnClickListener 
             }
 
             //SAVE TO SQLITE DATABASE

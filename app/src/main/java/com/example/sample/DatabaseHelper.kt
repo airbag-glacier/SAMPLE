@@ -12,9 +12,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
     companion object {
         private const val DATABASE_NAME = "DeTechStroke.db"
-        private const val DATABASE_VERSION = 8
+        // MUST BE 9 to create the new column!
+        private const val DATABASE_VERSION = 9
 
-        // --- 1. USER TABLE ---
         private const val TABLE_USER = "User"
         private const val COL_USER_ID = "user_id"
         private const val COL_USER_NAME = "user_name"
@@ -24,7 +24,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         private const val COL_AGE = "age"
         private const val COL_SEX = "sex"
 
-        // --- 2. HEALTH RISK FACTOR PROFILE TABLE () ---
         private const val TABLE_HEALTH_PROFILE = "HealthRiskFactorProfile"
         private const val COL_PROFILE_ID = "profile_id"
         private const val COL_HYPERTENSION = "hypertension"
@@ -36,15 +35,14 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         private const val COL_LDL = "ldl_level"
         private const val COL_TRIGLYCERIDES = "triglycerides"
 
-
         private const val TABLE_EXTENDED = "ExtendedMetrics"
         private const val COL_EXT_ID = "ext_id"
         private const val COL_HEIGHT = "height"
         private const val COL_WEIGHT = "weight"
         private const val COL_TOTAL_CHOL = "cholesterol"
         private const val COL_FBS = "fbs"
+        private const val COL_UPDATED_AT = "updated_at" // The missing column!
 
-        // --- OTHER TABLES ---
         private const val TABLE_EMERGENCY_CONTACTS = "EmergencyContacts"
         private const val COL_CONTACT_ID = "contact_id"
         private const val COL_CONTACT_NAME = "name"
@@ -110,7 +108,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 + "FOREIGN KEY($COL_USER_ID) REFERENCES $TABLE_USER($COL_USER_ID) ON DELETE CASCADE)")
         db.execSQL(createHealthProfileTable)
 
-
         val createExtendedTable = ("CREATE TABLE $TABLE_EXTENDED ("
                 + "$COL_EXT_ID INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + "$COL_USER_ID INTEGER UNIQUE,"
@@ -118,6 +115,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 + "$COL_WEIGHT REAL,"
                 + "$COL_TOTAL_CHOL REAL,"
                 + "$COL_FBS REAL,"
+                + "$COL_UPDATED_AT TEXT,"
                 + "FOREIGN KEY($COL_USER_ID) REFERENCES $TABLE_USER($COL_USER_ID) ON DELETE CASCADE)")
         db.execSQL(createExtendedTable)
 
@@ -155,16 +153,12 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.execSQL("DROP TABLE IF EXISTS $TABLE_RISK_ASSESSMENT")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_SCAN_RESULT")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_EMERGENCY_CONTACTS")
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_EXTENDED") // Drop shadow table
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_EXTENDED")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_HEALTH_PROFILE")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_USER")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_APPOINTMENTS")
         onCreate(db)
     }
-
-    // ==========================================
-    // AUTHENTICATION & UI HELPERS
-    // ==========================================
 
     fun registerUser(email: String, password: String, name: String, imageUri: String): Boolean {
         val db = this.writableDatabase
@@ -223,10 +217,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return summary
     }
 
-    // ==========================================
-    // ERD & SHADOW DATA MAPPING FUNCTIONS
-    // ==========================================
-
     private fun ensureProfileExists(userId: Long) {
         val db = this.writableDatabase
         val cursor = db.rawQuery("SELECT $COL_PROFILE_ID FROM $TABLE_HEALTH_PROFILE WHERE $COL_USER_ID = ?", arrayOf(userId.toString()))
@@ -252,16 +242,18 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         ensureExtendedExists(userId)
         val db = this.writableDatabase
 
-
         val erdValues = ContentValues().apply { put(COL_BMI, bmi) }
-        val rows = db.update(TABLE_HEALTH_PROFILE, erdValues, "$COL_USER_ID = ?", arrayOf(userId.toString()))
+        db.update(TABLE_HEALTH_PROFILE, erdValues, "$COL_USER_ID = ?", arrayOf(userId.toString()))
 
+        // EXACT TIMESTAMP LOGIC
+        val currentTime = SimpleDateFormat("MMMM dd, yyyy - hh:mm a", Locale.US).format(Date())
 
         val extValues = ContentValues().apply {
             put(COL_HEIGHT, height)
             put(COL_WEIGHT, weight)
+            put(COL_UPDATED_AT, currentTime)
         }
-        db.update(TABLE_EXTENDED, extValues, "$COL_USER_ID = ?", arrayOf(userId.toString()))
+        val rows = db.update(TABLE_EXTENDED, extValues, "$COL_USER_ID = ?", arrayOf(userId.toString()))
 
         db.close()
         return rows > 0
@@ -272,20 +264,22 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         ensureExtendedExists(userId)
         val db = this.writableDatabase
 
-        // 1. Update ERD Table
         val erdValues = ContentValues().apply {
             put(COL_HDL, hdl)
             put(COL_LDL, ldl)
             put(COL_TRIGLYCERIDES, tri)
         }
-        val rows = db.update(TABLE_HEALTH_PROFILE, erdValues, "$COL_USER_ID = ?", arrayOf(userId.toString()))
+        db.update(TABLE_HEALTH_PROFILE, erdValues, "$COL_USER_ID = ?", arrayOf(userId.toString()))
 
-        // 2. Secretly update Shadow Table
+        // EXACT TIMESTAMP LOGIC
+        val currentTime = SimpleDateFormat("MMMM dd, yyyy - hh:mm a", Locale.US).format(Date())
+
         val extValues = ContentValues().apply {
             put(COL_TOTAL_CHOL, totalChol)
             put(COL_FBS, fbs)
+            put(COL_UPDATED_AT, currentTime)
         }
-        db.update(TABLE_EXTENDED, extValues, "$COL_USER_ID = ?", arrayOf(userId.toString()))
+        val rows = db.update(TABLE_EXTENDED, extValues, "$COL_USER_ID = ?", arrayOf(userId.toString()))
 
         db.close()
         return rows > 0
@@ -313,18 +307,17 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val db = this.readableDatabase
         val map = mutableMapOf<String, String>()
 
-
-        val keys = listOf("name", "email", "password", "age", "sex", "bmi", "hdl", "ldl", "tri", "hypertension", "smoker", "diabetes", "cardiac_disease", "height", "weight", "cholesterol", "fbs", "image_uri")
+        val keys = listOf("name", "email", "password", "age", "sex", "bmi", "hdl", "ldl", "tri", "hypertension", "smoker", "diabetes", "cardiac_disease", "height", "weight", "cholesterol", "fbs", "updated_at", "image_uri")
         keys.forEach { map[it] = "N/A" }
         map["image_uri"] = ""
-
+        map["updated_at"] = "Not Recorded"
 
         val query = """
         SELECT u.$COL_USER_NAME, u.$COL_EMAIL, u.$COL_PASSWORD, u.$COL_AGE, u.$COL_SEX, u.$COL_IMAGE_URI,
                h.$COL_BMI, h.$COL_HYPERTENSION, h.$COL_SMOKER,
                h.$COL_HDL, h.$COL_LDL, h.$COL_TRIGLYCERIDES,
                h.$COL_DIABETES, h.$COL_CARDIAC_DISEASE,
-               e.$COL_HEIGHT, e.$COL_WEIGHT, e.$COL_TOTAL_CHOL, e.$COL_FBS
+               e.$COL_HEIGHT, e.$COL_WEIGHT, e.$COL_TOTAL_CHOL, e.$COL_FBS, e.$COL_UPDATED_AT
         FROM $TABLE_USER u
         LEFT JOIN $TABLE_HEALTH_PROFILE h ON u.$COL_USER_ID = h.$COL_USER_ID
         LEFT JOIN $TABLE_EXTENDED e ON u.$COL_USER_ID = e.$COL_USER_ID
@@ -347,20 +340,15 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             map["tri"] = cursor.getString(11) ?: "N/A"
             map["diabetes"] = if (cursor.getInt(12) == 1) "Yes" else "No"
             map["cardiac_disease"] = if (cursor.getInt(13) == 1) "Yes" else "No"
-
-            // Extract the Shadow Table data!
             map["height"] = cursor.getString(14) ?: "N/A"
             map["weight"] = cursor.getString(15) ?: "N/A"
             map["cholesterol"] = cursor.getString(16) ?: "N/A"
             map["fbs"] = cursor.getString(17) ?: "N/A"
+            map["updated_at"] = cursor.getString(18) ?: "Not Recorded"
         }
         cursor.close()
         return map
     }
-
-    // ==========================================
-    // ASSESSMENT, SCANS, & APPOINTMENTS
-    // ==========================================
 
     fun insertRiskAssessment(userId: Long, lrPrediction: Double, riskLevel: String, timestamp: String): Boolean {
         val db = this.writableDatabase

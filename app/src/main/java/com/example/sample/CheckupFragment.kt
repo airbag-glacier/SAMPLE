@@ -25,8 +25,11 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 class CheckupFragment : Fragment() {
 
     private val doctorsList = mutableListOf(
-        "Dr. Willie Ong (Cardiology)",
-        "Dr. Juan Dela Cruz (General Practice)"
+        "Dr. Willie Ong",
+        "Dr. Juan Dela Cruz",
+        "Dr. Rommel Hernandez",
+        "Dr. Fe Del Mundo",
+        "Dr. Jose Rizal"
     )
 
     private val fullyBookedDays = listOf(15, 30)

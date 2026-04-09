@@ -92,6 +92,17 @@
 
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Basic Information" android:textColor="#D81B60" android:textStyle="bold" android:layout_marginBottom="12dp"/>
 
+                    <TextView
+                        android:id="@+id/tvLastUpdated"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Data recorded as of: Not Recorded"
+                        android:textStyle="italic"
+                        android:textColor="#808080"
+                        android:textSize="12sp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="12dp"/>
+
                     <TextView android:id="@+id/tvAgeGender" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Age / Gender: --" android:textSize="16sp" android:layout_marginBottom="8dp"/>
                     <TextView android:id="@+id/tvHeightWeight" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Height / Weight: -- cm / -- kg" android:textSize="16sp" android:layout_marginBottom="8dp"/>
                 </LinearLayout>
@@ -111,12 +122,21 @@
 
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Health Metrics" android:textColor="#D81B60" android:textStyle="bold" android:layout_marginBottom="12dp"/>
 
+                    <TextView
+                        android:id="@+id/tvVitalsUpdated"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Data recorded as of: Not Recorded"
+                        android:textStyle="italic"
+                        android:textColor="#808080"
+                        android:textSize="12sp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="12dp"/>
+
                     <TextView android:id="@+id/tvFullBmi" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="BMI: --" android:textSize="16sp" android:layout_marginBottom="8dp"/>
-                    <TextView android:id="@+id/tvFullBp" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Blood Pressure: --/--" android:textSize="16sp" android:layout_marginBottom="8dp"/>
+                    <TextView android:id="@+id/tvFullBp" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Hypertension: --" android:textSize="16sp" android:layout_marginBottom="8dp"/>
                     <TextView android:id="@+id/tvSmoking" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Smoking Status: --" android:textSize="16sp" />
                 </LinearLayout>
-
-
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
@@ -134,6 +154,17 @@
                     android:padding="16dp">
 
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Blood Chemistry" android:textColor="#D81B60" android:textStyle="bold" android:layout_marginBottom="12dp"/>
+
+                    <TextView
+                        android:id="@+id/tvBloodChemUpdated"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Data recorded as of: Not Recorded"
+                        android:textStyle="italic"
+                        android:textColor="#808080"
+                        android:textSize="12sp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="12dp"/>
 
                     <TextView android:id="@+id/tvTotalChol" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Total Cholesterol: -- mg/dL" android:textSize="16sp" android:layout_marginBottom="8dp"/>
                     <TextView android:id="@+id/tvHDL" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="HDL: -- mg/dL" android:textSize="16sp" android:layout_marginBottom="8dp"/>
@@ -218,6 +249,7 @@
                         android:orientation="vertical"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
+
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -255,6 +287,7 @@
                         android:orientation="vertical"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

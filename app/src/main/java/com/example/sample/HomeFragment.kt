@@ -26,11 +26,47 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Bottom Navigation
+        val dbHelper = DatabaseHelper(requireContext())
+        val userId = requireActivity().intent.getLongExtra("USER_ID", -1L)
+
+
+        if (userId != -1L) {
+            val userData = dbHelper.getUserData(userId)
+
+            if (userData != null) {
+
+                view.findViewById<TextView>(R.id.tvName)?.text = userData["name"] ?: "Unknown User"
+
+
+                val imageUriString = userData["image_uri"]
+                val profileImageView = view.findViewById<ImageView>(R.id.imgProfile)
+
+                if (!imageUriString.isNullOrEmpty() && profileImageView != null) {
+                    try {
+                        profileImageView.setImageURI(imageUriString.toUri())
+                    } catch (e: SecurityException) {
+                        profileImageView.setImageResource(R.drawable.pink_profile_image)
+                    }
+                }
+            }
+
+            // Set Health Summary
+            view.findViewById<TextView>(R.id.tvDetails)?.text = dbHelper.getUserHealthSummary(userId)
+
+            // OPTIONAL: Force a background sync so the dashboard updates from "New Patient" to real name
+            CloudSyncManager(requireContext()).syncLocalDatabaseToCloud(userId)
+        }
+
+        // ==================================================
+        // NAVIGATION & CLICK LISTENERS BELOW
+        // ==================================================
+
+        // Bottom Navigation (Camera)
         view.findViewById<FloatingActionButton>(R.id.btnCamera)?.setOnClickListener {
             findNavController().navigate(R.id.action_global_scan)
         }
 
+        // Top Navigation (Menu)
         view.findViewById<ImageView>(R.id.btnMenu)?.setOnClickListener {
             val menuOptions = arrayOf("Assessment Result", "Emergency Contacts", "About / Credits", "Log out")
 
@@ -63,15 +99,10 @@ class HomeFragment : Fragment() {
 
         // Standard Card Click Listeners
         view.findViewById<View>(R.id.cardCheckup)?.setOnClickListener {
-            val db = DatabaseHelper(requireContext())
-            val currentUserId = requireActivity().intent?.getLongExtra("USER_ID", -1L) ?: -1L
-
-            // If the user is logged in, check their appointment history
-            if (currentUserId != -1L) {
-                val pendingAppointments = db.getAppointments(currentUserId)
-
+            // Check for pending appointments before letting them book a new one
+            if (userId != -1L) {
+                val pendingAppointments = dbHelper.getAppointments(userId)
                 if (pendingAppointments.isNotEmpty()) {
-
                     Toast.makeText(
                         requireContext(),
                         "You have a pending appointment. Please complete your existing checkup before scheduling a new one.",
@@ -82,6 +113,7 @@ class HomeFragment : Fragment() {
                 }
             }
         }
+
         view.findViewById<View>(R.id.cardVitals)?.setOnClickListener { findNavController().navigate(R.id.action_home_to_vitals) }
         view.findViewById<View>(R.id.cardBefast)?.setOnClickListener { findNavController().navigate(R.id.action_home_to_befast) }
         view.findViewById<View>(R.id.cardBloodChem)?.setOnClickListener { findNavController().navigate(R.id.action_home_to_bloodChem) }
@@ -91,29 +123,6 @@ class HomeFragment : Fragment() {
         // The Hospital Map Click Listener!
         view.findViewById<View>(R.id.cardHospitalMap)?.setOnClickListener {
             findNavController().navigate(R.id.action_global_hospitalMap)
-        }
-
-        // User Data Logic
-        val dbHelper = DatabaseHelper(requireContext())
-        val userId = requireActivity().intent?.getLongExtra("USER_ID", -1L) ?: -1L
-
-        if (userId != -1L) {
-            val userData = dbHelper.getUserData(userId)
-            if (userData != null) {
-                view.findViewById<TextView>(R.id.tvName).text = userData["name"]
-
-                val imageUriString = userData["image_uri"]
-                val profileImageView = view.findViewById<ImageView>(R.id.imgProfile)
-
-                if (!imageUriString.isNullOrEmpty()) {
-                    try {
-                        profileImageView.setImageURI(imageUriString.toUri())
-                    } catch (e: SecurityException) {
-                        profileImageView.setImageResource(R.drawable.pink_profile_image)
-                    }
-                }
-            }
-            view.findViewById<TextView>(R.id.tvDetails).text = dbHelper.getUserHealthSummary(userId)
         }
     }
 }
