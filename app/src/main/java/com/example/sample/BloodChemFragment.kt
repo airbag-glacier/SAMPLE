@@ -74,7 +74,7 @@ class BloodChemFragment : Fragment() {
                     .setPositiveButton("Okay", null)
                     .show()
 
-                return@setOnClickListener 
+                return@setOnClickListener
             }
 
             //SAVE TO SQLITE DATABASE

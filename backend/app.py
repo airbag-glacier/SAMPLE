@@ -57,8 +57,8 @@ def init_doctor_accounts():
 
         # 2. Seed Predefined Doctors (Force update if they already exist as 'Pending')
         predefined_docs = [
-            ("dr.willie", "Dr. Willie Ong (Cardiology)"),
-            ("dr.juan", "Dr. Juan Dela Cruz (General Practice)"),
+            ("dr.willie", "Dr. Willie Ong"),
+            ("dr.juan", "Dr. Juan Dela Cruz"),
             ("dr.rommel", "Dr. Rommel Hernandez"),
             ("dr.fe", "Dr. Fe Del Mundo"),
             ("dr.jose", "Dr. Jose Rizal")
